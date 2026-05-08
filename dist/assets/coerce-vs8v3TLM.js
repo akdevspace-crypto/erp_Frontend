@@ -1,0 +1,1 @@
+import{D as e,b as t}from"./index-DXHWE5Aw.js";function n(n){return e(t,n)}export{n as t};
