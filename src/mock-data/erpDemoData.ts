@@ -31,6 +31,17 @@ export type DemoModuleKey =
     | 'omnichannel.sms'
     | 'omnichannel.calls'
     | 'omnichannel.missedCalls'
+    | 'crm.customerCare'
+    | 'crm.feedback'
+    | 'crm.admissionForms'
+    | 'ambulance.bookings'
+    | 'ambulance.dispatch'
+    | 'ambulance.fleet'
+    | 'ambulance.staff'
+    | 'ambulance.tripSheets'
+    | 'ambulance.maintenance'
+    | 'ambulance.billing'
+    | 'ambulance.callLogs'
 
 export type DemoRow = Record<string, string | number>
 
@@ -62,8 +73,14 @@ const patientRows = [
     { id: 'PAT-1031', patient: 'Rohan Menon', metric: 'SpO2 88%', status: 'CRITICAL', owner: 'Dr Arjun', due: '10 min' },
     { id: 'PAT-1045', patient: 'Lakshmi Rao', metric: 'Temp 101.4 F', status: 'WATCH', owner: 'Nurse Diya', due: '25 min' },
     { id: 'PAT-1058', patient: 'Suresh Iyer', metric: 'Pulse 118', status: 'CRITICAL', owner: 'Nurse Farah', due: 'Now' },
-    { id: 'PAT-1072', patient: 'Ananya Das', metric: 'BP 154/94', status: 'WATCH', owner: 'Caregiver Nila', due: '45 min' }
+    { id: 'PAT-1072', patient: 'Ananya Das', metric: 'BP 154/94', status: 'WATCH', owner: 'Caregiver Nila', due: '45 min' },
+    { id: 'PAT-1085', patient: 'Arjun Das', metric: 'Temp 102.1 F', status: 'CRITICAL', owner: 'Dr Meera', due: '5 min' },
+    { id: 'PAT-1099', patient: 'Priya Sharma', metric: 'SpO2 91%', status: 'WATCH', owner: 'Nurse Kavya', due: '15 min' },
+    { id: 'PAT-1105', patient: 'Karthik Raja', metric: 'BP 145/90', status: 'STABLE', owner: 'Nurse Diya', due: '1h' },
+    { id: 'PAT-1112', patient: 'Saanvi Reddy', metric: 'Pulse 92', status: 'STABLE', owner: 'Nurse Farah', due: '2h' },
+    { id: 'PAT-1128', patient: 'Ishaan Varma', metric: 'BP 130/85', status: 'WATCH', owner: 'Nurse Rohan', due: '30 min' }
 ]
+
 
 export const erpDemoData: Record<DemoModuleKey, DemoModuleData> = {
     'crm.activeEnquiries': {
@@ -406,7 +423,11 @@ export const erpDemoData: Record<DemoModuleKey, DemoModuleData> = {
         rows: [
             { id: 'INV-3101', name: 'Aarav Sharma', amount: 'Rs 72,000', status: status.overdue, due: '2 days ago' },
             { id: 'INV-3115', name: 'Priya Menon', amount: 'Rs 38,500', status: 'PARTIAL', due: 'Today' },
-            { id: 'INV-3120', name: 'Karthik Iyer', amount: 'Rs 64,000', status: status.pending, due: 'Friday' }
+            { id: 'INV-3120', name: 'Karthik Iyer', amount: 'Rs 64,000', status: status.pending, due: 'Friday' },
+            { id: 'INV-3135', name: 'Saanvi Reddy', amount: 'Rs 45,000', status: status.pending, due: 'Next Monday' },
+            { id: 'INV-3142', name: 'Ishaan Varma', amount: 'Rs 88,000', status: status.overdue, due: '1 week ago' },
+            { id: 'INV-3150', name: 'Meera Nair', amount: 'Rs 52,000', status: 'PARTIAL', due: 'Tomorrow' },
+            { id: 'INV-3168', name: 'Rohan Menon', amount: 'Rs 70,000', status: status.pending, due: 'In 3 days' }
         ]
     },
     'finance.invoice': {
@@ -423,7 +444,10 @@ export const erpDemoData: Record<DemoModuleKey, DemoModuleData> = {
         rows: [
             { id: 'INV-3008', name: 'Janani Bose', amount: 'Rs 68,000', status: status.paid, due: 'May 2026' },
             { id: 'INV-3015', name: 'Vivaan Reddy', amount: 'Rs 82,000', status: 'PARTIAL', due: 'May 2026' },
-            { id: 'INV-3022', name: 'George Thomas', amount: 'Rs 45,500', status: status.pending, due: 'May 2026' }
+            { id: 'INV-3022', name: 'George Thomas', amount: 'Rs 45,500', status: status.pending, due: 'May 2026' },
+            { id: 'INV-3030', name: 'Lakshmi Rao', amount: 'Rs 75,000', status: status.paid, due: 'April 2026' },
+            { id: 'INV-3045', name: 'Suresh Iyer', amount: 'Rs 62,000', status: status.paid, due: 'April 2026' },
+            { id: 'INV-3058', name: 'Farah Khan', amount: 'Rs 58,000', status: 'PARTIAL', due: 'May 2026' }
         ]
     },
     'finance.renewals': {
@@ -440,7 +464,9 @@ export const erpDemoData: Record<DemoModuleKey, DemoModuleData> = {
         rows: [
             { id: 'REN-1201', name: 'Meera Nair', amount: 'Rs 65,000', status: 'DUE_SOON', due: '2026-05-12' },
             { id: 'REN-1210', name: 'Rohan Menon', amount: 'Rs 72,000', status: 'CONFIRMED', due: '2026-05-18' },
-            { id: 'REN-1228', name: 'Suresh Iyer', amount: 'Rs 58,000', status: status.pending, due: '2026-05-22' }
+            { id: 'REN-1228', name: 'Suresh Iyer', amount: 'Rs 58,000', status: status.pending, due: '2026-05-22' },
+            { id: 'REN-1235', name: 'Ananya Das', amount: 'Rs 60,000', status: 'DUE_SOON', due: '2026-05-25' },
+            { id: 'REN-1248', name: 'Kavya Pillai', amount: 'Rs 70,000', status: 'CONFIRMED', due: '2026-05-30' }
         ]
     },
     'security.gate': {
@@ -606,6 +632,203 @@ export const erpDemoData: Record<DemoModuleKey, DemoModuleData> = {
         rows: [
             { id: 'MISS-8001', name: 'Karthik Iyer', status: 'CALLBACK_DUE', owner: 'Care Desk', due: '34 min ago' },
             { id: 'MISS-8010', name: 'Farah Khan', status: 'ESCALATED', owner: 'CRM Lead', due: '1h ago' }
+        ]
+    },
+    'crm.customerCare': {
+        title: 'Customer Care',
+        module: 'CRM',
+        searchPlaceholder: 'Search customer care records...',
+        columns: [
+            { key: 'id', header: 'Ticket ID' },
+            { key: 'name', header: 'Client' },
+            { key: 'issue', header: 'Query / Concern' },
+            { key: 'status', header: 'Priority' },
+            { key: 'owner', header: 'Representative' },
+            { key: 'due', header: 'Last Follow-up' }
+        ],
+        rows: [
+            { id: 'CC-501', name: 'Aarav Sharma', issue: 'Dietary preferences update request', status: status.progress, owner: 'Nila Thomas', due: '10 mins ago' },
+            { id: 'CC-504', name: 'Lakshmi Rao', issue: 'Physiotherapy timing adjustment', status: status.open, owner: 'Arjun Das', due: '1 hour ago' },
+            { id: 'CC-512', name: 'Vivaan Reddy', issue: 'Room maintenance status inquiry', status: status.completed, owner: 'Meera Nair', due: 'Yesterday' }
+        ]
+    },
+    'crm.feedback': {
+        title: 'Feedback',
+        module: 'CRM',
+        searchPlaceholder: 'Search feedback...',
+        columns: [
+            { key: 'id', header: 'Feedback ID' },
+            { key: 'name', header: 'Client' },
+            { key: 'rating', header: 'Rating' },
+            { key: 'category', header: 'Category' },
+            { key: 'comments', header: 'Comments' },
+            { key: 'status', header: 'Status' }
+        ],
+        rows: [
+            { id: 'FB-902', name: 'Priya Menon', rating: '★★★★★ 5/5', category: 'Nursing Care', comments: 'Excellent and highly attentive care staff.', status: 'REVIEWED' },
+            { id: 'FB-905', name: 'Karthik Iyer', rating: '★★★★☆ 4/5', category: 'Food & Nutrition', comments: 'Meals are good, prefer less spice.', status: 'ACTION_TAKEN' },
+            { id: 'FB-911', name: 'Suresh Iyer', rating: '★★★☆☆ 3/5', category: 'Housekeeping', comments: 'Laundry pickup was slightly delayed yesterday.', status: status.pending }
+        ]
+    },
+    'crm.admissionForms': {
+        title: 'Admission Forms',
+        module: 'CRM',
+        searchPlaceholder: 'Search admission forms...',
+        columns: [
+            { key: 'id', header: 'Form ID' },
+            { key: 'name', header: 'Applicant Name' },
+            { key: 'plan', header: 'Requested Plan' },
+            { key: 'submission', header: 'Submission Date' },
+            { key: 'status', header: 'Review Status' },
+            { key: 'action', header: 'Next Action' }
+        ],
+        rows: [
+            { id: 'AF-101', name: 'Sunita Varma', plan: 'Assisted Living Premium', submission: '2026-05-14', status: 'VERIFICATION', action: 'Medical Screening' },
+            { id: 'AF-105', name: 'Ramesh Nair', plan: 'Memory & Dementia Care', submission: '2026-05-13', status: 'APPROVED', action: 'Room Allocation' },
+            { id: 'AF-109', name: 'Devika Sen', plan: 'Short-term Rehabilitation', submission: '2026-05-12', status: 'DOCS_REQUESTED', action: 'Awaiting Records' }
+        ]
+    },
+    'ambulance.bookings': {
+        title: 'Ambulance Bookings',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search ambulance bookings...',
+        columns: [
+            { key: 'id', header: 'Booking ID' },
+            { key: 'patient', header: 'Resident / Patient' },
+            { key: 'service', header: 'Service Type' },
+            { key: 'route', header: 'Route' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'Pickup' }
+        ],
+        rows: [
+            { id: 'AMB-1001', patient: 'Meera Nair', service: 'Hospital Transfer', route: 'UEC Main to GKNM Hospital', status: 'CONFIRMED', due: 'Today 11:30 AM' },
+            { id: 'AMB-1008', patient: 'Rohan Menon', service: 'Emergency Support', route: 'Care Unit B to PSG Hospital', status: 'URGENT', due: 'Now' },
+            { id: 'AMB-1014', patient: 'Lakshmi Rao', service: 'Dialysis Drop', route: 'UEC Main to Avinashi Road', status: status.pending, due: 'Tomorrow 8:00 AM' }
+        ]
+    },
+    'ambulance.dispatch': {
+        title: 'Dispatch Management',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search dispatch queue...',
+        columns: [
+            { key: 'id', header: 'Dispatch ID' },
+            { key: 'vehicle', header: 'Ambulance' },
+            { key: 'crew', header: 'Crew' },
+            { key: 'route', header: 'Route' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'ETA' }
+        ],
+        rows: [
+            { id: 'DSP-401', vehicle: 'TN38 UA 2041', crew: 'Driver Suresh + Nurse Kavya', route: 'Unit A to KMCH', status: 'EN_ROUTE', due: '18 min' },
+            { id: 'DSP-408', vehicle: 'TN38 UA 2062', crew: 'Driver Ravi + Attender Manoj', route: 'Unit B to GKNM', status: 'READY', due: '5 min' },
+            { id: 'DSP-415', vehicle: 'TN38 UA 2090', crew: 'Driver Bala + EMT Farah', route: 'Unit C standby', status: 'STANDBY', due: 'Available' }
+        ]
+    },
+    'ambulance.fleet': {
+        title: 'Vehicle & Fleet',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search ambulance fleet...',
+        columns: [
+            { key: 'id', header: 'Vehicle No' },
+            { key: 'name', header: 'Vehicle Type' },
+            { key: 'equipment', header: 'Equipment' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'Next Check' }
+        ],
+        rows: [
+            { id: 'TN38 UA 2041', name: 'BLS Ambulance', equipment: 'Oxygen, stretcher, monitor', status: 'ACTIVE', due: 'Today 6 PM' },
+            { id: 'TN38 UA 2062', name: 'Patient Transport', equipment: 'Wheelchair ramp, stretcher', status: 'ACTIVE', due: 'Tomorrow' },
+            { id: 'TN38 UA 2090', name: 'ALS Ambulance', equipment: 'Ventilator, defib, suction', status: 'SERVICE_DUE', due: '2026-05-18' }
+        ]
+    },
+    'ambulance.staff': {
+        title: 'Driver & Staff Assignment',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search assigned ambulance staff...',
+        columns: [
+            { key: 'id', header: 'Shift ID' },
+            { key: 'name', header: 'Staff' },
+            { key: 'role', header: 'Role' },
+            { key: 'vehicle', header: 'Vehicle' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'Shift' }
+        ],
+        rows: [
+            { id: 'SHF-701', name: 'Suresh Babu', role: 'Driver', vehicle: 'TN38 UA 2041', status: 'ON_DUTY', due: '08:00-16:00' },
+            { id: 'SHF-708', name: 'Kavya Rao', role: 'Nurse', vehicle: 'TN38 UA 2041', status: 'ON_DUTY', due: '08:00-16:00' },
+            { id: 'SHF-715', name: 'Farah Khan', role: 'EMT', vehicle: 'TN38 UA 2090', status: 'STANDBY', due: '16:00-00:00' }
+        ]
+    },
+    'ambulance.tripSheets': {
+        title: 'Trip Sheets',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search trip sheets...',
+        columns: [
+            { key: 'id', header: 'Trip ID' },
+            { key: 'patient', header: 'Patient' },
+            { key: 'vehicle', header: 'Vehicle' },
+            { key: 'distance', header: 'Distance' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'Completed' }
+        ],
+        rows: [
+            { id: 'TRP-9001', patient: 'Janani Bose', vehicle: 'TN38 UA 2041', distance: '18 km', status: status.completed, due: 'Today 09:40 AM' },
+            { id: 'TRP-9015', patient: 'Suresh Iyer', vehicle: 'TN38 UA 2062', distance: '24 km', status: 'BILL_PENDING', due: 'Yesterday' },
+            { id: 'TRP-9028', patient: 'Meera Nair', vehicle: 'TN38 UA 2090', distance: '12 km', status: status.progress, due: 'In progress' }
+        ]
+    },
+    'ambulance.maintenance': {
+        title: 'Ambulance Maintenance',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search ambulance maintenance...',
+        columns: [
+            { key: 'id', header: 'Ticket ID' },
+            { key: 'vehicle', header: 'Vehicle' },
+            { key: 'issue', header: 'Issue' },
+            { key: 'status', header: 'Status' },
+            { key: 'owner', header: 'Owner' },
+            { key: 'due', header: 'Due' }
+        ],
+        rows: [
+            { id: 'AMNT-301', vehicle: 'TN38 UA 2090', issue: 'Oxygen line inspection', status: status.progress, owner: 'MediSafe', due: 'Today' },
+            { id: 'AMNT-318', vehicle: 'TN38 UA 2041', issue: 'Tyre rotation', status: status.open, owner: 'Fleet Admin', due: 'Tomorrow' },
+            { id: 'AMNT-326', vehicle: 'TN38 UA 2062', issue: 'Stretcher lock service', status: status.completed, owner: 'PrimeFix', due: 'Done' }
+        ]
+    },
+    'ambulance.billing': {
+        title: 'Ambulance Billing',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search ambulance bills...',
+        columns: [
+            { key: 'id', header: 'Bill ID' },
+            { key: 'patient', header: 'Patient' },
+            { key: 'service', header: 'Service' },
+            { key: 'amount', header: 'Amount' },
+            { key: 'status', header: 'Status' },
+            { key: 'due', header: 'Due' }
+        ],
+        rows: [
+            { id: 'ABILL-501', patient: 'Janani Bose', service: 'Hospital transfer', amount: 'Rs 2,800', status: status.paid, due: 'Paid today' },
+            { id: 'ABILL-508', patient: 'Suresh Iyer', service: 'Dialysis transport', amount: 'Rs 1,600', status: status.pending, due: 'Today' },
+            { id: 'ABILL-515', patient: 'Rohan Menon', service: 'Emergency support', amount: 'Rs 4,500', status: 'INSURANCE_REVIEW', due: 'Tomorrow' }
+        ]
+    },
+    'ambulance.callLogs': {
+        title: 'Emergency Call Logs',
+        module: 'Ambulance Services',
+        searchPlaceholder: 'Search ambulance call logs...',
+        columns: [
+            { key: 'id', header: 'Call ID' },
+            { key: 'name', header: 'Caller' },
+            { key: 'purpose', header: 'Request' },
+            { key: 'status', header: 'Status' },
+            { key: 'owner', header: 'Handled By' },
+            { key: 'due', header: 'Time' }
+        ],
+        rows: [
+            { id: 'ACALL-2101', name: 'Care Unit B', purpose: 'Low SpO2 transfer request', status: 'DISPATCHED', owner: 'Care Desk', due: '5 min ago' },
+            { id: 'ACALL-2114', name: 'Meera Nair Family', purpose: 'Hospital appointment pickup', status: 'BOOKED', owner: 'Saanvi', due: '28 min ago' },
+            { id: 'ACALL-2120', name: 'Night Nurse Station', purpose: 'Emergency standby', status: 'ESCALATED', owner: 'CRM Lead', due: '1h ago' }
         ]
     }
 }

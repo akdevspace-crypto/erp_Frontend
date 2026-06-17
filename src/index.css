@@ -2,19 +2,19 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Interpolated from #00b3a7 base for soft structural highlights */
-  --color-primary-50: #e0f8f6;
-  --color-primary-100: #ccf3ef;
-  --color-primary-200: #a3e7e1;
-  --color-primary-300: #70d6cd;
-  --color-primary-400: #42bfb5;
-  --color-primary-500: #00b3a7;
-  --color-primary-600: #009088;
-  --color-primary-700: #00736d;
-  --color-primary-800: #005a56;
-  --color-primary-900: #004644;
+  /* Deep blue, blue-gray, olive, sage, and soft ivory brand scale */
+  --color-primary-50: #f2f5ea;
+  --color-primary-100: #c0c7a0;
+  --color-primary-200: #c0c7a0;
+  --color-primary-300: #7b8f5d;
+  --color-primary-400: #7b8f5d;
+  --color-primary-500: #3f5f6a;
+  --color-primary-600: #1f3b4d;
+  --color-primary-700: #1f3b4d;
+  --color-primary-800: #1f3b4d;
+  --color-primary-900: #1f3b4d;
 
-  --color-accent: #ffce75;
+  --color-accent: #7b8f5d;
   --color-success: #a0d6b4;
   --color-surface: #ffffff;
   --color-border: #d9d9d9;
@@ -27,11 +27,13 @@
 
 @layer base {
   body {
-    background-color: #f7f9fb;
+    background-color: #f2f5ea;
     color: black;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 14px;
+    line-height: 1.5;
   }
 
   .dark body {
@@ -54,5 +56,22 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    body {
+      font-size: 13px;
+    }
+
+    /* Ensure touch targets are at least 44px */
+    button, [role="button"], input, select, textarea {
+      min-height: 44px;
+    }
+
+    /* Better text readability on mobile */
+    h1, h2, h3, h4, h5, h6 {
+      line-height: 1.3;
+    }
   }
 }

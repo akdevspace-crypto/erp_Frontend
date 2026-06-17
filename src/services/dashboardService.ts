@@ -18,7 +18,7 @@ export const dashboardService = {
         return res.data.data
     },
     getRecentActivities: async (): Promise<any[]> => {
-        const res = await api.get('/enquiry?take=6')
+        const res = await api.get('/enquiry?limit=6')
         return res.data.data
     }
 }

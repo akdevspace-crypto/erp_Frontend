@@ -1,7 +1,27 @@
 import { io } from "socket.io-client";
 
-// In a real SaaS, this would come from an environment variable
-const SOCKET_URL = "https://erp-backend-nxl1.onrender.com";
+const resolveSocketUrl = () => {
+    const configuredUrl = import.meta.env.VITE_SOCKET_URL || "https://n32rn7gl-4000.inc1.devtunnels.ms";
+
+    if (typeof window === "undefined") {
+        return configuredUrl;
+    }
+
+    try {
+        const socketUrl = new URL(configuredUrl, window.location.origin);
+        const appUrl = new URL(window.location.origin);
+
+        if (socketUrl.port === "3000" && appUrl.port === "3000") {
+            socketUrl.port = "4000";
+        }
+
+        return socketUrl.toString().replace(/\/$/, "");
+    } catch {
+        return configuredUrl;
+    }
+};
+
+const SOCKET_URL = resolveSocketUrl();
 
 export const socket = io(SOCKET_URL, {
     autoConnect: true,

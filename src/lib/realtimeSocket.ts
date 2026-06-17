@@ -3,18 +3,35 @@ import { useAuthStore } from "../store/authStore";
 
 const resolveSocketUrl = () => {
     const explicitSocketUrl = import.meta.env.VITE_SOCKET_URL?.trim();
-    if (explicitSocketUrl) return explicitSocketUrl;
+    if (explicitSocketUrl) return normalizeBackendOrigin(explicitSocketUrl);
 
     const apiUrl = import.meta.env.VITE_API_URL?.trim();
     if (apiUrl) {
         try {
-            return new URL(apiUrl, window.location.origin).origin;
+            return normalizeBackendOrigin(new URL(apiUrl, window.location.origin).origin);
         } catch {
             return window.location.origin;
         }
     }
 
     return window.location.origin;
+};
+
+const normalizeBackendOrigin = (url: string) => {
+    if (typeof window === "undefined") return url;
+
+    try {
+        const backendUrl = new URL(url, window.location.origin);
+        const appUrl = new URL(window.location.origin);
+
+        if (backendUrl.port === "3000" && appUrl.port === "3000") {
+            backendUrl.port = "4000";
+        }
+
+        return backendUrl.toString().replace(/\/$/, "");
+    } catch {
+        return url;
+    }
 };
 
 const SOCKET_URL = resolveSocketUrl();

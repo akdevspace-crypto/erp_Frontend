@@ -15,7 +15,7 @@
                             <h3 className="font-bold text-gray-800 text-[14px]">Email Notifications</h3>
                             <p className="text-[12px] font-medium text-gray-400 mt-0.5">Receive daily summary updates and alerts directly to your inbox</p>
                         </div>
-                        <div className="w-10 h-5 bg-[#00b3a7] rounded-full relative shadow-inner">
+                        <div className="w-10 h-5 bg-[#3f5f6a] rounded-full relative shadow-inner">
                             <div className="w-[14px] h-[14px] bg-white rounded-full absolute top-[3px] left-[22px] shadow-sm transition-all" />
                         </div>
                     </div>
