@@ -10,6 +10,8 @@ import { useToast } from './Toast'
 import { StatusHighlighter } from './StatusHighlighter'
 import { callsSocket, connectCallsSocket, connectRealtimeSocket, realtimeSocket } from '../lib/realtimeSocket'
 import { useCallCenterStore } from '../store/callCenterStore'
+import { useAuthStore } from '../store/authStore'
+import { WebRTCService } from '../features/conversation/services/webrtc.service'
 
 const normalizeDirection = (value?: string) => String(value || '').trim().toUpperCase()
 const normalizeChannel = (value?: string) => String(value || '').trim().toLowerCase()
@@ -247,13 +249,7 @@ const getBubbleClassName = (channel?: string, outbound?: boolean) => {
     const meta = getChannelMeta(channel)
 
     if (outbound) {
-        return meta.value === 'email'
-            ? 'border-sky-500 bg-sky-600 text-white shadow-[0_18px_40px_rgba(14,165,233,0.25)]'
-            : meta.value === 'call'
-                ? 'border-amber-500 bg-amber-500 text-white shadow-[0_18px_40px_rgba(245,158,11,0.28)]'
-                : meta.value === 'sms'
-                    ? 'border-violet-500 bg-violet-600 text-white shadow-[0_18px_40px_rgba(124,58,237,0.24)]'
-                    : 'border-emerald-500 bg-emerald-600 text-white shadow-[0_18px_40px_rgba(16,185,129,0.25)]'
+        return 'border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(63,95,106,0.25)]'
     }
 
     return cn('border bg-white text-slate-900 dark:bg-[#171717] dark:text-slate-100', meta.surfaceClassName)
@@ -298,6 +294,11 @@ type ChatModalProps = {
 export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversationId, openCallCenter = false }: ChatModalProps) {
     const [chatType, setChatType] = useState<'client' | 'internal'>('client')
     const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null)
+    const [internalCallTargetStaff, setInternalCallTargetStaff] = useState<any>(null)
+    const [internalCallState, setInternalCallState] = useState<'idle' | 'calling' | 'incoming' | 'connected'>('idle')
+    const [incomingCallPayload, setIncomingCallPayload] = useState<any>(null)
+    const [webrtcServiceInstance, setWebrtcServiceInstance] = useState<WebRTCService | null>(null)
+    const currentUser = useAuthStore((state) => state.user)
     const [draft, setDraft] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [replyChannel, setReplyChannel] = useState('whatsapp')
@@ -607,6 +608,116 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
         }
     }, [activeConversation?.id, callModalOpen, chatType, customerCallTarget, isOpen, isGlobalMode, setCallStoreAnalytics, setCallStoreCalls])
 
+    useEffect(() => {
+        if (!isOpen || !currentUser?.id) return
+
+        connectCallsSocket()
+        callsSocket.emit('join:agent', currentUser.id)
+
+        const handleIncomingOffer = (payload: any) => {
+            console.log('📥 Incoming internal WebRTC voice call offer:', payload)
+            setIncomingCallPayload(payload)
+            setInternalCallState('incoming')
+        }
+
+        const handleCallEnded = () => {
+            setInternalCallState('idle')
+            setIncomingCallPayload(null)
+            setWebrtcServiceInstance((current) => {
+                if (current) current.destroy()
+                return null
+            })
+        }
+
+        callsSocket.on('webrtc:offer', handleIncomingOffer)
+        callsSocket.on('webrtc:end', handleCallEnded)
+
+        return () => {
+            callsSocket.off('webrtc:offer', handleIncomingOffer)
+            callsSocket.off('webrtc:end', handleCallEnded)
+        }
+    }, [isOpen, currentUser?.id])
+
+    const handleStartInternalCall = async (staffMember: any) => {
+        if (!currentUser?.id || !staffMember?.userId) return
+
+        try {
+            setInternalCallTargetStaff(staffMember)
+            setInternalCallState('calling')
+
+            const service = new WebRTCService(currentUser.id, staffMember.userId)
+            setWebrtcServiceInstance(service)
+
+            service.onCallEnded(() => {
+                setInternalCallState('idle')
+                setWebrtcServiceInstance(null)
+            })
+
+            await service.startCall()
+            setInternalCallState('connected')
+
+            toast({
+                type: 'success',
+                title: 'Calling Voice',
+                message: `Ringing ${staffMember.firstName || 'Staff'} via WebRTC P2P.`
+            })
+        } catch (err: any) {
+            setInternalCallState('idle')
+            setWebrtcServiceInstance(null)
+            toast({
+                type: 'error',
+                title: 'Microphone Error',
+                message: err?.message || 'Could not access microphone for WebRTC call.'
+            })
+        }
+    }
+
+    const handleAcceptInternalCall = async () => {
+        if (!incomingCallPayload || !currentUser?.id) return
+
+        try {
+            setInternalCallState('connected')
+            const callerUserId = incomingCallPayload.callerUserId || incomingCallPayload.caller?.replace('agent:', '')
+            const service = new WebRTCService(currentUser.id, callerUserId)
+            setWebrtcServiceInstance(service)
+
+            service.onCallEnded(() => {
+                setInternalCallState('idle')
+                setIncomingCallPayload(null)
+                setWebrtcServiceInstance(null)
+            })
+
+            await service.answerCall(incomingCallPayload)
+
+            toast({
+                type: 'success',
+                title: 'Connected',
+                message: 'WebRTC P2P Voice Call established securely.'
+            })
+        } catch (err: any) {
+            setInternalCallState('idle')
+            setIncomingCallPayload(null)
+            toast({
+                type: 'error',
+                title: 'Answer Failed',
+                message: err?.message || 'Could not access microphone to answer.'
+            })
+        }
+    }
+
+    const handleDeclineOrEndInternalCall = () => {
+        if (webrtcServiceInstance) {
+            webrtcServiceInstance.endCall(true)
+            webrtcServiceInstance.destroy()
+            setWebrtcServiceInstance(null)
+        } else if (incomingCallPayload) {
+            const callerUserId = incomingCallPayload.callerUserId || incomingCallPayload.caller?.replace('agent:', '')
+            callsSocket.emit('webrtc:end', { target: `agent:${callerUserId}` })
+        }
+        setInternalCallState('idle')
+        setIncomingCallPayload(null)
+    }
+
     const handleSend = async () => {
         const body = draft.trim()
         if (!body) return
@@ -738,8 +849,8 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
     return (
         <div className="fixed inset-0 z-50 bg-slate-950/55 p-2 backdrop-blur-md sm:p-4">
             <div className="absolute inset-0" onClick={onClose} />
-            <div className="relative z-10 mx-auto flex h-full max-h-[860px] w-full max-w-[1480px] flex-col overflow-hidden rounded-[30px] border border-white/15 bg-[#f5f7f2] shadow-[0_40px_120px_rgba(15,23,42,0.28)] dark:bg-[#0d1117] lg:h-[760px] lg:flex-row">
-                <aside className="flex w-full shrink-0 flex-col border-b border-slate-200/80 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 lg:w-[320px] lg:border-b-0 lg:border-r">
+            <div className="relative z-10 mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-none flex-col overflow-hidden rounded-[24px] border border-white/15 bg-[#f5f7f2] shadow-[0_40px_120px_rgba(15,23,42,0.28)] dark:bg-[#0d1117] sm:h-[calc(100dvh-2rem)] lg:flex-row lg:rounded-[30px]">
+                <aside className="flex max-h-[42dvh] w-full shrink-0 flex-col border-b border-slate-200/80 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 lg:max-h-none lg:w-[clamp(280px,22vw,360px)] lg:border-b-0 lg:border-r">
                     <div className="border-b border-slate-200/80 px-4 py-4 dark:border-white/10">
                         <div className="mb-4 flex items-center justify-between">
                             <div>
@@ -813,7 +924,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         onClick={() => selectConversation(conversation.id)}
                                         className={cn(
                                             'w-full border-b border-slate-100 px-4 py-4 text-left transition hover:bg-slate-50/90 dark:border-white/5 dark:hover:bg-white/5',
-                                            activeConversation?.id === conversation.id ? 'bg-slate-100/70 dark:bg-white/5' : 'bg-transparent'
+                                            activeConversation?.id === conversation.id ? 'bg-primary-50/50 border-l-4 border-l-primary-500 pl-3 dark:bg-primary-900/20' : 'bg-transparent border-l-4 border-l-transparent pl-3'
                                         )}
                                     >
                                         <div className="flex items-start gap-3">
@@ -853,7 +964,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     )}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-black text-white dark:bg-white/10">
+                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-black text-white shadow-md dark:from-primary-600 dark:to-primary-800">
                                             {(person.firstName || 'S').charAt(0)}{(person.lastName || '').charAt(0)}
                                         </div>
                                         <div className="min-w-0">
@@ -895,7 +1006,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 onClick={() => setCallModalOpen(true)}
                                                 className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
                                             >
-                                                <PhoneCall className="h-3.5 w-3.5 text-teal-600 dark:text-teal-300" />
+                                                <PhoneCall className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" />
                                                 Call
                                             </button>
                                             <button
@@ -1046,21 +1157,39 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                             <>
                                 <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4 backdrop-blur-xl dark:border-white/10">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-sm font-black text-white dark:bg-white/10">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-black text-white shadow-md dark:from-primary-600 dark:to-primary-800">
                                             {(selectedStaff?.firstName || 'S').charAt(0)}{(selectedStaff?.lastName || '').charAt(0)}
                                         </div>
                                         <div>
-                                            <h3 className="text-base font-black text-slate-900 dark:text-white">{selectedStaff?.firstName} {selectedStaff?.lastName}</h3>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-base font-black text-slate-900 dark:text-white">{selectedStaff?.firstName} {selectedStaff?.lastName}</h3>
+                                                {internalCallState !== 'idle' ? (
+                                                    <span className="animate-pulse rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
+                                                        {internalCallState}
+                                                    </span>
+                                                ) : null}
+                                            </div>
                                             <p className="text-xs text-slate-500 dark:text-slate-400">{selectedStaff?.designation || 'Staff member'}</p>
                                         </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={onClose}
-                                        className="hidden rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white lg:inline-flex"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleStartInternalCall(selectedStaff)}
+                                            disabled={internalCallState !== 'idle'}
+                                            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
+                                        >
+                                            <PhoneCall className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" />
+                                            Call
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={onClose}
+                                            className="hidden rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white lg:inline-flex"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
@@ -1077,7 +1206,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                         <div className={cn(
                                                             'max-w-[88%] rounded-[26px] border px-4 py-3 sm:max-w-[78%]',
                                                             isOutbound
-                                                                ? 'rounded-br-md border-slate-900 bg-slate-900 text-white dark:border-white/10 dark:bg-white/10'
+                                                                ? 'rounded-br-md border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(63,95,106,0.25)] dark:border-primary-500/30 dark:bg-primary-600/90'
                                                                 : 'rounded-bl-md border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#171717] dark:text-slate-100'
                                                         )}>
                                                             <p className="whitespace-pre-wrap text-[14px] leading-6">{message.body}</p>
@@ -1088,6 +1217,18 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                     </div>
                                                 )
                                             })}
+                                            {internalConversation?.id && typingUsers[internalConversation.id]?.size > 0 ? (
+                                                <div className="flex animate-in fade-in duration-300 justify-start">
+                                                    <div className="rounded-[26px] border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#171717]">
+                                                        <div className="flex items-center gap-1">
+                                                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.3s]"></span>
+                                                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500 [animation-delay:-0.15s]"></span>
+                                                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : null}
+                                            <div ref={messagesEndRef} />
                                         </div>
                                     )}
                                 </div>
@@ -1147,15 +1288,19 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     <textarea
                                         value={draft}
                                         onChange={(event) => {
-                                            setDraft(event.target.value)
-                                            if (chatType === 'client' && event.target.value.trim() && !draft.trim()) {
-                                                emitTypingStart()
-                                            } else if (chatType === 'client' && !event.target.value.trim()) {
-                                                emitTypingStop()
+                                            const nextValue = event.target.value
+                                            setDraft(nextValue)
+                                            if (nextValue.trim() && !draft.trim()) {
+                                                if (chatType === 'client') emitTypingStart()
+                                                else if (internalConversation?.id) realtimeSocket.emit('typing:start', { conversationId: internalConversation.id })
+                                            } else if (!nextValue.trim()) {
+                                                if (chatType === 'client') emitTypingStop()
+                                                else if (internalConversation?.id) realtimeSocket.emit('typing:stop', { conversationId: internalConversation.id })
                                             }
                                         }}
                                         onBlur={() => {
                                             if (chatType === 'client') emitTypingStop()
+                                            else if (internalConversation?.id) realtimeSocket.emit('typing:stop', { conversationId: internalConversation.id })
                                         }}
                                         rows={1}
                                         placeholder={chatType === 'client'
@@ -1168,11 +1313,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         disabled={!draft.trim() || sending || sendInternal.isPending || (chatType === 'client' && !hasSelectedReplyRecipient)}
                                         className={cn(
                                             'inline-flex h-[54px] items-center gap-2 rounded-[22px] px-5 text-sm font-black text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50',
-                                            chatType === 'client' && normalizeChannel(replyChannel) === 'email'
-                                                ? 'bg-sky-600 hover:bg-sky-700'
-                                                : chatType === 'client' && normalizeChannel(replyChannel) === 'sms'
-                                                    ? 'bg-violet-600 hover:bg-violet-700'
-                                                : 'bg-emerald-600 hover:bg-emerald-700'
+                                            'bg-primary-600 hover:bg-primary-700'
                                         )}
                                     >
                                         <Send className="h-4 w-4" />
@@ -1183,7 +1324,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                         ) : null}
                     </div>
                     {chatType === 'client' && activeConversation ? (
-                        <aside className="hidden w-[300px] shrink-0 border-l border-slate-200/80 bg-white/85 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 xl:flex xl:flex-col">
+                        <aside className="hidden w-[clamp(260px,20vw,340px)] shrink-0 border-l border-slate-200/80 bg-white/85 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 xl:flex xl:flex-col">
                             <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(135deg,_rgba(255,255,255,0.95),_rgba(226,232,240,0.9))] p-4 dark:border-white/10 dark:bg-[linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(30,41,59,0.75))]">
                                 <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">Customer Context</p>
                                 <h4 className="mt-2 text-lg font-black text-slate-900 dark:text-white">{getConversationName(activeConversation)}</h4>
@@ -1256,10 +1397,10 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
             {callModalOpen && (activeConversation || isGlobalMode) ? (
                 <div className="fixed inset-0 z-20 flex items-end justify-center bg-slate-950/40 p-3 backdrop-blur-md animate-in fade-in duration-200 sm:items-center sm:p-6">
                     <div className="absolute inset-0" onClick={() => setCallModalOpen(false)} />
-                    <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-white/20 bg-white/90 shadow-[0_34px_110px_rgba(15,23,42,0.34)] backdrop-blur-2xl animate-in slide-in-from-bottom-8 fade-in duration-300 dark:bg-[#0f141c]/95">
+                    <div className="relative flex max-h-[92dvh] w-full max-w-none flex-col overflow-hidden rounded-[24px] border border-white/20 bg-white/90 shadow-[0_34px_110px_rgba(15,23,42,0.34)] backdrop-blur-2xl animate-in slide-in-from-bottom-8 fade-in duration-300 dark:bg-[#0f141c]/95 lg:rounded-[30px]">
                         <div className="flex flex-col gap-4 border-b border-slate-200/80 px-5 py-5 dark:border-white/10 lg:flex-row lg:items-center lg:justify-between">
                             <div className="min-w-0">
-                                <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-teal-600 dark:text-teal-300">Enterprise Call Center</p>
+                                <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary-600 dark:text-primary-300">Enterprise Call Center</p>
                                 <div className="mt-2 flex flex-wrap items-center gap-3">
                                     <h3 className="text-xl font-black text-slate-900 dark:text-white">
                                         {isGlobalMode ? 'Enterprise Operations' : getConversationName(activeConversation)}
@@ -1277,7 +1418,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     type="button"
                                     onClick={handleStartCall}
                                     disabled={!canStartCall}
-                                    className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-teal-700 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-200 dark:hover:bg-teal-400/20"
+                                    className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary-700 transition hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-primary-400/30 dark:bg-primary-400/10 dark:text-primary-200 dark:hover:bg-primary-400/20"
                                 >
                                     <PhoneCall className="h-3.5 w-3.5" />
                                     {startingCall ? 'Calling...' : 'Start Call'}
@@ -1293,7 +1434,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                         </div>
 
                         <div className="min-h-0 flex-1 overflow-y-auto p-5">
-                            <div className="grid gap-4 lg:grid-cols-[1.05fr_1.45fr]">
+                            <div className="grid gap-4 lg:grid-cols-[minmax(320px,0.95fr)_minmax(0,1.55fr)]">
                                 <div className="space-y-4">
                                     <div className="rounded-[26px] border border-slate-200 bg-white/85 p-4 dark:border-white/10 dark:bg-white/5">
                                         <div className="flex items-center justify-between gap-3">
@@ -1307,7 +1448,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                             {(activeCalls.length ? activeCalls : liveCall ? [liveCall] : []).length === 0 ? (
                                                 <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4 text-sm font-semibold text-slate-500 dark:border-white/10 dark:bg-black/20 dark:text-slate-400">No active call right now.</div>
                                             ) : (activeCalls.length ? activeCalls : [liveCall]).filter(Boolean).map((call: any) => (
-                                                <div key={call.id || call.callSid || call.startedAt} className="rounded-2xl border border-teal-100 bg-teal-50/70 p-4 dark:border-teal-400/20 dark:bg-teal-400/10">
+                                                <div key={call.id || call.callSid || call.startedAt} className="rounded-2xl border border-primary-100 bg-primary-50/70 p-4 dark:border-primary-400/20 dark:bg-primary-400/10">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="min-w-0">
                                                             <p className="truncate text-sm font-black text-slate-900 dark:text-white">
@@ -1322,7 +1463,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                             Ongoing
                                                         </span>
                                                     </div>
-                                                    <div className="mt-3 flex h-6 items-center gap-1 text-teal-500 dark:text-teal-300" aria-hidden="true">
+                                                    <div className="mt-3 flex h-6 items-center gap-1 text-primary-500 dark:text-primary-300" aria-hidden="true">
                                                         {[0, 1, 2, 3, 4].map((bar) => (
                                                             <span
                                                                 key={bar}
@@ -1416,7 +1557,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 className={cn(
                                                     'rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition',
                                                     callFilter === value
-                                                        ? 'border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-200'
+                                                        ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-400/30 dark:bg-primary-400/10 dark:text-primary-200'
                                                         : 'border-slate-200 bg-white text-slate-500 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white'
                                                 )}
                                             >
@@ -1425,7 +1566,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         ))}
                                     </div>
 
-                                    <div className="mt-4 max-h-[520px] space-y-3 overflow-y-auto pr-1">
+                                    <div className="mt-4 max-h-[min(52dvh,620px)] space-y-3 overflow-y-auto pr-1">
                                         {filteredCallHistory.length === 0 ? (
                                             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-5 text-sm font-semibold text-slate-500 dark:border-white/10 dark:bg-black/20 dark:text-slate-400">No calls match this view.</div>
                                         ) : filteredCallHistory.slice(0, 80).map((call) => {
@@ -1436,7 +1577,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 <div key={call.id || call.callSid} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-black/20">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="flex min-w-0 gap-3">
-                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm dark:bg-white/10 dark:text-teal-300">
+                                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-primary-600 shadow-sm dark:bg-white/10 dark:text-primary-300">
                                                                 <DirectionIcon className="h-4 w-4" />
                                                             </div>
                                                             <div className="min-w-0">
@@ -1451,7 +1592,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                                     <span>{call.agentName || call.agentEmail || 'Unassigned'}</span>
                                                                     {recordingUrl ? (
                                                                         <>
-                                                                            <a href={recordingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-bold text-teal-700 dark:text-teal-200"><Play className="h-3 w-3" /> Play</a>
+                                                                            <a href={recordingUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-bold text-primary-700 dark:text-primary-200"><Play className="h-3 w-3" /> Play</a>
                                                                             <a href={recordingUrl} download className="inline-flex items-center gap-1 font-bold text-slate-600 dark:text-slate-300"><Download className="h-3 w-3" /> Download</a>
                                                                         </>
                                                                     ) : null}
@@ -1467,6 +1608,43 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            ) : null}
+
+            {incomingCallPayload || internalCallState === 'calling' || internalCallState === 'connected' ? (
+                <div className="absolute top-4 right-4 z-50 flex w-[min(20rem,calc(100vw-2rem))] animate-in fade-in slide-in-from-top-4 flex-col gap-3 rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl backdrop-blur-2xl">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 font-black shadow-md">
+                            📞
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400">
+                                {internalCallState === 'incoming' ? 'Incoming Voice Call' : internalCallState === 'calling' ? 'Calling...' : 'Live Call'}
+                            </p>
+                            <p className="truncate text-sm font-black">
+                                {incomingCallPayload ? `Agent #${incomingCallPayload.callerUserId || 'Staff'}` : internalCallTargetStaff ? `${internalCallTargetStaff.firstName} ${internalCallTargetStaff.lastName}` : 'Internal Voice'}
+                            </p>
+                            <p className="text-xs text-slate-400">WebRTC Secure P2P</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 border-t border-white/10 pt-3">
+                        {internalCallState === 'incoming' ? (
+                            <button
+                                type="button"
+                                onClick={handleAcceptInternalCall}
+                                className="flex-1 rounded-full bg-emerald-600 py-2 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-emerald-500"
+                            >
+                                Accept
+                            </button>
+                        ) : null}
+                        <button
+                            type="button"
+                            onClick={handleDeclineOrEndInternalCall}
+                            className="flex-1 rounded-full bg-red-600 py-2 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-red-500"
+                        >
+                            {internalCallState === 'incoming' ? 'Decline' : 'End Call'}
+                        </button>
                     </div>
                 </div>
             ) : null}

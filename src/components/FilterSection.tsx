@@ -35,7 +35,7 @@ export function FilterSection({
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-white/10 rounded-xl leading-5 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#00b3a7]/20 focus:border-[#00b3a7] sm:text-sm text-gray-900 dark:text-gray-100 transition-all"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-white/10 rounded-xl leading-5 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] sm:text-sm text-gray-900 dark:text-gray-100 transition-all"
                         placeholder={searchPlaceholder}
                         value={searchQuery}
                         onChange={onSearchChange}
@@ -49,7 +49,7 @@ export function FilterSection({
                         name={filter.name}
                         value={filter.value}
                         onChange={filter.onChange}
-                        className="block w-full sm:w-auto pl-3 pr-10 py-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 focus:outline-none focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#00b3a7]/20 focus:border-[#00b3a7] sm:text-sm rounded-xl border text-gray-900 dark:text-gray-100 transition-all"
+                        className="block w-full sm:w-auto pl-3 pr-10 py-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 focus:outline-none focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] sm:text-sm rounded-xl border text-gray-900 dark:text-gray-100 transition-all"
                     >
                         {filter.placeholder && (
                             <option value="" disabled className="text-gray-400">

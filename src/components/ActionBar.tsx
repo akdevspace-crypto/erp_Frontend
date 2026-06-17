@@ -42,7 +42,7 @@ export function ActionBar({
             {onAdd && (
                 <button
                     onClick={onAdd}
-                    className="inline-flex items-center px-4 py-2.5 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#00b3a7] to-[#01867c] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(0,179,167,0.2)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b3a7] transition-all active:scale-95 border border-transparent"
+                    className="inline-flex items-center px-4 py-2.5 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3f5f6a] transition-all active:scale-95 border border-transparent"
                 >
                     <Plus className="h-4 w-4 mr-2" />
                     {addLabel}

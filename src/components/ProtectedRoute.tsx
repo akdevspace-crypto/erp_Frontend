@@ -1,17 +1,27 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
-import { canAccessPath, hasPermissionAccess } from '../lib/access'
+import { canAccessPath, getDefaultRouteForUser, getRolePreferredRedirectPath, hasPermissionAccess } from '../lib/access'
+import { GlobalSpinner } from './SkeletonLoader'
 
 interface ProtectedRouteProps {
     requiredPermissions?: string[]
 }
 
 export function ProtectedRoute({ requiredPermissions }: ProtectedRouteProps) {
-    const { isAuthenticated, user } = useAuthStore()
+    const { hasHydrated, isAuthenticated, token, user } = useAuthStore()
     const location = useLocation()
 
-    if (!isAuthenticated || !user) {
+    if (!hasHydrated) {
+        return <GlobalSpinner />
+    }
+
+    if (!isAuthenticated || !token || !user) {
         return <Navigate to="/auth/login" state={{ from: location }} replace />
+    }
+
+    const preferredRedirectPath = getRolePreferredRedirectPath(user, location.pathname)
+    if (preferredRedirectPath && preferredRedirectPath !== location.pathname) {
+        return <Navigate to={preferredRedirectPath} replace />
     }
 
     // Basic RBAC check if requiredPermissions are passed at route level
@@ -19,12 +29,12 @@ export function ProtectedRoute({ requiredPermissions }: ProtectedRouteProps) {
         const hasPermission = hasPermissionAccess(user, requiredPermissions)
 
         if (!hasPermission) {
-            return <Navigate to="/dashboard" replace />
+            return <Navigate to={getDefaultRouteForUser(user)} replace />
         }
     }
 
     if (!canAccessPath(user, location.pathname)) {
-        return <Navigate to="/dashboard" replace />
+        return <Navigate to={getDefaultRouteForUser(user)} replace />
     }
 
     return <Outlet />

@@ -22,7 +22,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
                 </label>
                 <select
                     className={cn(
-                        "flex h-10 w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black hover:bg-white dark:hover:bg-white/5 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-black focus:outline-none focus:ring-2 focus:ring-[#00b3a7]/20 focus:border-[#00b3a7] disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+                        "flex h-10 w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black hover:bg-white dark:hover:bg-white/5 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:bg-white dark:focus:bg-black focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] disabled:cursor-not-allowed disabled:opacity-50 transition-all",
                         error && "border-red-500 focus:ring-red-500",
                         className
                     )}

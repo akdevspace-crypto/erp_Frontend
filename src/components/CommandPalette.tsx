@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Command } from 'cmdk'
-import { Search, PhoneCall, CheckCircle, CreditCard, Users, ShieldAlert, FileText, Activity } from 'lucide-react'
+import { Search, PhoneCall, CheckCircle, Users, ShieldAlert, FileText, Activity } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function CommandPalette() {
@@ -51,14 +51,14 @@ export function CommandPalette() {
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Record a new lead</span>
                         </Command.Item>
 
-                        <Command.Item onSelect={() => { navigate('/tasks/assign'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#00b3a7]/10 aria-selected:bg-[#00b3a7]/10 text-gray-700 dark:text-gray-300 hover:text-[#00b3a7] aria-selected:text-[#00b3a7] transition-colors group">
-                            <div className="w-8 h-8 rounded-full bg-[#00b3a7]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#00b3a7]/20 shadow-sm transition-all"><CheckCircle className="w-4 h-4" /></div>
+                        <Command.Item onSelect={() => { navigate('/tasks/assign'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#3f5f6a]/10 aria-selected:bg-[#3f5f6a]/10 text-gray-700 dark:text-gray-300 hover:text-[#3f5f6a] aria-selected:text-[#3f5f6a] transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-[#3f5f6a]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#3f5f6a]/20 shadow-sm transition-all"><CheckCircle className="w-4 h-4" /></div>
                             <span className="text-[14px] font-bold text-gray-900 dark:text-gray-100">Assign Task</span>
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Delegate to team</span>
                         </Command.Item>
 
-                        <Command.Item onSelect={() => { navigate('/clients/new'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#00b3a7]/10 aria-selected:bg-[#00b3a7]/10 text-gray-700 dark:text-gray-300 hover:text-[#00b3a7] aria-selected:text-[#00b3a7] transition-colors group">
-                            <div className="w-8 h-8 rounded-full bg-[#00b3a7]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#00b3a7]/20 shadow-sm transition-all"><Users className="w-4 h-4" /></div>
+                        <Command.Item onSelect={() => { navigate('/clients/new'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#3f5f6a]/10 aria-selected:bg-[#3f5f6a]/10 text-gray-700 dark:text-gray-300 hover:text-[#3f5f6a] aria-selected:text-[#3f5f6a] transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-[#3f5f6a]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#3f5f6a]/20 shadow-sm transition-all"><Users className="w-4 h-4" /></div>
                             <span className="text-[14px] font-bold text-gray-900 dark:text-gray-100">Create Client Profile</span>
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Onboard new patient</span>
                         </Command.Item>

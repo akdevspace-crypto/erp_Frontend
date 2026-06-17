@@ -26,17 +26,17 @@ export function Drawer({ isOpen, onClose, title, children, size = 'md' }: Drawer
 
     const sizeClasses = {
         md: 'max-w-md',
-        lg: 'max-w-2xl',
-        xl: 'max-w-4xl',
+        lg: 'max-w-2xl 2xl:max-w-3xl',
+        xl: 'max-w-4xl 2xl:max-w-6xl',
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
             <div
                 className="fixed inset-0 bg-gray-900/40 backdrop-blur-md transition-opacity"
                 onClick={onClose}
             />
-            <div className={cn("relative flex max-h-[90vh] flex-col overflow-hidden rounded-[32px] border border-white/20 dark:border-white/5 bg-white dark:bg-black text-left shadow-2xl transition-all w-full z-10 p-2", sizeClasses[size])}>
+            <div className={cn("relative flex max-h-[92dvh] flex-col overflow-hidden rounded-[32px] border border-white/20 dark:border-white/5 bg-white dark:bg-black text-left shadow-2xl transition-all w-full z-10 p-2", sizeClasses[size])}>
                 <div className="flex flex-col bg-white dark:bg-black dark:border-white/10 overflow-hidden rounded-[24px] h-full relative shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-gray-50">
                     <div className="px-5 py-5 sm:px-6 border-b border-gray-100/80 flex-shrink-0">
                         <div className="flex items-center justify-between">
@@ -44,7 +44,7 @@ export function Drawer({ isOpen, onClose, title, children, size = 'md' }: Drawer
                             <div className="ml-3 flex h-7 items-center">
                                 <button
                                     type="button"
-                                    className="rounded-md bg-white dark:bg-transparent text-gray-400 hover:text-[#00b3a7] focus:outline-none focus:ring-2 focus:ring-[#00b3a7]/30 transition-colors"
+                                    className="rounded-md bg-white dark:bg-transparent text-gray-400 hover:text-[#3f5f6a] focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/30 transition-colors"
                                     onClick={onClose}
                                 >
                                     <span className="sr-only">Close panel</span>

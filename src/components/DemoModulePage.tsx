@@ -8,14 +8,7 @@ export function DemoModulePage({ moduleKey }: { moduleKey: DemoModuleKey }) {
     const [searchQuery, setSearchQuery] = useState('')
     const demo = getDemoModuleData(moduleKey)
 
-    const rows = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase()
-        if (!query) return demo.rows
-
-        return demo.rows.filter((row) => (
-            Object.values(row).some((value) => String(value).toLowerCase().includes(query))
-        ))
-    }, [demo.rows, searchQuery])
+    const rows = useMemo<DemoRow[]>(() => [], [searchQuery])
 
     return (
         <div className="flex flex-col h-full bg-transparent dark:bg-black">
@@ -37,7 +30,7 @@ export function DemoModulePage({ moduleKey }: { moduleKey: DemoModuleKey }) {
                 data={rows}
                 columns={demo.columns}
                 keyExtractor={(item) => String(item.id)}
-                emptyStateMessage={`No ${demo.title.toLowerCase()} match this search.`}
+                emptyStateMessage={`No live ${demo.title.toLowerCase()} records available.`}
             />
         </div>
     )

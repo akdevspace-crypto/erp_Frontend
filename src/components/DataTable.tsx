@@ -24,6 +24,8 @@ export interface DataTableProps<T> {
     emptyStateMessage?: string
     isLoading?: boolean
     actionsTitle?: string
+    minTableWidth?: string
+    showScrollbars?: boolean
 }
 
 export function DataTable<T>({
@@ -35,7 +37,9 @@ export function DataTable<T>({
     pagination,
     emptyStateMessage = 'No data available',
     isLoading = false,
-    actionsTitle = 'Actions'
+    actionsTitle = 'Actions',
+    minTableWidth,
+    showScrollbars = false
 }: DataTableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(null)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
@@ -105,9 +109,14 @@ export function DataTable<T>({
     }
 
     return (
-        <div className="bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden flex flex-col h-full flex-1 min-h-0 p-2">
-            <div className="overflow-x-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10">
+        <div className="bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden flex flex-col h-full flex-1 min-h-0 p-2 2xl:p-3">
+            <div className={cn(
+                "flex-1",
+                showScrollbars
+                    ? "overflow-auto"
+                    : "overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            )}>
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10" style={minTableWidth ? { minWidth: minTableWidth } : undefined}>
                     <thead className="bg-gray-50/80 dark:bg-white/5 backdrop-blur-sm sticky top-0 z-10 rounded-2xl">
                         <tr>
                             {columns.map(col => (
@@ -115,7 +124,7 @@ export function DataTable<T>({
                                     key={col.key}
                                     scope="col"
                                     className={cn(
-                                        "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap",
+                                        "px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap sm:px-4 xl:px-6 2xl:py-4",
                                         col.sortable && "cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
                                     )}
                                     onClick={() => col.sortable && handleSort(col.key)}
@@ -162,17 +171,17 @@ export function DataTable<T>({
                                 <tr
                                     key={keyExtractor(item)}
                                     className={cn(
-                                        "hover:bg-[#00b3a7]/5 transition-colors group border-b border-gray-50 dark:border-white/5",
+                                        "hover:bg-[#3f5f6a]/5 transition-colors group border-b border-gray-50 dark:border-white/5",
                                         index % 2 === 0 ? "bg-white dark:bg-black" : "bg-gray-50/30 dark:bg-white/2"
                                     )}
                                 >
                                     {columns.map(col => (
-                                        <td key={col.key} className="px-6 py-3.5 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                        <td key={col.key} className="px-3 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap sm:px-4 xl:px-6 2xl:py-4">
                                             {renderCell(item, col, (currentPage - 1) * entriesPerPage + index)}
                                         </td>
                                     ))}
                                     {actions && (
-                                        <td className="px-6 py-3.5 text-sm text-right font-medium whitespace-nowrap">
+                                        <td className="px-3 py-3 text-sm text-right font-medium whitespace-nowrap sm:px-4 xl:px-6 2xl:py-4">
                                             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex justify-end space-x-2">
                                                 {actions(item)}
                                             </div>
