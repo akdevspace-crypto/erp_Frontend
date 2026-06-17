@@ -79,13 +79,13 @@ export function CashboxPending() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => handleAction(t.id, 'APPROVED')}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#28a745] text-white text-xs font-medium rounded hover:bg-[#218838] transition-colors"
+                        className="rounded bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-700 disabled:opacity-50"
                     >
                         <Check className="w-3 h-3" /> Approve
                     </button>
                     <button
                         onClick={() => handleAction(t.id, 'REJECTED')}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#dc3545] text-white text-xs font-medium rounded hover:bg-[#c82333] transition-colors"
+                        className="rounded border border-gray-300 dark:border-white/10 bg-white dark:bg-transparent px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
                     >
                         <X className="w-3 h-3" /> Reject
                     </button>

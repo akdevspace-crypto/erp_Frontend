@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export function RuleBuilder() {
-    const [rules, setRules] = useState([{ field: '', operator: '=', value: '' }]);
+    const [rules] = useState([{ field: '', operator: '=', value: '' }]);
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Automation Rule Builder</h2>
             <div className="space-y-4">
-                {rules.map((rule, idx) => (
+                {rules.map((_, idx) => (
                     <div key={idx} className="flex flex-wrap gap-4 items-center">
                         <input
                             type="text"

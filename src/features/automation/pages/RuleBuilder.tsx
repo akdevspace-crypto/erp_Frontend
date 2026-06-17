@@ -135,9 +135,10 @@ export const RuleBuilder = () => {
         try {
             const res = await fetch(`/api/automation/rules?module=${activeModule}`);
             const data = await res.json();
-            setRules(data);
+            setRules(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Failed to fetch rules', err);
+            setRules([]);
         } finally {
             setLoading(false);
         }
@@ -251,7 +252,7 @@ export const RuleBuilder = () => {
     );
 
     return (
-        <div className="p-6 space-y-8 max-w-7xl mx-auto h-[calc(100vh-64px)] flex flex-col overflow-hidden dark:bg-black">
+        <div className="flex h-full min-h-0 w-full min-w-0 flex-col space-y-5 overflow-hidden p-4 dark:bg-black sm:p-6 xl:space-y-6 2xl:space-y-8">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-shrink-0">
                 <div className="flex items-center gap-3">
@@ -265,7 +266,7 @@ export const RuleBuilder = () => {
                         <p className="text-gray-500 dark:text-gray-400 font-medium">Fine-tune your business intelligence rules.</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center md:w-auto">
                     <div className="relative flex-grow md:flex-grow-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -287,9 +288,9 @@ export const RuleBuilder = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 overflow-hidden">
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-12 xl:gap-6 2xl:gap-8">
                 {/* Left Sidebar: Rule List */}
-                <div className="lg:col-span-4 flex flex-col space-y-4 overflow-hidden">
+                <div className="flex min-h-0 flex-col space-y-4 overflow-hidden lg:col-span-4">
                     {/* Module Selectors */}
                     <div className="flex p-1 bg-gray-100 dark:bg-white/5 border dark:border-white/10 rounded-xl flex-shrink-0">
                         {['enquiry', 'accounts', 'hr'].map(mod => (
@@ -304,7 +305,7 @@ export const RuleBuilder = () => {
                     </div>
 
                     {/* Scrollable Rule Cards */}
-                    <div className="flex-grow overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                         {loading && !editingRule ? (
                             <div className="animate-pulse space-y-3">
                                 {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-24 bg-gray-100 dark:bg-white/5 rounded-2xl"></div>)}
@@ -367,9 +368,9 @@ export const RuleBuilder = () => {
                 </div>
 
                 {/* Right Panel: Editor */}
-                <div className="lg:col-span-8 flex flex-col overflow-hidden bg-white dark:bg-black rounded-3xl border border-gray-100 dark:border-white/10 shadow-2xl relative">
+                <div className="relative flex min-h-0 flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl dark:border-white/10 dark:bg-black lg:col-span-8">
                     {editingRule ? (
-                        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="flex h-full min-h-0 flex-col animate-in fade-in slide-in-from-right-4 duration-300">
                             {/* Editor Header */}
                             <div className="p-6 border-b dark:border-white/10 bg-gray-50/50 dark:bg-black flex justify-between items-center">
                                 <div>
@@ -382,7 +383,7 @@ export const RuleBuilder = () => {
                             </div>
 
                             {/* Editor Body */}
-                            <div className="flex-grow overflow-y-auto p-6 space-y-8 custom-scrollbar">
+                            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar sm:p-6 2xl:space-y-8">
                                 {/* Configuration Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="md:col-span-2 space-y-2">
@@ -429,7 +430,7 @@ export const RuleBuilder = () => {
                                         </button>
                                     </div>
 
-                                    <div className="space-y-3 bg-gray-50/50 dark:bg-black p-6 rounded-[2rem] border-2 border-dashed border-gray-100 dark:border-white/10">
+                                    <div className="space-y-3 rounded-[2rem] border-2 border-dashed border-gray-100 bg-gray-50/50 p-4 dark:border-white/10 dark:bg-black sm:p-6">
                                         {editingRule.conditions.conditions.map((c, i) => (
                                             <ConditionRow
                                                 key={i}
@@ -453,7 +454,7 @@ export const RuleBuilder = () => {
                                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Then perform the following...</p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col sm:flex-row gap-6 bg-gradient-to-br from-gray-50 to-white dark:from-black dark:to-black p-6 rounded-[2rem] border border-gray-100 dark:border-white/10 shadow-sm transition-all">
+                                    <div className="flex flex-col gap-4 rounded-[2rem] border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4 shadow-sm transition-all dark:from-black dark:to-black dark:border-white/10 sm:flex-row sm:p-6">
                                         <div className="flex-grow space-y-2">
                                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Task Action</label>
                                             <select
@@ -477,7 +478,7 @@ export const RuleBuilder = () => {
                                 </div>
 
                                 {/* Live Human-Readable Preview */}
-                                <div className="p-8 bg-primary-500 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                                <div className="group relative overflow-hidden rounded-[2rem] bg-primary-500 p-5 text-white shadow-2xl sm:p-8 sm:rounded-[2.5rem]">
                                     <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                                         <FileJson size={120} />
                                     </div>
@@ -511,7 +512,7 @@ export const RuleBuilder = () => {
                             </div>
 
                             {/* Editor Footer */}
-                            <div className="p-8 border-t dark:border-white/10 bg-gray-50/50 dark:bg-black flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div className="flex flex-col items-center justify-between gap-4 border-t bg-gray-50/50 p-4 dark:border-white/10 dark:bg-black sm:flex-row sm:p-6 2xl:p-8">
                                 <button
                                     onClick={() => setShowTestModal(true)}
                                     className="w-full sm:w-auto px-6 py-3 border dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all"

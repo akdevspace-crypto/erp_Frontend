@@ -73,7 +73,9 @@ export function Cashbox() {
                 category: t.category,
                 clientName: t.clientName,
                 amount: t.amount,
+                mode: t.mode,
                 notes: t.notes,
+                metadata: t.metadata,
                 date: t.date,
                 type: t.type,
                 income: t.amount > 0 ? t.amount : null,
@@ -109,7 +111,7 @@ export function Cashbox() {
             key: 'action', header: 'Action', cell: (t) => (
                 <div className="flex items-center gap-1 justify-center">
                     <button onClick={() => openModal(t, 'VIEW')} className="p-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500" title="View"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-teal-500 text-white rounded hover:bg-teal-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-primary-500 text-white rounded hover:bg-primary-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => openModal(t, 'DELETE')} className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )
@@ -119,10 +121,10 @@ export function Cashbox() {
     columns[0].cell = (item) => data.findIndex((a: any) => a.id === item.id) + 1
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex h-full min-w-0 flex-col">
             <PageHeader title="Cashbox" breadcrumbs={[{ label: 'Home' }, { label: 'Cashbox' }]} />
 
-            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4 2xl:mb-6 2xl:p-5">
                 {/* Date Filters Section */}
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
@@ -142,7 +144,7 @@ export function Cashbox() {
                                 onChange={(e) => setToDate(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                             <button
                                 onClick={handleViewMonth}
                                 className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white hover:bg-gray-50 transition-colors"

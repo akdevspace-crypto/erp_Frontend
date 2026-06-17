@@ -133,7 +133,7 @@ export function Expense() {
             key: 'action', header: 'Action', cell: (t) => (
                 <div className="flex items-center gap-1 justify-center">
                     <button onClick={() => openModal(t, 'VIEW')} className="p-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500" title="View"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-teal-500 text-white rounded hover:bg-teal-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-primary-500 text-white rounded hover:bg-primary-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => openModal(t, 'DELETE')} className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export function LogViewer() {
     // Mock Data mimicking what comes from Prisma's AutomationLog table

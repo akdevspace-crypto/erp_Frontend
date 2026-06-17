@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StatusHighlighter } from '../../components/StatusHighlighter';
 
 export function TaskPanel() {

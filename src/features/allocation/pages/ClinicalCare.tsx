@@ -1,12 +1,32 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader'
 import { FilterSection } from '../../../components/FilterSection'
 import { DataTable, type Column } from '../../../components/DataTable'
-
-const mockData: any[] = []
+import { StatusHighlighter } from '../../../components/StatusHighlighter'
+import { useClinicalAllocations, useUpdateAllocation } from '../hooks/useAllocation'
+import { AssignStaffModal } from '../components/AssignStaffModal'
 
 export function ClinicalCare() {
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchParams] = useSearchParams()
+    const routeUnitId = searchParams.get('unitId')
+    const { data = [], isLoading } = useClinicalAllocations(routeUnitId)
+    const updateAllocation = useUpdateAllocation()
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+    const [selectedAllocation, setSelectedAllocation] = useState<any | null>(null)
+    const filteredData = data.filter((item: any) =>
+        [
+            item.ref,
+            item.allocationRef,
+            item.enquiryRef,
+            item.service,
+            item.clientName,
+            item.mobile,
+            item.patient,
+            item.staffName,
+            item.status
+        ].some((value) => String(value || '').toLowerCase().includes(searchQuery.toLowerCase()))
+    )
 
     const columns: Column<any>[] = [
         { key: 'sno', header: 'S.No', cell: (_, index) => <span className="text-gray-500 font-medium text-sm">{index + 1}</span> },
@@ -16,12 +36,26 @@ export function ClinicalCare() {
         { key: 'enquiryMode', header: 'Mode of Enquiry', cell: (row) => <span className="px-2 py-1 text-[11px] font-bold rounded shadow-sm bg-blue-50 text-blue-700 uppercase border border-blue-100">{row.mode || 'N/A'}</span> },
         { key: 'createdBy', header: 'Created By', cell: (row) => <span className="text-sm">{row.createdBy || '-'}</span> },
         { key: 'patientDetails', header: 'Patient Details', cell: (row) => <span className="text-sm">{row.patient || '-'}</span> },
+        { key: 'status', header: 'Status', cell: (row) => <StatusHighlighter value={row.status} /> },
+        {
+            key: 'assignedStaff',
+            header: 'Assigned Staff',
+            cell: (row) => (
+                <div className="text-sm">
+                    <p className="font-bold text-gray-900 dark:text-gray-100">{row.staffName || 'Not Assigned'}</p>
+                    <p className="mt-1 text-xs text-gray-500">{row.scheduleText || '-'}</p>
+                </div>
+            )
+        },
         {
             key: 'outPatientEntry',
-            header: 'Out-Patient Entry',
-            cell: () => (
-                <button className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded shadow-sm transition-all active:scale-95">
-                    Entry Form
+            header: 'Actions',
+            cell: (row) => (
+                <button
+                    onClick={() => setSelectedAllocation(row)}
+                    className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded shadow-sm transition-all active:scale-95"
+                >
+                    {row.status === 'Allocated' ? 'Reassign Staff' : 'Assign Staff'}
                 </button>
             )
         }
@@ -49,13 +83,33 @@ export function ClinicalCare() {
 
                 <div className="p-4">
                     <DataTable
-                        data={mockData}
+                        data={filteredData}
                         columns={columns}
-                        keyExtractor={(item: any) => item.id || Math.random().toString()}
+                        keyExtractor={(item: any) => item.id}
                         emptyStateMessage="No data available in table"
+                        isLoading={isLoading}
                     />
                 </div>
             </div>
+            <AssignStaffModal
+                isOpen={Boolean(selectedAllocation)}
+                allocation={selectedAllocation}
+                isSaving={updateAllocation.isPending}
+                onClose={() => setSelectedAllocation(null)}
+                onAssign={(payload) => {
+                    if (!selectedAllocation) return
+                    updateAllocation.mutate({
+                        id: selectedAllocation.id,
+                        staffId: payload.staffId,
+                        status: 'ALLOCATED',
+                        startDate: payload.startDate,
+                        endDate: payload.endDate,
+                        metadata: { notes: payload.notes || null }
+                    }, {
+                        onSuccess: () => setSelectedAllocation(null)
+                    })
+                }}
+            />
         </div>
     )
 }

@@ -1,25 +1,57 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader'
 import { FilterSection } from '../../../components/FilterSection'
 import { DataTable, type Column } from '../../../components/DataTable'
-import { useOthersAllocations } from '../hooks/useAllocation'
+import { StatusHighlighter } from '../../../components/StatusHighlighter'
+import { useOthersAllocations, useUpdateAllocation } from '../hooks/useAllocation'
+import { AssignStaffModal } from '../components/AssignStaffModal'
 
 export function OthersAllocation() {
-    const { data = [], isLoading } = useOthersAllocations()
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchParams] = useSearchParams()
+    const routeUnitId = searchParams.get('unitId')
+    const { data = [], isLoading } = useOthersAllocations(routeUnitId)
+    const updateAllocation = useUpdateAllocation()
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+    const [selectedAllocation, setSelectedAllocation] = useState<any | null>(null)
+    const filteredData = data.filter((item: any) =>
+        [
+            item.ref,
+            item.allocationRef,
+            item.enquiryRef,
+            item.service,
+            item.clientName,
+            item.mobile,
+            item.staffName,
+            item.status
+        ].some((value) => String(value || '').toLowerCase().includes(searchQuery.toLowerCase()))
+    )
 
     const columns: Column<any>[] = [
         { key: 'sno', header: 'S.No', cell: (_, index) => <span className="text-gray-500 font-medium text-sm">{index + 1}</span> },
         { key: 'clientRef', header: 'Client Ref. No.', cell: (row) => <span className="text-sm font-semibold text-primary-600 dark:text-primary-400">{row.ref || '-'}</span> },
         { key: 'serviceLookingFor', header: 'Service Looking for', cell: (row) => <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{row.service || '-'}</span> },
         { key: 'clientDetails', header: 'Client Details', cell: (row) => <span className="text-sm font-medium dark:text-gray-300">{row.clientName || '-'}</span> },
-        { key: 'staffName', header: 'Assigned Staff', cell: (row) => <span className="text-sm text-gray-600 dark:text-gray-400">{row.staffName || '-'}</span> },
+        { key: 'status', header: 'Status', cell: (row) => <StatusHighlighter value={row.status} /> },
+        {
+            key: 'staffName',
+            header: 'Assigned Staff',
+            cell: (row) => (
+                <div className="text-sm">
+                    <p className="font-bold text-gray-900 dark:text-gray-100">{row.staffName || 'Not Assigned'}</p>
+                    <p className="mt-1 text-xs text-gray-500">{row.scheduleText || '-'}</p>
+                </div>
+            )
+        },
         {
             key: 'followUpHistory',
-            header: 'Follow-Up History',
-            cell: () => (
-                <button className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded shadow-sm transition-all active:scale-95">
-                    History
+            header: 'Actions',
+            cell: (row) => (
+                <button
+                    onClick={() => setSelectedAllocation(row)}
+                    className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded shadow-sm transition-all active:scale-95"
+                >
+                    {row.status === 'Allocated' ? 'Reassign Staff' : 'Assign Staff'}
                 </button>
             )
         }
@@ -47,14 +79,33 @@ export function OthersAllocation() {
 
                 <div className="p-4">
                     <DataTable
-                        data={data}
+                        data={filteredData}
                         columns={columns}
                         isLoading={isLoading}
-                        keyExtractor={(item: any) => item.id || Math.random().toString()}
+                        keyExtractor={(item: any) => item.id}
                         emptyStateMessage="No data available in table"
                     />
                 </div>
             </div>
+            <AssignStaffModal
+                isOpen={Boolean(selectedAllocation)}
+                allocation={selectedAllocation}
+                isSaving={updateAllocation.isPending}
+                onClose={() => setSelectedAllocation(null)}
+                onAssign={(payload) => {
+                    if (!selectedAllocation) return
+                    updateAllocation.mutate({
+                        id: selectedAllocation.id,
+                        staffId: payload.staffId,
+                        status: 'ALLOCATED',
+                        startDate: payload.startDate,
+                        endDate: payload.endDate,
+                        metadata: { notes: payload.notes || null }
+                    }, {
+                        onSuccess: () => setSelectedAllocation(null)
+                    })
+                }}
+            />
         </div>
     )
 }

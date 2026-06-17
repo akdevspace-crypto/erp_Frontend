@@ -62,7 +62,9 @@ export function Income() {
                 receiptNoRaw: t.receiptNo,
                 category: t.category,
                 amount: t.amount,
+                mode: t.mode,
                 notes: t.notes,
+                metadata: t.metadata,
                 date: t.date,
                 type: t.type,
                 receiptNo: t.receiptNo || 'N/A',
@@ -167,7 +169,7 @@ export function Income() {
             key: 'action', header: 'Action', cell: (t) => (
                 <div className="flex items-center gap-1 justify-center">
                     <button onClick={() => openModal(t, 'VIEW')} className="p-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500" title="View"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-teal-500 text-white rounded hover:bg-teal-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-primary-500 text-white rounded hover:bg-primary-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => openModal(t, 'DELETE')} className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )
@@ -183,7 +185,7 @@ export function Income() {
             <div className="mb-4 flex items-center justify-end">
                 <button
                     onClick={handleAdd}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#00a79d] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(0,167,157,0.24)] hover:bg-[#008f86] transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#3f5f6a] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(63,95,106,0.24)] hover:bg-[#1f3b4d] transition-colors"
                 >
                     Add Income
                 </button>
@@ -307,7 +309,7 @@ export function Income() {
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="px-4 py-2 bg-[#00a79d] text-white rounded-md hover:bg-[#008f86] font-medium shadow-sm disabled:opacity-50 transition-colors"
+                            className="px-4 py-2 bg-[#3f5f6a] text-white rounded-md hover:bg-[#1f3b4d] font-medium shadow-sm disabled:opacity-50 transition-colors"
                         >
                             {isPending ? 'Saving...' : 'Submit Income'}
                         </button>

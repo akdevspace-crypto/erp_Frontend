@@ -33,6 +33,18 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
 
     if (!isOpen || !transaction) return null
 
+    const isInvoiceReceipt = transaction.type === 'RECEIPT' && transaction.metadata?.source === 'INVOICE_PAYMENT'
+    const receiptDetails = [
+        { label: 'Receipt No', value: transaction.receiptNo || transaction.receiptNoRaw || transaction.invoiceNo || 'N/A' },
+        { label: 'Invoice No', value: transaction.metadata?.invoiceRefNo || 'N/A' },
+        { label: 'Payment Mode', value: transaction.mode || 'Cash' },
+        { label: 'Payment Status', value: transaction.metadata?.paymentStatus || 'POSTED' },
+        { label: 'Paid Amount', value: `Rs ${Number(transaction.metadata?.paidAmount ?? transaction.amount ?? 0).toFixed(2)}` },
+        { label: 'Balance Amount', value: `Rs ${Number(transaction.metadata?.balanceAmount ?? 0).toFixed(2)}` },
+        { label: 'Allocation Ref', value: transaction.metadata?.allocationRef || transaction.metadata?.allocationId || 'N/A' },
+        { label: 'Duty Ref', value: transaction.metadata?.taskRefNo || 'N/A' }
+    ]
+
     const handleConfirm = () => {
         if (type === 'DELETE') {
             onConfirm()
@@ -49,7 +61,7 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
                 <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/2">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         {type === 'VIEW' && <><Eye className="w-5 h-5 text-yellow-500" /> Transaction Details</>}
-                        {type === 'EDIT' && <><Edit2 className="w-5 h-5 text-teal-500" /> Edit Transaction</>}
+                        {type === 'EDIT' && <><Edit2 className="w-5 h-5 text-primary-500" /> Edit Transaction</>}
                         {type === 'DELETE' && <><Trash2 className="w-5 h-5 text-red-500" /> Delete Transaction</>}
                     </h3>
                     <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
@@ -73,6 +85,28 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            {type === 'VIEW' && isInvoiceReceipt && (
+                                <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
+                                    <div className="mb-3 flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="text-xs font-bold uppercase tracking-wide text-primary-700">Service Receipt</p>
+                                            <p className="text-lg font-black text-gray-900">{transaction.receiptNo || transaction.receiptNoRaw || transaction.invoiceNo}</p>
+                                        </div>
+                                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-primary-700 shadow-sm">
+                                            {transaction.metadata?.paymentStatus || 'POSTED'}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        {receiptDetails.map((detail) => (
+                                            <div key={detail.label} className="rounded-xl bg-white/80 p-3">
+                                                <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{detail.label}</p>
+                                                <p className="mt-1 text-sm font-bold text-gray-900">{detail.value}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider uppercase ml-1">Category</label>

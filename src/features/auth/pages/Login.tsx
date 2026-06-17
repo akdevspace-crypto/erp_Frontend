@@ -1,11 +1,13 @@
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuthStore } from '../../../store/authStore'
 import { Input } from '../../../components/Input'
 import { api } from '../../../lib/axios'
+import { canAccessPath, getDefaultRouteForUser, getRolePreferredRedirectPath } from '../../../lib/access'
 import { LogIn } from 'lucide-react'
+import axios from 'axios'
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -14,13 +16,26 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
+const getRoleName = (role: unknown) => {
+    if (!role) return 'Employee'
+    if (typeof role === 'string') return role
+    if (typeof role === 'object' && 'name' in role) {
+        const roleName = (role as { name?: unknown }).name
+        return typeof roleName === 'string' && roleName.trim() ? roleName : 'Employee'
+    }
+    return 'Employee'
+}
+
 export function Login() {
     const navigate = useNavigate()
+    const location = useLocation()
     const login = useAuthStore((state) => state.login)
+    const authDebug = import.meta.env.VITE_AUTH_DEBUG === 'true'
 
     const {
         register,
         handleSubmit,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -29,23 +44,69 @@ export function Login() {
     const onSubmit = async (data: LoginFormValues) => {
         try {
             const response = await api.post('/auth/login', data)
-            const { user, accessToken } = response.data.data
+            const loginData = response.data?.data
+            const user = loginData?.user
+            const accessToken = loginData?.accessToken || loginData?.token
 
-            login({
+            if (!user || !accessToken) {
+                throw new Error('Login response did not include a user and access token.')
+            }
+
+            const sessionUser = {
                 id: user.id,
                 name: user.name || `${user.firstName} ${user.lastName || ''}`.trim(),
                 email: user.email,
-                role: user.role?.name || 'Employee',
+                role: getRoleName(user.role),
                 permissions: Array.isArray(user.permissions) ? user.permissions : [],
                 unitAccess: Array.isArray(user.unitAccess) ? user.unitAccess : [user.unitId].filter(Boolean),
                 unitId: user.unitId,
+                staffId: user.staffId || null,
+                empId: user.empId || null,
                 menuPrivilege: user.menuPrivilege || null
-            }, accessToken)
+            }
 
-            navigate('/dashboard')
+            login(sessionUser, accessToken)
+
+            if (authDebug) {
+                console.debug('[AUTH][login-success]', {
+                    hasToken: Boolean(accessToken),
+                    userId: user.id,
+                    email: user.email,
+                    unitId: user.unitId || null,
+                    permissions: Array.isArray(user.permissions) ? user.permissions.length : 0,
+                    persistedStorage: localStorage.getItem('erp-auth-storage'),
+                })
+            }
+
+            const requestedPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
+            const defaultRoute = getDefaultRouteForUser(sessionUser)
+            const preferredRequestedPath = requestedPath
+                ? getRolePreferredRedirectPath(sessionUser, requestedPath) || requestedPath
+                : null
+            const commonDashboardPaths = new Set(['/dashboard', '/uec/dashboard', '/uhc/dashboard', '/ua/dashboard', '/ueo/dashboard'])
+            const shouldRestoreRequestedPath = Boolean(
+                preferredRequestedPath &&
+                !commonDashboardPaths.has(preferredRequestedPath) &&
+                !preferredRequestedPath.startsWith('/profile') &&
+                !preferredRequestedPath.startsWith('/settings') &&
+                canAccessPath(sessionUser, preferredRequestedPath)
+            )
+            const redirectTo = shouldRestoreRequestedPath && preferredRequestedPath
+                ? preferredRequestedPath
+                : defaultRoute
+            navigate(redirectTo, { replace: true })
         } catch (error) {
-            console.error('Login failed', error)
-            alert('Invalid credentials')
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || (error.code === 'ECONNABORTED' ? 'Login request timed out. Check that the backend is running.' : 'Unable to reach the backend.')
+                : error instanceof Error
+                    ? error.message
+                : 'Login failed. Please try again.'
+
+            if (!axios.isAxiosError(error) || error.response?.status !== 401) {
+                console.error('Login failed', error)
+            }
+
+            setError('root', { type: 'server', message })
         }
     }
 
@@ -103,6 +164,11 @@ export function Login() {
                     </div>
 
                     <div>
+                        {errors.root?.message && (
+                            <p className="mb-3 text-sm font-medium text-red-600">
+                                {errors.root.message}
+                            </p>
+                        )}
                         <button
                             type="submit"
                             disabled={isSubmitting}

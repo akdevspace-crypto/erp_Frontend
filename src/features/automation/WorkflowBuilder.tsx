@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 export function WorkflowBuilder() {
     return (
         <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">

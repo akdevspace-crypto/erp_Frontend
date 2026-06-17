@@ -36,11 +36,20 @@ export function InHouseExpense() {
     const data = useMemo(() => {
         return rawData
             .filter((t: any) => {
+                const query = searchQuery.trim().toLowerCase()
                 const matchesSearch =
-                    t.claimId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    t.item?.toLowerCase().includes(searchQuery.toLowerCase());
+                    !query ||
+                    t.claimId?.toLowerCase().includes(query) ||
+                    t.item?.toLowerCase().includes(query) ||
+                    t.receiptNo?.toLowerCase().includes(query) ||
+                    t.category?.toLowerCase().includes(query) ||
+                    t.vendor?.toLowerCase().includes(query) ||
+                    t.clientName?.toLowerCase().includes(query) ||
+                    t.notes?.toLowerCase().includes(query) ||
+                    t.remarks?.toLowerCase().includes(query);
 
-                const matchesStatus = selectedStatus === 'ALL' || t.status === selectedStatus;
+                const displayStatus = t.status === 'PENDING_APPROVAL' ? 'Not yet Approved' : t.status
+                const matchesStatus = selectedStatus === 'ALL' || displayStatus === selectedStatus;
 
                 return matchesSearch && matchesStatus;
             })
@@ -53,7 +62,7 @@ export function InHouseExpense() {
                 date: t.date,
                 type: t.type,
                 paymentModeDate: `${t.mode || 'Cash'} / ${t.date}`,
-                vendorDetails: `${t.vendor || t.clientName || '-'} / ${t.remarks || '-'}`,
+                vendorDetails: `${t.vendor || t.clientName || '-'} / ${t.remarks || t.notes || '-'}`,
                 status: t.status === 'PENDING_APPROVAL' ? 'Not yet Approved' : t.status
             }))
     }, [rawData, searchQuery, selectedStatus])
@@ -133,7 +142,7 @@ export function InHouseExpense() {
             key: 'action', header: 'Action', cell: (t) => (
                 <div className="flex items-center gap-1 justify-center">
                     <button onClick={() => openModal(t, 'VIEW')} className="p-1.5 bg-yellow-400 text-white rounded hover:bg-yellow-500" title="View"><Eye className="w-4 h-4" /></button>
-                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-teal-500 text-white rounded hover:bg-teal-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => openModal(t, 'EDIT')} className="p-1.5 bg-primary-500 text-white rounded hover:bg-primary-600" title="Edit"><Edit2 className="w-4 h-4" /></button>
                     <button onClick={() => openModal(t, 'DELETE')} className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
             )

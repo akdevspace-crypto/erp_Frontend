@@ -1,18 +1,35 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../../components/PageHeader'
 import { FilterSection } from '../../../components/FilterSection'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
-import { useHomeCareAllocations } from '../hooks/useAllocation'
+import { useHomeCareAllocations, useUpdateAllocation } from '../hooks/useAllocation'
+import { AssignStaffModal } from '../components/AssignStaffModal'
 
 // Local mock data since we are focusing on UI templating for now
 export function HomeCare() {
-    const { data: allocations, isLoading } = useHomeCareAllocations()
-    const [searchQuery, setSearchQuery] = useState('')
+    const [searchParams] = useSearchParams()
+    const routeUnitId = searchParams.get('unitId')
+    const { data: allocations, isLoading } = useHomeCareAllocations(routeUnitId)
+    const updateAllocation = useUpdateAllocation()
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+    const [selectedAllocation, setSelectedAllocation] = useState<any | null>(null)
 
-    const filteredData = (allocations || []).filter((item: any) =>
-        item.clientName?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredData = (allocations || []).filter((item: any) => {
+        const query = searchQuery.toLowerCase()
+        return [
+            item.ref,
+            item.allocationRef,
+            item.enquiryRef,
+            item.service,
+            item.clientName,
+            item.mobile,
+            item.patient,
+            item.staffName,
+            item.status
+        ].some((value) => String(value || '').toLowerCase().includes(query))
+    })
 
     const columns: Column<any>[] = [
         { key: 'sno', header: 'S.No', cell: (_, index) => <span className="text-gray-500 font-medium text-sm">{index + 1}</span> },
@@ -20,20 +37,27 @@ export function HomeCare() {
         { key: 'clientDetails', header: 'Client Details', cell: (row) => <span className="text-sm font-medium dark:text-gray-200">{row.clientName || '-'}</span> },
         { key: 'allocatedStatus', header: 'Allocated Status', cell: (row) => <StatusHighlighter value={row.status} /> },
         { key: 'contractDetails', header: 'Contract Details', cell: (row) => <span className="text-sm">{row.contract || '-'}</span> },
-        { key: 'allocatedStaff', header: 'Allocated Staff', cell: (row) => <span className="text-sm dark:text-gray-300 font-bold">{row.staffName || 'Not Assigned'}</span> },
+        {
+            key: 'allocatedStaff',
+            header: 'Allocated Staff',
+            cell: (row) => (
+                <div className="text-sm">
+                    <p className="font-bold text-gray-900 dark:text-gray-100">{row.staffName || 'Not Assigned'}</p>
+                    <p className="mt-1 text-xs text-gray-500">{row.scheduleText || '-'}</p>
+                </div>
+            )
+        },
         {
             key: 'actions',
             header: 'Actions',
             cell: (row) => (
                 <div className="flex gap-2">
-                    {row.status === 'Pending' && (
-                        <button
-                            onClick={() => console.log('Allocate', row.id)}
-                            className="px-3 py-1.5 bg-[#00b0a3] hover:bg-[#008c82] text-white text-xs font-bold rounded shadow-sm transition-all active:scale-95"
-                        >
-                            Allocate
-                        </button>
-                    )}
+                    <button
+                        onClick={() => setSelectedAllocation(row)}
+                        className="px-3 py-1.5 bg-[#3f5f6a] hover:bg-[#1f3b4d] text-white text-xs font-bold rounded shadow-sm transition-all active:scale-95"
+                    >
+                        {row.status === 'Allocated' ? 'Reassign' : 'Allocate'}
+                    </button>
                     <button className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold rounded shadow-sm transition-all active:scale-95">
                         View History
                     </button>
@@ -72,6 +96,25 @@ export function HomeCare() {
                     />
                 </div>
             </div>
+            <AssignStaffModal
+                isOpen={Boolean(selectedAllocation)}
+                allocation={selectedAllocation}
+                isSaving={updateAllocation.isPending}
+                onClose={() => setSelectedAllocation(null)}
+                onAssign={(payload) => {
+                    if (!selectedAllocation) return
+                    updateAllocation.mutate({
+                        id: selectedAllocation.id,
+                        staffId: payload.staffId,
+                        status: 'ALLOCATED',
+                        startDate: payload.startDate,
+                        endDate: payload.endDate,
+                        metadata: { notes: payload.notes || null }
+                    }, {
+                        onSuccess: () => setSelectedAllocation(null)
+                    })
+                }}
+            />
         </div>
     )
 }
