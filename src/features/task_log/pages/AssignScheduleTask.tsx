@@ -30,6 +30,11 @@ type ViewState = 'list' | 'staff_tasks'
 
 export function AssignScheduleTask() {
     const { data: staffList = [], isLoading: isLoadingStaff, refetch: refetchStaff } = useStaff()
+    const activeStaffList = staffList.filter((staff) => {
+        const status = String(staff.status || '').trim().toUpperCase()
+        return !staff.isDeleted && status !== 'RESIGNED' && status !== 'TERMINATED'
+    })
+    const taskStaffList = activeStaffList
     const { data: allTasks = [], isLoading: isLoadingTasks } = useTasks()
     const createTask = useCreateTask()
     const { toast } = useToast()
@@ -44,7 +49,7 @@ export function AssignScheduleTask() {
     const [selectedHistoryTask, setSelectedHistoryTask] = useState<Task | null>(null)
 
     const selectedStaff = useMemo(() =>
-        staffList.find(s => s.id === viewingStaffId), [staffList, viewingStaffId]
+        taskStaffList.find(s => s.id === viewingStaffId), [taskStaffList, viewingStaffId]
     )
     const selectedStaffId = selectedStaff?.id ?? null
     const selectedStaffHasActiveLogin = !!selectedStaff?.user?.id && selectedStaff.user.isActive
@@ -52,10 +57,10 @@ export function AssignScheduleTask() {
 
     const approvalAuthorityOptions = useMemo(() => [
         { value: '', label: '-- Select the Staff --' },
-        ...staffList
+        ...taskStaffList
             .filter((s) => !!s.user?.id && s.user.isActive)
             .map((s) => ({ value: s.user!.id, label: `${s.name} (ID: ${s.empId})` }))
-    ], [staffList])
+    ], [taskStaffList])
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm<ScheduleTaskFormValues>({
         resolver: zodResolver(scheduleTaskFormSchema),
@@ -67,13 +72,16 @@ export function AssignScheduleTask() {
         }
     })
 
-    const filteredStaff = staffList.filter(s =>
+    const filteredStaff = taskStaffList.filter(s =>
         (s.name && s.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (s.empId && s.empId.toLowerCase().includes(searchQuery.toLowerCase()))
     )
 
     const tasksForSelectedStaff = allTasks.filter(
-        (t) => !!selectedStaffUserId && t.assigneeId === selectedStaffUserId && t.type === 'SCHEDULED'
+        (t) => (
+            (!!selectedStaffUserId && t.assigneeId === selectedStaffUserId) ||
+            (!!selectedStaffId && t.assignedStaffId === selectedStaffId)
+        ) && t.type === 'SCHEDULED'
     )
 
     const taskStatusMeta: Record<string, { label: string, className: string }> = {
@@ -128,8 +136,10 @@ export function AssignScheduleTask() {
     }
 
     const getStaffScheduledTaskCount = (staff: Staff) => {
-        if (!staff.user?.id) return 0
-        return allTasks.filter((task) => task.assigneeId === staff.user?.id && task.type === 'SCHEDULED').length
+        return allTasks.filter((task) => (
+            task.assignedStaffId === staff.id ||
+            (!!staff.user?.id && task.assigneeId === staff.user.id)
+        ) && task.type === 'SCHEDULED').length
     }
 
     const handleViewStaffTasks = (staffId: string) => {
@@ -159,7 +169,7 @@ export function AssignScheduleTask() {
     }
 
     const onSubmitTask = async (data: ScheduleTaskFormValues) => {
-        if (!selectedStaffUserId) {
+        if (!selectedStaffId || !selectedStaffUserId) {
             toast({
                 type: 'error',
                 title: 'Staff Login Required',
@@ -328,7 +338,7 @@ export function AssignScheduleTask() {
                     )}
 
                     <section className="rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.06)] overflow-hidden">
-                        <div className="flex flex-col gap-3 border-b border-teal-100 bg-gradient-to-r from-[#00b3a7] via-[#06a99d] to-[#01867c] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-col gap-3 border-b border-primary-100 bg-gradient-to-r from-[#3f5f6a] via-[#7b8f5d] to-[#1f3b4d] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Task Log Workspace</p>
                                 <h2 className="mt-1 text-2xl font-black tracking-tight">Update Assign Schedule Task</h2>
@@ -342,10 +352,10 @@ export function AssignScheduleTask() {
                             </button>
                         </div>
 
-                        <div className="space-y-6 bg-gradient-to-b from-[#f5fffd] via-white to-white px-5 py-6 sm:px-7">
+                        <div className="space-y-6 bg-gradient-to-b from-[#f2f5ea] via-white to-white px-5 py-6 sm:px-7">
                             <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                                <div className="rounded-[24px] border border-[#00b3a7]/15 bg-white p-5 shadow-[0_10px_30px_rgba(0,179,167,0.08)]">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#01867c]">Staff Reference</p>
+                                <div className="rounded-[24px] border border-[#3f5f6a]/15 bg-white p-5 shadow-[0_10px_30px_rgba(63,95,106,0.08)]">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#1f3b4d]">Staff Reference</p>
                                     <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p className="text-3xl font-black tracking-tight text-slate-900">{selectedStaff.empId}</p>
@@ -381,7 +391,7 @@ export function AssignScheduleTask() {
                             <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
                                 <div className="grid gap-px bg-gray-200 md:grid-cols-4">
                                     <div className="bg-[#e6fbf8] px-5 py-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#01867c]">Unit Name</p>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1f3b4d]">Unit Name</p>
                                         <p className="mt-2 text-lg font-bold text-slate-900">Universal Elder Care</p>
                                         <p className="text-sm text-slate-500">Coimbatore</p>
                                     </div>
@@ -399,7 +409,7 @@ export function AssignScheduleTask() {
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Action</p>
                                         <button
                                             onClick={handleAddNewTask}
-                                            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#00b3a7] to-[#01867c] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,179,167,0.2)] hover:-translate-y-0.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(63,95,106,0.22)] hover:-translate-y-0.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             <Plus className="h-4 w-4" />
                                             Add New Task
@@ -422,7 +432,7 @@ export function AssignScheduleTask() {
                                     </div>
                                 ) : tasksForSelectedStaff.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-                                        <CalendarDays className="h-10 w-10 text-[#00b3a7]/40" />
+                                        <CalendarDays className="h-10 w-10 text-[#3f5f6a]/40" />
                                         <p className="mt-4 text-2xl font-black tracking-tight text-slate-900">No Task Added</p>
                                         <p className="mt-2 max-w-md text-sm font-medium text-slate-500">Create the first scheduled task for this staff member to populate the history section.</p>
                                     </div>
@@ -442,7 +452,7 @@ export function AssignScheduleTask() {
                                                 {tasksForSelectedStaff.map((task, index) => {
                                                     const statusMeta = taskStatusMeta[task.status] || taskStatusMeta.ASSIGNED
                                                     return (
-                                                        <tr key={task.id} className="transition-colors hover:bg-[#00b3a7]/4">
+                                                        <tr key={task.id} className="transition-colors hover:bg-[#3f5f6a]/4">
                                                             <td className="px-5 py-5 text-sm font-bold text-slate-500">{index + 1}</td>
                                                             <td className="px-5 py-5 align-top">
                                                                 <div className="text-sm font-bold text-slate-900">{task.assignedBy || 'System'}</div>
@@ -468,7 +478,7 @@ export function AssignScheduleTask() {
                                                             <td className="px-5 py-5 align-top">
                                                                 <button
                                                                     onClick={() => setSelectedHistoryTask(task)}
-                                                                    className="inline-flex items-center gap-2 rounded-2xl border border-[#00b3a7]/20 bg-[#00b3a7]/8 px-3 py-2 text-sm font-semibold text-[#01867c] hover:bg-[#00b3a7]/12 transition-colors"
+                                                                    className="inline-flex items-center gap-2 rounded-2xl border border-[#3f5f6a]/20 bg-[#3f5f6a]/8 px-3 py-2 text-sm font-semibold text-[#1f3b4d] hover:bg-[#3f5f6a]/12 transition-colors"
                                                                 >
                                                                     <Clock3 className="h-4 w-4" />
                                                                     View Details
@@ -492,8 +502,8 @@ export function AssignScheduleTask() {
                 onClose={() => setIsDrawerOpen(false)}
                 title={`Schedule Task - ${(selectedStaff as any)?.name || ''}`}
             >
-                <form onSubmit={handleSubmit(onSubmitTask)} className="space-y-6 flex flex-col h-[calc(100vh-120px)]">
-                    <div className="flex-1 space-y-6 overflow-y-auto pr-2">
+                <form onSubmit={handleSubmit(onSubmitTask)} className="flex max-h-full min-h-0 flex-col space-y-6">
+                    <div className="min-h-0 flex-1 space-y-6 overflow-y-auto pr-2">
                     <Select
                         label="Task Approval Authority *"
                         {...register('approvalAuthorityId')}
@@ -533,7 +543,7 @@ export function AssignScheduleTask() {
                         </div>
                     </div>
 
-                    <div className="pt-6 border-t border-gray-200 flex justify-end gap-3 mt-auto bg-white pb-2">
+                    <div className="mt-auto flex flex-col gap-3 border-t border-gray-200 bg-white pt-6 pb-2 sm:flex-row sm:justify-end">
                         {selectedStaff && !selectedStaffHasActiveLogin && (
                             <button
                                 type="button"
@@ -571,8 +581,8 @@ export function AssignScheduleTask() {
             >
                 {selectedHistoryTask ? (
                     <div className="space-y-5 p-1">
-                        <div className="rounded-3xl border border-[#00b3a7]/15 bg-[#f5fffd] p-5">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#01867c]">Task Overview</p>
+                        <div className="rounded-3xl border border-[#3f5f6a]/15 bg-[#f2f5ea] p-5">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1f3b4d]">Task Overview</p>
                             <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">{selectedHistoryTask.title}</h4>
                             <p className="mt-2 text-sm font-medium text-slate-500">{selectedHistoryTask.description || 'Scheduled staff task'}</p>
                         </div>

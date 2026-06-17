@@ -3,10 +3,20 @@ import { taskService } from '../services/tasks'
 import { useToast } from '../../../components/Toast'
 import { AxiosError } from 'axios'
 
-export const useTasks = () => {
+export const useTasks = (
+    params?: { scope?: 'approval' | 'mine'; assigneeId?: string; assignedStaffId?: string },
+    unitId?: string | null
+) => {
     return useQuery({
-        queryKey: ['tasks'],
-        queryFn: taskService.getTasks
+        queryKey: ['tasks', params || {}, unitId || 'active-unit'],
+        queryFn: () => taskService.getTasks(params, unitId)
+    })
+}
+
+export const useApprovalTasks = (unitId?: string | null) => {
+    return useQuery({
+        queryKey: ['tasks', 'approval', unitId || 'active-unit'],
+        queryFn: () => taskService.getTasks({ scope: 'approval' }, unitId)
     })
 }
 
@@ -19,6 +29,7 @@ export const useCreateTask = () => {
         retry: 0,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['tasks'] })
+            queryClient.invalidateQueries({ queryKey: ['tasks', 'approval'] })
             toast({ type: 'success', title: 'Assigned', message: 'Task successfully created' })
         },
         onError: (error) => {
@@ -35,10 +46,15 @@ export const useUpdateTaskStatus = () => {
     const { toast } = useToast()
 
     return useMutation({
-        mutationFn: ({ id, status }: { id: string, status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'APPROVED' }) =>
-            taskService.updateTaskStatus(id, status),
+        mutationFn: ({ id, status, completedAt, remarks }: { id: string, status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'APPROVED' | 'REJECTED', completedAt?: string | null, remarks?: string | null }) =>
+            taskService.updateTaskStatus(id, status, { completedAt, remarks }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['tasks'] })
+            queryClient.invalidateQueries({ queryKey: ['tasks', 'approval'] })
+            queryClient.invalidateQueries({ queryKey: ['invoices'] })
+            queryClient.invalidateQueries({ queryKey: ['cashbox'] })
+            queryClient.invalidateQueries({ queryKey: ['workflow-timeline'] })
+            queryClient.invalidateQueries({ queryKey: ['customer-care', 'service-history'] })
             toast({ type: 'success', title: 'Updated', message: 'Task status updated' })
         },
         onError: (error) => {

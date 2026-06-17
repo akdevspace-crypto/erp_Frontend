@@ -17,6 +17,11 @@ import { CreateStaffLoginDrawer } from '../components/CreateStaffLoginDrawer'
 
 export function AssignDailyTask() {
     const { data: staffList = [], isLoading: isLoadingStaff, refetch: refetchStaff } = useStaff()
+    const activeStaffList = staffList.filter((staff) => {
+        const status = String(staff.status || '').trim().toUpperCase()
+        return !staff.isDeleted && status !== 'RESIGNED' && status !== 'TERMINATED'
+    })
+    const taskStaffList = activeStaffList
     const createTask = useCreateTask()
     const { toast } = useToast()
 
@@ -28,7 +33,7 @@ export function AssignDailyTask() {
     const [autoOpenForStaffId, setAutoOpenForStaffId] = useState<string | null>(null)
 
     const selectedStaff = useMemo(() =>
-        staffList.find(s => s.id === viewingStaffId), [staffList, viewingStaffId]
+        taskStaffList.find(s => s.id === viewingStaffId), [taskStaffList, viewingStaffId]
     )
     const selectedStaffId = selectedStaff?.id ?? null
     const selectedStaffHasActiveLogin = !!selectedStaff?.user?.id && selectedStaff.user.isActive
@@ -36,10 +41,10 @@ export function AssignDailyTask() {
 
     const approvalAuthorityOptions = useMemo(() => [
         { value: '', label: 'Select approval authority' },
-        ...staffList
+        ...taskStaffList
             .filter((s) => !!s.user?.id && s.user.isActive)
             .map((s) => ({ value: s.user!.id, label: `${s.name} (ID: ${s.empId})` }))
-    ], [staffList])
+    ], [taskStaffList])
 
     // Setup form
     const { register, control, handleSubmit, reset, formState: { errors } } = useForm<AssignTasksFormValues>({
@@ -56,7 +61,7 @@ export function AssignDailyTask() {
     })
 
     // Filter logic
-    const filteredStaff = staffList.filter(s =>
+    const filteredStaff = taskStaffList.filter(s =>
         (s.name && s.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (s.empId && s.empId.toLowerCase().includes(searchQuery.toLowerCase()))
     )
@@ -121,7 +126,7 @@ export function AssignDailyTask() {
 
     useEffect(() => {
         if (!autoOpenForStaffId) return
-        const staff = staffList.find((s) => s.id === autoOpenForStaffId)
+        const staff = taskStaffList.find((s) => s.id === autoOpenForStaffId)
         if (!staff?.user?.id || !staff.user.isActive) return
 
         setViewingStaffId(staff.id)
@@ -132,7 +137,7 @@ export function AssignDailyTask() {
         })
         setIsDrawerOpen(true)
         setAutoOpenForStaffId(null)
-    }, [autoOpenForStaffId, staffList, reset])
+    }, [autoOpenForStaffId, taskStaffList, reset])
 
     const columns: Column<Staff>[] = [
         {

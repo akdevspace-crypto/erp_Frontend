@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { cityService } from '../services/city'
 import type { CityFormValues } from '../schema'
 import { useToast } from '../../../components/Toast'
@@ -20,8 +21,11 @@ export const useAddCity = () => {
             queryClient.invalidateQueries({ queryKey: ['cities'] })
             toast({ type: 'success', title: 'Success', message: 'City added successfully' })
         },
-        onError: () => {
-            toast({ type: 'error', title: 'Error', message: 'Failed to add city' })
+        onError: (error) => {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || 'Failed to add city'
+                : 'Failed to add city'
+            toast({ type: 'error', title: 'Error', message })
         }
     })
 }
@@ -36,8 +40,11 @@ export const useUpdateCity = () => {
             queryClient.invalidateQueries({ queryKey: ['cities'] })
             toast({ type: 'success', title: 'Success', message: 'City updated successfully' })
         },
-        onError: () => {
-            toast({ type: 'error', title: 'Error', message: 'Failed to update city' })
+        onError: (error) => {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || 'Failed to update city'
+                : 'Failed to update city'
+            toast({ type: 'error', title: 'Error', message })
         }
     })
 }

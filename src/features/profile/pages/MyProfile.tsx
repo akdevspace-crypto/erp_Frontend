@@ -2,8 +2,10 @@ import { PageHeader } from '../../../components/PageHeader'
 import { User, Mail, Phone, Briefcase, MapPin } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../../lib/axios'
+import { useAuthStore } from '../../../store/authStore'
 
 export function MyProfile() {
+    const sessionUser = useAuthStore((state) => state.user)
     const { data, isLoading, isError } = useQuery({
         queryKey: ['profile'],
         queryFn: async () => {
@@ -30,7 +32,15 @@ export function MyProfile() {
         )
     }
 
-    const profile = data
+    const profile = {
+        empId: data.empId || sessionUser?.id?.split('-')?.[0] || 'N/A',
+        name: data.name || sessionUser?.name || 'User',
+        role: data.role || sessionUser?.role || 'Employee',
+        department: data.department || data.role || sessionUser?.role || 'General',
+        unitId: data.unitId || sessionUser?.unitId || 'N/A',
+        phone: data.phone || 'N/A',
+        email: data.email || sessionUser?.email || 'N/A'
+    }
 
     return (
         <div className="flex flex-col h-full space-y-6">
