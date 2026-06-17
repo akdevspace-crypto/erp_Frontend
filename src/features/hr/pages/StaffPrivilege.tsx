@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PageHeader } from '../../../components/PageHeader'
 import { FilterSection } from '../../../components/FilterSection'
 import { DataTable, type Column } from '../../../components/DataTable'
@@ -32,7 +32,8 @@ const privilegeFormSchema = z.object({
     isActive: booleanish.optional()
 })
 
-type PrivilegeFormValues = z.infer<typeof privilegeFormSchema>
+type PrivilegeFormInput = z.input<typeof privilegeFormSchema>
+type PrivilegeFormValues = z.output<typeof privilegeFormSchema>
 
 export function StaffPrivilege() {
     const { data: staffData = [] } = useStaff()
@@ -53,10 +54,11 @@ export function StaffPrivilege() {
         }))
     ], [units])
 
-    const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<PrivilegeFormValues>({
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<PrivilegeFormInput, any, PrivilegeFormValues>({
         resolver: zodResolver(privilegeFormSchema),
         defaultValues: { staffId: '', unitId: '', email: '', password: '', roleId: '', isActive: true }
     })
+    const selectedStaffId = watch('staffId')
 
     const filteredData = staffData.filter(s =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -107,17 +109,17 @@ export function StaffPrivilege() {
     const openAddDrawer = () => {
         setEditingStaffId(null)
         setChangePassword(true)
-        reset({ staffId: '', unitId: '', email: '', password: '', roleId: '', isActive: true })
+        reset({ staffId: '', unitId: staffData[0]?.unitId || '', email: '', password: '', roleId: '', isActive: true })
         setIsDrawerOpen(true)
     }
 
     const openEditDrawer = (s: any) => {
         setEditingStaffId(s.id)
-        setChangePassword(false)
+        setChangePassword(!s.user)
         reset({
             staffId: s.id,
             unitId: s.unitId || '',
-            email: s.user?.email || '',
+            email: s.user?.email || s.email || '',
             password: '',
             roleId: s.user?.role?.id || s.user?.role?.name || 'Employee',
             isActive: s.user?.isActive ?? true
@@ -125,8 +127,27 @@ export function StaffPrivilege() {
         setIsDrawerOpen(true)
     }
 
+    useEffect(() => {
+        if (!isDrawerOpen || editingStaffId || !selectedStaffId) return
+
+        const selectedStaff = staffData.find((staff) => staff.id === selectedStaffId)
+        if (!selectedStaff) return
+
+        setValue('unitId', selectedStaff.unitId || '')
+        setValue('email', selectedStaff.user?.email || selectedStaff.email || '')
+        setValue('roleId', selectedStaff.user?.role?.id || selectedStaff.user?.role?.name || 'Employee')
+        setValue('isActive', selectedStaff.user?.isActive ?? true)
+        setChangePassword(!selectedStaff.user)
+    }, [editingStaffId, isDrawerOpen, selectedStaffId, setValue, staffData])
+
     const onSubmit = async (data: PrivilegeFormValues) => {
         try {
+            const selectedStaff = staffData.find((staff) => staff.id === data.staffId)
+            if (!selectedStaff?.user && !data.password) {
+                toast({ type: 'error', title: 'Password Required', message: 'Enter a password to create login for this staff.' })
+                return
+            }
+
             await hrService.updateStaffPrivilege(data.staffId, {
                 loginEnabled: data.isActive ?? true,
                 roleId: data.roleId,
@@ -172,8 +193,13 @@ export function StaffPrivilege() {
         {
             key: 'action', header: 'Action', cell: (s) => (
                 <div className="flex items-center gap-2">
-                    <button onClick={() => openEditDrawer(s)} className="p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-white/5 rounded" title="Edit Logic Details">
+                    <button
+                        onClick={() => openEditDrawer(s)}
+                        className="inline-flex items-center gap-1 rounded-md bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700 transition hover:bg-primary-100 dark:bg-primary-900/30 dark:text-primary-300"
+                        title={s.user ? 'Edit Login Details' : 'Create Login Credentials'}
+                    >
                         <Edit2 className="h-4 w-4" />
+                        {s.user ? 'Edit Login' : 'Create Login'}
                     </button>
                     {s.user?.isActive && (
                         <button
@@ -198,7 +224,7 @@ export function StaffPrivilege() {
                 </div>
                 <div className="flex gap-3">
                     <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">Enable Live Monitoring</button>
-                    <button onClick={openAddDrawer} className="inline-flex items-center px-4 py-2 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#00b3a7] to-[#01867c] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(0,179,167,0.2)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00b3a7] transition-all active:scale-95 border border-transparent">Add New Staff</button>
+                    <button onClick={openAddDrawer} className="inline-flex items-center px-4 py-2 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3f5f6a] transition-all active:scale-95 border border-transparent">Add New Staff</button>
                 </div>
             </div>
 
@@ -235,7 +261,7 @@ export function StaffPrivilege() {
 
                         <div className="relative">
                             <Input
-                                label="Password *"
+                                label={editingStaffId && !changePassword ? 'Password' : 'Password *'}
                                 type="password"
                                 {...register('password')}
                                 error={errors.password?.message}

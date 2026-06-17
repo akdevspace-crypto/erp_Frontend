@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { hrService } from '../services/hr'
 import { useToast } from '../../../components/Toast'
+import { useAuthStore } from '../../../store/authStore'
 
 const resolveApiErrorMessage = (error: any, fallback: string) => {
     const validationErrors = error?.response?.data?.errors
@@ -11,9 +12,12 @@ const resolveApiErrorMessage = (error: any, fallback: string) => {
     return error?.response?.data?.message || fallback
 }
 
-export const useStaff = (options?: { includeFormer?: boolean }) => {
+export const useStaff = (options?: { includeFormer?: boolean; scope?: 'all'; unitId?: string | null }) => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+    const resolvedUnitId = options?.unitId || activeUnitId
+
     return useQuery({
-        queryKey: ['staff', options?.includeFormer ? 'includeFormer' : 'activeOnly'],
+        queryKey: ['staff', options?.scope === 'all' ? 'all' : resolvedUnitId, options?.includeFormer ? 'includeFormer' : 'activeOnly'],
         queryFn: () => hrService.getStaffList(options),
         retry: false
     })
@@ -26,11 +30,143 @@ export const useRoles = () => {
     })
 }
 
-export const useAttendanceLogs = (options?: { date?: string }) => {
+export const useAttendanceLogs = (options?: { date?: string; scope?: 'all' }) => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+
     return useQuery({
-        queryKey: ['attendance', options?.date || 'today'],
+        queryKey: ['attendance', options?.scope === 'all' ? 'all' : activeUnitId, options?.date || 'today'],
         queryFn: () => hrService.getAttendanceLogs(options),
         retry: false
+    })
+}
+
+export const useMyAttendanceLogs = (options?: { date?: string }) => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+    const staffId = useAuthStore((state) => state.user?.staffId || 'no-staff')
+
+    return useQuery({
+        queryKey: ['my-attendance', activeUnitId, staffId, options?.date || 'today'],
+        queryFn: () => hrService.getMyAttendanceLogs(options),
+        retry: false
+    })
+}
+
+export const useMarkMyAttendance = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: hrService.markMyAttendance,
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['my-attendance'] })
+            queryClient.invalidateQueries({ queryKey: ['attendance'] })
+            toast({
+                type: 'success',
+                title: variables.action === 'CHECK_IN' ? 'Checked In' : 'Checked Out',
+                message: variables.action === 'CHECK_IN' ? 'Your attendance check-in is saved' : 'Your attendance check-out is saved'
+            })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to update attendance') })
+        }
+    })
+}
+
+export const usePayrollPreview = (options?: { month?: string; scope?: 'all' }) => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+
+    return useQuery({
+        queryKey: ['payroll-preview', options?.scope === 'all' ? 'all' : activeUnitId, options?.month || 'current'],
+        queryFn: () => hrService.getPayrollPreview(options),
+        retry: false
+    })
+}
+
+export const useProcessPayroll = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: hrService.processPayroll,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['payroll-preview'] })
+            toast({ type: 'success', title: 'Processed', message: 'Payroll has been marked as processed' })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to process payroll') })
+        }
+    })
+}
+
+export const useLeaveRequests = () => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+
+    return useQuery({
+        queryKey: ['leave-requests', activeUnitId, 'all-accessible'],
+        queryFn: () => hrService.getLeaveRequests({ scope: 'all' }),
+        retry: false
+    })
+}
+
+export const useCreateLeaveRequest = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: hrService.createLeaveRequest,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['leave-requests'] })
+            toast({ type: 'success', title: 'Saved', message: 'Leave request created successfully' })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to create leave request') })
+        }
+    })
+}
+
+export const useMyLeaveRequests = () => {
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
+    const staffId = useAuthStore((state) => state.user?.staffId || 'no-staff')
+
+    return useQuery({
+        queryKey: ['my-leave-requests', activeUnitId, staffId],
+        queryFn: hrService.getMyLeaveRequests,
+        retry: false
+    })
+}
+
+export const useCreateMyLeaveRequest = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: hrService.createMyLeaveRequest,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['my-leave-requests'] })
+            queryClient.invalidateQueries({ queryKey: ['leave-requests'] })
+            toast({ type: 'success', title: 'Submitted', message: 'Leave request sent to HR for approval' })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to submit leave request') })
+        }
+    })
+}
+
+export const useUpdateLeaveRequestStatus = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: ({ id, status, remarks }: { id: string; status: 'APPROVED' | 'REJECTED'; remarks?: string }) =>
+            hrService.updateLeaveRequestStatus(id, { status, remarks }),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['leave-requests'] })
+            queryClient.invalidateQueries({ queryKey: ['my-leave-requests'] })
+            toast({ type: 'success', title: 'Updated', message: `Leave request ${variables.status.toLowerCase()} successfully` })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to update leave request') })
+        }
     })
 }
 

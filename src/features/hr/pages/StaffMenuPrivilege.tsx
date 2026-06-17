@@ -30,43 +30,62 @@ function CustomSwitch({ checked, onChange, onText = 'View Access Only', offText 
 
 const matrixStructure = [
     {
-        category: 'Master',
+        category: 'Profile / Staff Self Service',
         items: [
-            'City Master', 'Unit Master', 'Client Services', 'Department Master',
-            'Designation Master', 'Labour Services', 'Payment Category', 'Vendor Master', 'Room Mgt'
+            'My Profile', 'Daily Task', 'Profile Task Dashboard', 'Notifications'
         ]
     },
     {
-        category: 'Enquiry Desk',
-        items: ['Enquiry Follow-up', 'New Enquiry Form', 'All Client Details', 'UEC Enquiry']
+        category: 'UNCF - Core Admin',
+        items: [
+            'City Master', 'Unit Master', 'Client Services', 'Department Master',
+            'Designation Master', 'Labour Services', 'Payment Category', 'Vendor Master', 'Room Mgt',
+            'Cashbox', 'Cashbox Pending', 'Income', 'Expense', 'Allowance Tracking', 'Invoice', 'Renewals',
+            'HR Dashboard', 'Staff Management', 'Staff Privilege', 'Leave Management',
+            'Shift Roster', 'Document Tracker', 'Training Compliance', 'Labour Mgt',
+            'Recruitment', 'Attendance', 'Holiday Mapping', 'Payroll',
+            'Gate Management', 'Visitor Management', 'Entry Logs', 'OTP Logs',
+            'Blogs', 'FAQ', 'Events'
+        ]
     },
     {
-        category: 'Allocation Desk',
-        items: ['Home Care', 'Clinical Care', 'In-House Care', 'Others']
+        category: 'UEC - Universal Elder Care Services',
+        items: [
+            'Revenue Form', 'Vital Form', 'ADL', 'Food Preparation', 'Nutrition Planning',
+            'Laundry Management', 'Maintenance', 'Waste Management', 'Ration Products',
+            'Stationary Products', 'Electrical & Plumbing', 'Low Stock Alerts',
+            'Stock Issue Request', 'Stock Issue Approval',
+            'In-House Expense', 'Assign Daily Task', 'Assign Schedule Task',
+            'Daily Task Approval', 'Schedule Task Approval'
+        ]
     },
     {
-        category: 'Business Desk',
-        items: ['Welcome Call']
+        category: 'UHC - Universal Health Care Services',
+        items: [
+            'Critical Patients', 'Patient Dashboard', 'Medical Monitor', 'Medication Management',
+            'Nutrition & Diet', 'Clinical Care', 'Home Care', 'Others',
+            'Stock', 'Products', 'Purchase Orders', 'Stock Issue Request', 'Stock Issue Approval'
+        ]
     },
     {
-        category: 'Adv. Customer Care (HC)',
-        items: ['Pending Feedbacks', 'Customer Complaints', 'Service History']
+        category: 'UA - Universal Ambulance Services',
+        items: [
+            'Ambulance Services', 'Ambulance Bookings', 'Dispatch Management',
+            'Vehicle & Fleet', 'Driver & Staff Assignment', 'Trip Sheets',
+            'Ambulance Maintenance', 'Ambulance Billing', 'Emergency Call Logs',
+            'Field Duty'
+        ]
     },
     {
-        category: 'In-House Care',
-        items: ['Revenue Form', 'Vital Form']
-    },
-    {
-        category: 'Daily Logs',
-        items: ['Daily Cash Sheet', 'Guardian Visit Log', 'Visitors Log']
-    },
-    {
-        category: 'Accounts',
-        items: ['Cashbox', 'Cashbox Pending', 'Income', 'Expense', 'In-house Expense']
-    },
-    {
-        category: 'Human Resource',
-        items: ['Staff Management', 'Staff Privilege', 'Labour Mgt']
+        category: 'UEO - Universal Customer Relationship Management',
+        items: [
+            'Active Enquiries', 'Enquiry Follow-up', 'New Enquiry Form',
+            'All Client Details', 'Admission Tracking', 'Admission Forms',
+            'Welcome Call', 'Customer Care', 'Pending Feedbacks',
+            'Customer Complaints', 'Feedback', 'Service History',
+            'Conversations', 'Email', 'WhatsApp', 'SMS', 'Missed Calls',
+            'Calls', 'Omnichannel'
+        ]
     }
 ]
 
@@ -148,19 +167,19 @@ export function StaffMenuPrivilege() {
     }
 
     return (
-        <div className="flex flex-col h-full space-y-6 bg-transparent dark:bg-black">
+        <div className="flex h-full min-w-0 flex-col space-y-4 bg-transparent dark:bg-black sm:space-y-6">
             <PageHeader title="Staff Menu Privilege" breadcrumbs={[{ label: 'Home' }, { label: 'Staff Login Privilege' }]} />
 
-            <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-white/10 overflow-y-auto h-[calc(100vh-10rem)]">
-                <div className="flex justify-between items-center py-4 px-6 border-b border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 sticky top-0 z-10">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
+                <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-gray-100 bg-gray-50/50 px-4 py-4 dark:border-white/10 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200">Edit - Staff Menu Privilege</h2>
                     <button onClick={() => navigate('/hr/staff-privilege')} className="px-3 py-1.5 bg-white dark:bg-black border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 font-medium rounded-md text-xs hover:bg-gray-50 dark:hover:bg-white/5 transition shadow-sm">
                         &lt; Back to Privileges
                     </button>
                 </div>
 
-                <div className="p-6">
-                    <div className="max-w-4xl mx-auto border border-gray-200 dark:border-white/10 rounded-md overflow-hidden mb-8">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+                    <div className="mx-auto mb-8 w-full max-w-none overflow-hidden rounded-md border border-gray-200 dark:border-white/10">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10 text-gray-900 dark:text-gray-100">
                             <tbody className="divide-y divide-gray-200 dark:divide-white/10 text-sm">
                                 <tr>
@@ -193,9 +212,9 @@ export function StaffMenuPrivilege() {
                         </table>
                     </div>
 
-                    <div className="max-w-4xl mx-auto mb-10">
+                    <div className="mx-auto mb-10 w-full max-w-none">
                         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Select the Unit for Access</h3>
-                        <div className="flex items-center gap-6 mb-4">
+                        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" checked={unitAccessMode === 'all'} onChange={() => setUnitAccessMode('all')} className="translate-y-[1px] text-red-500 focus:ring-red-500" />
                                 <span className={`text-sm font-medium ${unitAccessMode === 'all' ? 'text-gray-900 dark:text-gray-100 font-bold' : 'text-gray-600'}`}>Assign All Unit Access</span>
@@ -207,7 +226,7 @@ export function StaffMenuPrivilege() {
                         </div>
 
                         {unitAccessMode === 'individual' && (
-                            <div className="flex flex-col gap-2 pl-8">
+                            <div className="grid gap-2 pl-0 sm:pl-8 2xl:grid-cols-2">
                                 {unitsList.map((u: any) => (
                                     <label key={u.id} className="flex items-center gap-2 cursor-pointer">
                                         <input
@@ -226,21 +245,21 @@ export function StaffMenuPrivilege() {
                         )}
                     </div>
 
-                    <div className="max-w-4xl mx-auto space-y-8">
+                    <div className="mx-auto w-full max-w-none space-y-8">
                         {matrixStructure.map((category) => (
                             <div key={category.category}>
                                 <h3 className="text-lg font-medium text-gray-100 mb-4">{category.category}</h3>
-                                <div className="border border-white/10 rounded-md overflow-hidden bg-black">
+                                <div className="overflow-x-auto rounded-md border border-white/10 bg-black">
                                     <table className="min-w-full divide-y divide-white/10">
                                         <tbody className="divide-y divide-white/10">
                                             {category.items.map((item) => {
                                                 const noCreate = item === 'All Client Details' || item === 'Service History'
                                                 return (
                                                     <tr key={item} className="hover:bg-white/5 transition-colors">
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300 w-1/3 border-r border-white/10">
+                                                        <td className="w-1/3 whitespace-nowrap border-r border-white/10 px-4 py-4 text-sm font-medium text-gray-300 sm:px-6">
                                                             {item}
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap border-r border-white/10">
+                                                        <td className="whitespace-nowrap border-r border-white/10 px-4 py-4 sm:px-6">
                                                             <div className="flex justify-center">
                                                                 <CustomSwitch
                                                                     checked={permissions[item]?.view || false}
@@ -249,7 +268,7 @@ export function StaffMenuPrivilege() {
                                                                 />
                                                             </div>
                                                         </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                        <td className="whitespace-nowrap px-4 py-4 sm:px-6">
                                                             {noCreate ? (
                                                                 <div className="text-center text-gray-400 font-medium text-sm">NA</div>
                                                             ) : (
@@ -272,7 +291,7 @@ export function StaffMenuPrivilege() {
                         ))}
                     </div>
 
-                    <div className="mt-8 flex justify-end pb-8 gap-3 border-t border-gray-200 dark:border-white/10 mt-auto pt-6 px-6 bg-white dark:bg-black">
+                    <div className="mt-8 flex flex-col justify-end gap-3 border-t border-gray-200 bg-white px-0 pt-6 pb-8 dark:border-white/10 dark:bg-black sm:flex-row sm:px-6">
                         <button onClick={() => navigate('/hr/staff-privilege')} className="px-4 py-2 border border-gray-300 dark:border-white/10 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-white/5 font-medium shadow-sm transition-colors text-sm">
                             Cancel
                         </button>

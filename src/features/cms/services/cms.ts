@@ -1,6 +1,5 @@
 import { api } from '../../../lib/axios'
 import type { Blog } from '../types'
-import type { BlogFormValues } from '../schema'
 
 export const cmsService = {
     getBlogs: async (): Promise<Blog[]> => {

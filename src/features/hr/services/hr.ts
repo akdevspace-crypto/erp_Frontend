@@ -1,5 +1,5 @@
 import { api } from '../../../lib/axios'
-import type { Staff } from '../types'
+import type { LeaveRequest, Staff } from '../types'
 import type { StaffFormValues } from '../schema'
 
 const mapStaff = (s: any): Staff => ({
@@ -19,6 +19,77 @@ const mapStaff = (s: any): Staff => ({
     metadata: s.metadata || undefined,
     user: s.user
 })
+
+const normalizeStaffKey = (value: unknown) => String(value || '').trim().toLowerCase()
+
+const getStaffIdentityKey = (staff: Staff) => {
+    const userId = normalizeStaffKey(staff.user?.id)
+    if (userId) return `user:${userId}`
+
+    const empId = normalizeStaffKey(staff.empId)
+    if (empId) return `emp:${empId}`
+
+    const email = normalizeStaffKey(staff.email)
+    if (email) return `email:${email}`
+
+    const phone = normalizeStaffKey(staff.phone)
+    if (phone) return `phone:${phone}`
+
+    const nameUnitRole = [staff.name, staff.unitId, staff.role]
+        .map(normalizeStaffKey)
+        .filter(Boolean)
+        .join('|')
+
+    return nameUnitRole ? `profile:${nameUnitRole}` : `id:${staff.id}`
+}
+
+const getStaffRank = (staff: Staff) => {
+    const status = normalizeStaffKey(staff.status)
+    let rank = 0
+
+    if (!staff.isDeleted) rank += 10
+    if (status !== 'terminated' && status !== 'resigned') rank += 10
+    if (staff.user?.isActive) rank += 5
+    if (staff.empId) rank += 3
+    if (staff.phone) rank += 2
+    if (staff.email) rank += 2
+
+    return rank
+}
+
+const dedupeStaff = (staffList: Staff[]) => {
+    const staffByKey = new Map<string, Staff>()
+
+    staffList.forEach((staff) => {
+        const key = getStaffIdentityKey(staff)
+        const current = staffByKey.get(key)
+
+        if (!current || getStaffRank(staff) > getStaffRank(current)) {
+            staffByKey.set(key, staff)
+        }
+    })
+
+    return Array.from(staffByKey.values())
+}
+
+const isSeedOrDemoStaff = (staff: Staff) => {
+    const id = normalizeStaffKey(staff.id)
+    const empId = normalizeStaffKey(staff.empId)
+    const email = normalizeStaffKey(staff.email)
+    const metadata = staff.metadata || {}
+
+    return Boolean(
+        id.startsWith('demo-') ||
+        empId.startsWith('demo-') ||
+        empId.startsWith('seed-') ||
+        email.endsWith('.demo') ||
+        email.endsWith('@demo.erp') ||
+        metadata.demo === true ||
+        metadata.seeded === true
+    )
+}
+
+const cleanStaffList = (staffList: Staff[]) => dedupeStaff(staffList).filter((staff) => !isSeedOrDemoStaff(staff))
 
 const appendIfPresent = (formData: FormData, key: string, value: unknown) => {
     if (value === undefined || value === null || value === '') return
@@ -62,18 +133,23 @@ const toStaffFormData = (data: StaffFormValues) => {
 export const hrService = {
     getStaff: async (): Promise<Staff[]> => {
         const res = await api.get('/hr/staff')
-        return res.data.data.map(mapStaff)
+        return cleanStaffList(res.data.data.map(mapStaff))
     },
 
-    getStaffList: async (options?: { includeFormer?: boolean }): Promise<Staff[]> => {
+    getStaffList: async (options?: { includeFormer?: boolean; scope?: 'all'; unitId?: string | null }): Promise<Staff[]> => {
         const res = await api.get('/hr/staff', {
-            params: options?.includeFormer ? { includeFormer: true } : undefined
+            params: {
+                ...(options?.includeFormer ? { includeFormer: true } : {}),
+                ...(options?.scope === 'all' ? { scope: 'all' } : {})
+            },
+            headers: options?.unitId ? { 'x-unit-id': options.unitId } : undefined
         })
-        return res.data.data.map(mapStaff)
+        return cleanStaffList(res.data.data.map(mapStaff))
     },
 
-    getAttendanceLogs: async (options?: { date?: string }): Promise<Array<{
+    getAttendanceLogs: async (options?: { date?: string; scope?: 'all' }): Promise<Array<{
         id: string
+        staffId?: string
         date: string
         empId: string
         name: string
@@ -82,9 +158,119 @@ export const hrService = {
         status: string
     }>> => {
         const res = await api.get('/hr/attendance', {
+            params: {
+                ...(options?.date ? { date: options.date } : {}),
+                ...(options?.scope === 'all' ? { scope: 'all' } : {})
+            }
+        })
+        return res.data.data || []
+    },
+
+    getMyAttendanceLogs: async (options?: { date?: string }): Promise<Array<{
+        id: string
+        staffId?: string
+        date: string
+        empId: string
+        name: string
+        checkIn: string
+        checkOut: string
+        status: string
+    }>> => {
+        const res = await api.get('/hr/my-attendance', {
             params: options?.date ? { date: options.date } : undefined
         })
         return res.data.data || []
+    },
+
+    markMyAttendance: async (data: { action: 'CHECK_IN' | 'CHECK_OUT'; note?: string }): Promise<{
+        id: string
+        staffId?: string
+        date: string
+        empId: string
+        name: string
+        checkIn: string
+        checkOut: string
+        status: string
+    }> => {
+        const res = await api.post('/hr/my-attendance', data)
+        return res.data.data
+    },
+
+    getPayrollPreview: async (options?: { month?: string; scope?: 'all' }): Promise<Array<{
+        id: string
+        staffId: string
+        empId: string
+        name: string
+        role: string
+        department: string
+        month: string
+        workingDays: number
+        presentDays: number
+        approvedLeaveDays: number
+        absentDays: number
+        baseSalary: number
+        fixedAllowance: number
+        fixedDeduction: number
+        grossPay: number
+        deductions: number
+        netPay: number
+        status: string
+        processedAt?: string | null
+        processedBy?: string | null
+    }>> => {
+        const res = await api.get('/hr/payroll', {
+            params: {
+                ...(options?.month ? { month: options.month } : {}),
+                ...(options?.scope === 'all' ? { scope: 'all' } : {})
+            }
+        })
+        return res.data.data || []
+    },
+
+    processPayroll: async (data: { staffId: string; month: string }) => {
+        const res = await api.post('/hr/payroll/process', data)
+        return res.data.data
+    },
+
+    getLeaveRequests: async (options?: { scope?: 'all' }): Promise<LeaveRequest[]> => {
+        const res = await api.get('/hr/leave-requests', {
+            params: options?.scope === 'all' ? { scope: 'all' } : undefined
+        })
+        return res.data.data || []
+    },
+
+    getMyLeaveRequests: async (): Promise<LeaveRequest[]> => {
+        const res = await api.get('/hr/my-leave-requests')
+        return res.data.data || []
+    },
+
+    createLeaveRequest: async (data: {
+        staffId: string
+        leaveType: string
+        fromDate: string
+        toDate: string
+        reason?: string
+    }): Promise<LeaveRequest> => {
+        const res = await api.post('/hr/leave-requests', data)
+        return res.data.data
+    },
+
+    createMyLeaveRequest: async (data: {
+        leaveType: string
+        fromDate: string
+        toDate: string
+        reason?: string
+    }): Promise<LeaveRequest> => {
+        const res = await api.post('/hr/my-leave-requests', data)
+        return res.data.data
+    },
+
+    updateLeaveRequestStatus: async (id: string, data: {
+        status: 'APPROVED' | 'REJECTED'
+        remarks?: string
+    }): Promise<LeaveRequest> => {
+        const res = await api.patch(`/hr/leave-requests/${id}`, data)
+        return res.data.data
     },
 
     addStaff: async (data: StaffFormValues): Promise<Staff> => {

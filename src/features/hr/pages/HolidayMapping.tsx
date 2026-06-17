@@ -165,7 +165,7 @@ export function HolidayMapping() {
     ]
 
     return (
-        <div className="flex flex-col h-full bg-transparent dark:bg-black">
+        <div className="flex h-full min-w-0 flex-col bg-transparent dark:bg-black">
             <PageHeader
                 title="Holiday Mapping"
                 breadcrumbs={[
@@ -179,8 +179,8 @@ export function HolidayMapping() {
                 addLabel="Add New Holiday"
             />
 
-            <div className="bg-white dark:bg-black rounded-lg shadow-sm border border-gray-200 dark:border-white/10 mt-4 overflow-hidden">
-                <div className="p-4">
+            <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
+                <div className="flex min-h-0 flex-1 flex-col p-4 2xl:p-5">
                     <FilterSection
                         searchQuery={searchQuery}
                         onSearchChange={(e) => setSearchQuery(e.target.value)}
@@ -192,7 +192,7 @@ export function HolidayMapping() {
                             <div className="h-8 bg-gray-200 rounded w-full"></div>
                         </div>
                     ) : (
-                        <div className="mt-4">
+                        <div className="mt-4 min-h-0 flex-1">
                             <DataTable
                                 data={filteredHolidays}
                                 columns={columns}
@@ -209,7 +209,7 @@ export function HolidayMapping() {
                 onClose={() => setIsDrawerOpen(false)}
                 title={editingHoliday ? "Edit Holiday" : "Add New Holiday"}
             >
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex flex-col h-[calc(100vh-120px)]">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex max-h-full min-h-0 flex-col space-y-6">
                     <div className="flex-1 space-y-6 overflow-y-auto pr-2">
                         <Input
                             label="Holiday Date *"

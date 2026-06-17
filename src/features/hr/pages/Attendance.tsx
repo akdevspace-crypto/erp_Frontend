@@ -6,7 +6,7 @@ import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { useAttendanceLogs } from '../hooks/useHR'
 
 export function Attendance() {
-    const { data = [], isLoading } = useAttendanceLogs()
+    const { data = [], isLoading } = useAttendanceLogs({ scope: 'all' })
     const [searchQuery, setSearchQuery] = useState('')
 
     const filteredData = useMemo(() => {

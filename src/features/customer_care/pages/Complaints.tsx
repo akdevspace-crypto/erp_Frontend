@@ -8,13 +8,34 @@ import { Drawer } from '../../../components/Drawer'
 import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
 import { Edit2, Eye } from 'lucide-react'
-import { useComplaints, useCreateComplaint } from '../hooks/useCustomerCare'
+import { useComplaints, useCreateComplaint, useUpdateComplaintWorkflow } from '../hooks/useCustomerCare'
 import { useToast } from '../../../components/Toast'
+import { useAuthStore } from '../../../store/authStore'
+import { useUnits } from '../../master/hooks/useUnit'
+import { useStaff } from '../../hr/hooks/useHR'
+
+const toApiComplaintStatus = (value: string): 'OPEN' | 'ASSIGNED' | 'RESOLVED' | 'CLOSED' => {
+    const normalized = String(value || '').toLowerCase()
+    if (normalized === 'closed') return 'CLOSED'
+    if (normalized === 'resolved') return 'RESOLVED'
+    if (normalized === 'in progress' || normalized === 'assigned') return 'ASSIGNED'
+    return 'OPEN'
+}
 
 export function Complaints() {
     const { data: dbComplaints = [], isLoading } = useComplaints()
+    const { data: units = [] } = useUnits()
+    const { data: staff = [] } = useStaff({ scope: 'all' })
     const createComplaint = useCreateComplaint()
+    const updateComplaintWorkflow = useUpdateComplaintWorkflow()
     const { toast } = useToast()
+    const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || '')
+    const canReadAllUnits = useAuthStore((state) => {
+        const roleName = typeof state.user?.role === 'string'
+            ? state.user.role
+            : state.user?.role?.name || ''
+        return state.user?.unitAccess?.includes('*') || roleName.trim().toLowerCase() === 'customer relations manager'
+    })
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedAttachmentName, setSelectedAttachmentName] = useState('')
     const attachmentInputRef = useRef<HTMLInputElement | null>(null)
@@ -23,6 +44,36 @@ export function Complaints() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
     const [drawerMode, setDrawerMode] = useState<'raise' | 'update' | 'view'>('raise')
     const [selectedComplaint, setSelectedComplaint] = useState<any>(null)
+    const unitOptions = units.map((unit) => ({
+        value: unit.id,
+        label: unit.location?.label ? `${unit.name} - ${unit.location.label}` : unit.name
+    }))
+    const staffOptions = staff
+        .filter((member) => {
+            const status = String(member.status || '').trim().toLowerCase()
+            return !member.isDeleted && status !== 'terminated' && status !== 'resigned'
+        })
+        .map((member) => ({
+            value: member.id,
+            label: `${member.name}${member.empId ? ` (${member.empId})` : ''}`
+        }))
+    const selectedUnitId = selectedComplaint?.unitId || activeUnitId || unitOptions[0]?.value || ''
+    const filteredComplaints = dbComplaints.filter((row: any) => {
+        const query = searchQuery.trim().toLowerCase()
+        if (!query) return true
+
+        return [
+            row.ticketNo,
+            row.ref,
+            row.clientName,
+            row.category,
+            row.priority,
+            row.status,
+            row.description,
+            row.assignedTo,
+            row.unitId
+        ].some((value) => String(value || '').toLowerCase().includes(query))
+    })
 
     const resetAttachment = () => {
         setSelectedAttachmentName('')
@@ -72,7 +123,7 @@ export function Complaints() {
             )
         },
         { key: 'complaintDate', header: 'Complaint Date', cell: (row) => <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{row.date || new Date().toISOString().split('T')[0]}</span> },
-        { key: 'staffAllocation', header: 'Staff Allocation', cell: (row) => <span className="text-sm text-gray-700 dark:text-gray-300">{row.staff}</span> },
+        { key: 'staffAllocation', header: 'Staff Allocation', cell: (row) => <span className="text-sm text-gray-700 dark:text-gray-300">{row.staff || row.assignedTo || '-'}</span> },
         { key: 'complaintStatus', header: 'Complaint Status', cell: (row) => <StatusHighlighter value={row.status} /> },
         {
             key: 'action', header: '', cell: (row) => {
@@ -98,13 +149,19 @@ export function Complaints() {
         const fd = new FormData(e.currentTarget)
 
         if (drawerMode === 'raise') {
+            const description = String(fd.get('description') || '').trim()
+            if (description.length < 5) {
+                toast({ type: 'error', title: 'Complaint required', message: 'Please enter at least 5 characters in the complaint comments.' })
+                return
+            }
+
             createComplaint.mutate({
                 clientName: (fd.get('reference') as string) || 'Walk-in Client',
-                category: 'General Complaint',
-                priority: 'MEDIUM',
-                status: 'New Complaint',
-                description: fd.get('description') as string,
-                unitId: fd.get('unitId') as string
+                category: String(fd.get('category') || 'General Complaint'),
+                priority: String(fd.get('priority') || 'Medium'),
+                status: 'Open',
+                description,
+                unitId: (fd.get('unitId') as string) || activeUnitId
             } as any, {
                 onSuccess: () => {
                     resetAttachment()
@@ -112,9 +169,25 @@ export function Complaints() {
                 }
             })
         } else {
-            toast({ type: 'success', title: 'Updated', message: 'Complaint has been updated successfully' })
-            resetAttachment()
-            setIsDrawerOpen(false)
+            if (!selectedComplaint?.id) {
+                toast({ type: 'error', title: 'Missing Complaint', message: 'Please select a complaint before updating.' })
+                return
+            }
+
+            updateComplaintWorkflow.mutate({
+                complaintId: selectedComplaint.id,
+                data: {
+                    status: toApiComplaintStatus(String(fd.get('status') || selectedComplaint.status || 'Open')),
+                    assignedTo: String(fd.get('assignedTo') || '').trim() || undefined,
+                    resolutionNotes: String(fd.get('resolutionNotes') || '').trim() || undefined
+                },
+                options: canReadAllUnits ? { scope: 'all' } : undefined
+            }, {
+                onSuccess: () => {
+                    resetAttachment()
+                    setIsDrawerOpen(false)
+                }
+            })
         }
     }
 
@@ -143,7 +216,7 @@ export function Complaints() {
                 <div className="animate-pulse bg-white dark:bg-black border border-gray-200 dark:border-white/10 shadow-sm rounded-lg h-64 p-6" />
             ) : (
                 <DataTable
-                    data={dbComplaints.length > 0 ? dbComplaints : []}
+                    data={filteredComplaints}
                     columns={columns}
                     keyExtractor={(item: any) => item.id}
                     emptyStateMessage="No complaints available in table"
@@ -168,8 +241,8 @@ export function Complaints() {
                     <Select
                         label="Unit Name"
                         name="unitId"
-                        options={[{ value: '11111111-1111-1111-1111-111111111111', label: 'Universal Edler Care - Coimbatore' }, { value: '22222222-2222-2222-2222-222222222222', label: 'Anbu Sri Sai Home Health Care - Coimbatore' }]}
-                        defaultValue={drawerMode === 'raise' ? '11111111-1111-1111-1111-111111111111' : '22222222-2222-2222-2222-222222222222'}
+                        options={unitOptions}
+                        defaultValue={selectedUnitId}
                         disabled={drawerMode === 'view'}
                     />
 
@@ -192,7 +265,34 @@ export function Complaints() {
                         label="Complaint Date *"
                         name="date"
                         type="date"
-                        defaultValue={drawerMode === 'raise' ? '' : '2025-03-18'}
+                        defaultValue={drawerMode === 'raise' ? new Date().toISOString().split('T')[0] : selectedComplaint?.date || new Date().toISOString().split('T')[0]}
+                        disabled={drawerMode === 'view'}
+                    />
+
+                    <Select
+                        label="Complaint Category *"
+                        name="category"
+                        options={[
+                            { value: 'Service Feedback', label: 'Service Feedback' },
+                            { value: 'Service Delay', label: 'Service Delay' },
+                            { value: 'Staff Behaviour', label: 'Staff Behaviour' },
+                            { value: 'Billing Query', label: 'Billing Query' },
+                            { value: 'General Complaint', label: 'General Complaint' }
+                        ]}
+                        defaultValue={selectedComplaint?.category || 'General Complaint'}
+                        disabled={drawerMode === 'view'}
+                    />
+
+                    <Select
+                        label="Priority *"
+                        name="priority"
+                        options={[
+                            { value: 'Low', label: 'Low' },
+                            { value: 'Medium', label: 'Medium' },
+                            { value: 'High', label: 'High' },
+                            { value: 'Critical', label: 'Critical' }
+                        ]}
+                        defaultValue={selectedComplaint?.priority || 'Medium'}
                         disabled={drawerMode === 'view'}
                     />
 
@@ -215,6 +315,19 @@ export function Complaints() {
                             </a>
                         </div>
                     ) : null}
+
+                    {drawerMode !== 'raise' && (
+                        <Select
+                            label="Assigned To"
+                            name="assignedTo"
+                            options={[
+                                { value: '', label: '-- Select Staff --' },
+                                ...staffOptions
+                            ]}
+                            defaultValue={selectedComplaint?.assignedStaffId || ''}
+                            disabled={drawerMode === 'view'}
+                        />
+                    )}
 
                     {drawerMode !== 'view' && (
                         <div className="space-y-1">
@@ -261,15 +374,29 @@ export function Complaints() {
                     {drawerMode !== 'raise' && (
                         <Select
                             label="Complaint Status *"
+                            name="status"
                             options={[
-                                { value: 'Issue Rectified', label: 'Issue Rectified' },
-                                { value: 'Contract Terminated', label: 'Contract Terminated' },
-                                { value: 'Need Followup', label: 'Need Followup' },
-                                { value: 'New Complaint', label: 'New Complaint' }
+                                { value: 'Open', label: 'Open' },
+                                { value: 'In Progress', label: 'Assigned / In Progress' },
+                                { value: 'Resolved', label: 'Resolved' },
+                                { value: 'Closed', label: 'Closed' }
                             ]}
-                            defaultValue={selectedComplaint?.status || "Contract Terminated"}
+                            defaultValue={selectedComplaint?.status || 'Open'}
                             disabled={drawerMode === 'view'}
                         />
+                    )}
+
+                    {drawerMode !== 'raise' && (
+                        <div className="space-y-1">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Resolution Notes</label>
+                            <textarea
+                                name="resolutionNotes"
+                                className="w-full border border-gray-300 dark:border-white/10 rounded-md shadow-sm p-3 focus:ring-primary-500 focus:border-primary-500 min-h-[90px] text-sm bg-transparent text-gray-900 dark:text-gray-100 disabled:bg-gray-100 dark:disabled:bg-white/5 disabled:text-gray-500"
+                                placeholder="Add what was assigned, resolved, or closed"
+                                defaultValue={selectedComplaint?.resolutionNotes || ''}
+                                disabled={drawerMode === 'view'}
+                            />
+                        </div>
                     )}
 
                     {drawerMode !== 'view' && (
@@ -286,9 +413,12 @@ export function Complaints() {
                             </button>
                             <button
                                 type="submit"
+                                disabled={createComplaint.isPending || updateComplaintWorkflow.isPending}
                                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 font-medium shadow-sm transition-colors text-sm"
                             >
-                                {drawerMode === 'raise' ? 'Raise Complaint' : 'Save Changes'}
+                                {drawerMode === 'raise'
+                                    ? (createComplaint.isPending ? 'Raising...' : 'Raise Complaint')
+                                    : (updateComplaintWorkflow.isPending ? 'Saving...' : 'Save Workflow')}
                             </button>
                         </div>
                     )}

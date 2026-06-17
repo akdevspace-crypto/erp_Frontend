@@ -6,29 +6,32 @@ import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { useEnquiries } from '../hooks/useEnquiry'
 import { useStaff } from '../../hr/hooks/useHR'
 import { EnquiryFollowUpModal } from '../components/EnquiryFollowUpModal'
-import { hasConfiguredMenuPrivilege } from '../../../lib/permissions'
+import type { Staff } from '../../hr/types'
 
+const isActiveStaff = (staff: Staff) =>
+    !staff.isDeleted &&
+    !['terminated', 'resigned'].includes(String(staff.status || '').trim().toLowerCase())
+
+const buildStaffOptions = (staffList: Staff[]) => {
+    const activeStaff = staffList
+        .filter(isActiveStaff)
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+    return activeStaff.map((staff) => ({
+        value: staff.id,
+        label: `${staff.name} (ID: ${staff.empId || staff.id})`
+    }))
+}
 
 export function AllClients() {
     // We map over Enquiries here because the requested layout acts as an aggregated Enquiry view.
     const { data: enquiries = [], isLoading } = useEnquiries()
-    const { data: staffList = [] } = useStaff()
-
+    const { data: staffList = [] } = useStaff({ scope: 'all' })
     const [searchQuery, setSearchQuery] = useState('')
     const [unitFilter, setUnitFilter] = useState('')
     const [statusFilter, setStatusFilter] = useState('')
     const [isFollowUpOpen, setIsFollowUpOpen] = useState(false)
     const [selectedEnquiry, setSelectedEnquiry] = useState<any | null>(null)
-
-    const eligibleFollowUpStaff = useMemo(
-        () => staffList.filter((staff) => (
-            Boolean(staff.user?.id) &&
-            Boolean(staff.user?.isActive) &&
-            Boolean(staff.user?.role?.id) &&
-            hasConfiguredMenuPrivilege(staff.metadata)
-        )),
-        [staffList]
-    )
 
     const filteredData = useMemo(() => {
         return enquiries.filter(e => {
@@ -46,18 +49,10 @@ export function AllClients() {
         setIsFollowUpOpen(true)
     }
 
-    const handleFollowUpSubmit = async () => {
-        setIsFollowUpOpen(false)
-        setSelectedEnquiry(null)
-    }
-
-    const followUpStaffOptions = [
-        { value: '', label: '-- Select the Staff --' },
-        ...eligibleFollowUpStaff.map((staff) => ({
-            value: staff.id,
-            label: `${staff.name} (ID: ${staff.empId})`
-        }))
-    ]
+    const followUpStaffOptions = useMemo(
+        () => buildStaffOptions(staffList),
+        [staffList]
+    )
 
     const columns: Column<any>[] = [
         {

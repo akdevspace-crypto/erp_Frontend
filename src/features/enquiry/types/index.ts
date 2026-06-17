@@ -19,11 +19,32 @@ export interface Enquiry {
     clientLocation?: string
     remarks?: string
     lastFollowUp?: string
+    lastFollowUpId?: string
+    lastFollowUpOutcome?: string
+    lastFollowUpStatus?: string
+    isRenewalFollowUp?: boolean
     serviceCategory?: string
     source?: string
     lastFollowedBy?: string
     automationScore?: number
     automationPriority?: 'HOT' | 'WARM' | 'COLD'
+    admissionId?: string | null
+    admittedAt?: string | null
+    admittedPatientName?: string | null
+    followUps?: EnquiryFollowUpRecord[]
+}
+
+export interface EnquiryFollowUpRecord {
+    id: string
+    notes?: string
+    scheduledAt?: string | null
+    channel?: string
+    outcome?: string
+    clientInterest?: string
+    readyToPayAmount?: number
+    paymentMode?: string
+    nextFollowupStatus?: string
+    createdAt?: string
 }
 
 export interface Client {
@@ -32,4 +53,24 @@ export interface Client {
     unitId: string
     status: 'active' | 'inactive'
     enquiriesCount: number
+}
+
+export interface AdmissionRecord {
+    id: string
+    enquiryId: string
+    refNo: string
+    status: string
+    admittedAt: string
+    patientName: string
+    clientName: string
+    mobile: string
+    email?: string
+    service: string
+    serviceCategory?: string
+    mode?: string
+    patientAge?: string
+    patientGender?: string
+    patientHealthCondition?: string
+    clientAddress?: string
+    remarks?: string
 }

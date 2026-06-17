@@ -13,7 +13,7 @@ export interface WelcomeCall {
 export const businessService = {
     getWelcomeCalls: async (): Promise<WelcomeCall[]> => {
         const res = await api.get('/business')
-        return res.data.data
+        return Array.isArray(res.data.data) ? res.data.data : []
     },
     createWelcomeCall: async (data: any) => {
         const res = await api.post('/business', data)

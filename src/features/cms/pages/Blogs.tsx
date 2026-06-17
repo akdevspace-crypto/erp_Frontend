@@ -96,7 +96,7 @@ export function Blogs() {
         {
             key: 'id',
             header: 'S.No',
-            cell: (item, index) => <span>{index + 1}</span>
+            cell: (_, index) => <span>{index + 1}</span>
         },
         {
             key: 'unit',
@@ -126,7 +126,7 @@ export function Blogs() {
             header: 'Action',
             cell: (d) => (
                 <div className="flex items-center gap-2 justify-end">
-                    <button onClick={() => handleEdit(d)} className="p-1.5 bg-teal-500 text-white rounded hover:bg-teal-600" title="Edit">
+                    <button onClick={() => handleEdit(d)} className="p-1.5 bg-primary-500 text-white rounded hover:bg-primary-600" title="Edit">
                         <Edit2 className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleDelete(d.id)} disabled={deleteBlog.isPending} className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50" title="Delete">
@@ -146,7 +146,7 @@ export function Blogs() {
             <div className="mb-4 flex items-center justify-end">
                 <button
                     onClick={handleAdd}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#00a79d] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(0,167,157,0.24)] hover:bg-[#008f86] transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#3f5f6a] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(63,95,106,0.24)] hover:bg-[#1f3b4d] transition-colors"
                 >
                     + Add New Blog
                 </button>
@@ -234,7 +234,7 @@ export function Blogs() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-4 py-2 bg-[#00a79d] text-white rounded-md hover:bg-[#008f86] font-medium shadow-sm disabled:opacity-50 transition-colors"
+                            className="px-4 py-2 bg-[#3f5f6a] text-white rounded-md hover:bg-[#1f3b4d] font-medium shadow-sm disabled:opacity-50 transition-colors"
                         >
                             {isSubmitting ? 'Saving...' : editingId ? 'Update Blog' : 'Submit Blog'}
                         </button>

@@ -26,8 +26,14 @@ export interface InternalConversation {
 
 export const internalChatService = {
     getStaff: async (): Promise<ChatStaff[]> => {
-        const response = await api.get('/internal/staff')
-        return response.data.data
+        try {
+            const response = await api.get('/internal/staff')
+            console.log("INTERNAL STAFF RESPONSE:", response.data)
+            return response.data.data
+        } catch (error) {
+            console.error("INTERNAL STAFF ERROR:", error)
+            return []
+        }
     },
 
     getOrCreateConversation: async (targetUserId: string): Promise<InternalConversation> => {

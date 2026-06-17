@@ -9,4 +9,9 @@ export interface Complaint {
     status: 'Open' | 'In Progress' | 'Resolved' | 'Closed'
     description: string
     assignedTo?: string
+    assignedStaffId?: string
+    complaintTaskId?: string
+    resolutionNotes?: string
+    resolvedAt?: string
+    closedAt?: string
 }

@@ -164,11 +164,11 @@ export function LabourManagement() {
         { key: 'status', header: 'Status', cell: (d) => <StatusHighlighter value={d.status} /> },
         {
             key: 'action', header: 'Action', cell: (d) => (
-                <div className="flex items-center gap-2 justify-end">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                     <button onClick={() => handleEdit(d)} className="px-3 py-1 bg-[#0d6efd] text-white text-xs font-semibold rounded hover:bg-blue-600 shadow flex items-center gap-1">
                         <Edit2 className="w-3 h-3" /> Edit
                     </button>
-                    <button onClick={() => handleDelete(d.id)} disabled={deleteStaff.isPending} className="px-3 py-1 bg-[#dc3545] text-white text-xs font-semibold rounded hover:bg-red-600 shadow flex items-center gap-1 disabled:opacity-50">
+                    <button onClick={() => handleDelete(d.id)} disabled={deleteStaff.isPending} className="rounded border border-gray-300 dark:border-white/10 bg-white dark:bg-transparent px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
                         <Trash2 className="w-3 h-3" /> Delete
                     </button>
                 </div>
@@ -177,7 +177,7 @@ export function LabourManagement() {
     ]
 
     return (
-        <div className="flex flex-col h-full space-y-6 bg-transparent dark:bg-black">
+        <div className="flex h-full min-w-0 flex-col space-y-4 bg-transparent dark:bg-black sm:space-y-6">
             <PageHeader title="Labour Management" breadcrumbs={[{ label: 'Home' }, { label: 'Labour Management' }]} />
 
             <ActionBar onAdd={() => { reset(); setEditingId(null); setIsAdding(true); }} addLabel="Add New Staff" />
@@ -186,11 +186,11 @@ export function LabourManagement() {
 
             <Drawer isOpen={isAdding} onClose={() => setIsAdding(false)} title={editingId ? 'Edit - Staff Profile' : 'Add - New Staff'} size="xl">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-10 py-4">
-                    <div className="max-w-4xl mx-auto space-y-8">
+                    <div className="mx-auto w-full max-w-none space-y-8">
                         {/* Camera and Upload Actions */}
                         <div className="flex flex-col items-center gap-4">
-                            <div className="flex justify-center gap-4">
-                                <button type="button" onClick={toggleCamera} className="px-6 py-2 bg-teal-500 text-white text-sm font-medium rounded hover:bg-teal-600 transition shadow-sm">
+                            <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+                                <button type="button" onClick={toggleCamera} className="px-6 py-2 bg-primary-500 text-white text-sm font-medium rounded hover:bg-primary-600 transition shadow-sm">
                                     {isCameraOpen ? 'Close Web Camera' : 'Open Web Camera'}
                                 </button>
                                 <label className="px-6 py-2 bg-gray-500 text-white text-sm font-medium rounded hover:bg-gray-600 dark:hover:bg-gray-400 transition shadow-sm cursor-pointer relative overflow-hidden">
@@ -199,14 +199,14 @@ export function LabourManagement() {
                                 </label>
                             </div>
                             {isCameraOpen && (
-                                <div className="mt-4 border-2 border-dashed border-teal-300 rounded-lg overflow-hidden relative shadow-inner bg-black" style={{ width: '320px', height: '240px' }}>
-                                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover shadow-sm" />
+                                <div className="mt-4 aspect-[4/3] w-full max-w-sm overflow-hidden rounded-lg border-2 border-dashed border-primary-300 bg-black shadow-inner">
+                                    <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover shadow-sm" />
                                 </div>
                             )}
                         </div>
 
                         {/* Top Level Selects */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
                             <HookSelect register={register} name="unitId" label="Unit Name" options={unitOptions} />
                             <HookSelect register={register} name="role" label="Service Name" required options={[{ value: '', label: '-- Select the Service Name --' }, { value: 'Attendant', label: 'Attendant' }, { value: 'Security Guard', label: 'Security Guard' }]} />
                         </div>
@@ -214,7 +214,7 @@ export function LabourManagement() {
                         {/* Personnel Details */}
                         <div>
                             <div className="bg-blue-600 text-white text-center py-2 text-lg font-medium mb-6 rounded-sm shadow-sm">Personnel Details</div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <HookInput register={register} name="name" label="Staff Name" required placeholder="Enter Full Name" />
                                 <HookInput register={register} name="joiningDate" label="Available From (mm-dd-yyyy)" required type="date" />
 
@@ -253,7 +253,7 @@ export function LabourManagement() {
                         {/* Aadhaar Verification */}
                         <div>
                             <div className="bg-blue-600 text-white text-center py-2 text-lg font-medium mb-6 rounded-sm shadow-sm">Aadhaar Verification</div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <HookInput register={register} name="aadhaarNo" label="Aadhaar No." required placeholder="Enter the Aadhaar No." />
                                 <HookInput register={register} name="aadhaarDate" label="Verified Date" type="date" />
                                 <HookInput register={register} name="aadhaarPerson" label="Verified Person Name" placeholder="Verified By" />
@@ -267,7 +267,7 @@ export function LabourManagement() {
                         {/* Address Verification */}
                         <div>
                             <div className="bg-blue-600 text-white text-center py-2 text-lg font-medium mb-6 rounded-sm shadow-sm">Address Verification</div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address *</label>
                                     <textarea {...register('address')} rows={2} className="block w-full border-gray-300 dark:border-white/10 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border bg-white dark:bg-black text-gray-900 dark:text-gray-100" placeholder="Enter Full Address with Pincode"></textarea>
@@ -284,7 +284,7 @@ export function LabourManagement() {
                         {/* Police Verification */}
                         <div>
                             <div className="bg-blue-600 text-white text-center py-2 text-lg font-medium mb-6 rounded-sm shadow-sm">Police Verification</div>
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <HookInput register={register} name="pvrStation" label="Nearby Police Station" required placeholder="Police Station Name" />
                                 <HookInput register={register} name="pvrNo" label="PVR No" placeholder="Police Verify Record No." />
                                 <HookInput register={register} name="pvrDate" label="Date of Issue" type="date" />
@@ -298,9 +298,9 @@ export function LabourManagement() {
                         {/* Relations Contact Details (Emergency) */}
                         <div>
                             <div className="bg-blue-600 text-white text-center py-2 text-lg font-medium mb-6 rounded-sm shadow-sm">Relations Contact Details (Emergency)</div>
-                            <div className="space-y-4 px-4">
+                            <div className="space-y-4 px-0 sm:px-4">
                                 {[1, 2, 3].map((num) => (
-                                    <div key={num} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div key={num} className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                         <HookInput register={register} name={`relName${num}`} label={`Relation Name ${num}`} placeholder={`Relation Name ${num}`} />
                                         <HookSelect register={register} name={`relType${num}`} label="Relationship Type" options={[{ value: '', label: '-- Select the Relationship --' }, { value: 'Spouse', label: 'Spouse' }, { value: 'Parent', label: 'Parent' }, { value: 'Child', label: 'Child' }]} />
                                         <HookInput register={register} name={`relPhone${num}`} label="Contact Number" placeholder="Contact Number" />
@@ -310,7 +310,7 @@ export function LabourManagement() {
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="pt-6 flex justify-end gap-3 mt-auto border-t border-gray-200 dark:border-white/10">
+                        <div className="mt-auto flex flex-col justify-end gap-3 border-t border-gray-200 pt-6 dark:border-white/10 sm:flex-row">
                             <button
                                 type="button"
                                 onClick={() => setIsAdding(false)}

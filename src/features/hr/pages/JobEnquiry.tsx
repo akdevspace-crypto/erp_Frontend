@@ -108,11 +108,11 @@ export function JobEnquiry() {
         { key: 'interestStatus', header: 'Interest Status' },
         {
             key: 'action', header: 'Action', cell: (d) => (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <button onClick={() => handleEdit(d)} className="p-1 px-3 bg-[#0d6efd] text-white text-xs rounded shadow flex items-center gap-1">
                         <Edit2 className="w-3 h-3" /> Edit
                     </button>
-                    <button onClick={() => handleDelete(d.id)} className="p-1 px-3 bg-[#dc3545] text-white text-xs rounded shadow flex items-center gap-1">
+                    <button onClick={() => handleDelete(d.id)} className="rounded border border-gray-300 dark:border-white/10 bg-white dark:bg-transparent px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-white/5">
                         <Trash2 className="w-3 h-3" /> Delete
                     </button>
                 </div>
@@ -121,7 +121,7 @@ export function JobEnquiry() {
     ]
 
     return (
-        <div className="flex flex-col h-full space-y-6 bg-transparent dark:bg-black">
+        <div className="flex h-full min-w-0 flex-col space-y-4 bg-transparent dark:bg-black sm:space-y-6">
             <PageHeader title="Job Enquiry / Applications" breadcrumbs={[{ label: 'Home' }, { label: 'Job Enquiry' }]} />
             <ActionBar onAdd={() => { reset(); setEditingId(null); setIsAdding(true); }} addLabel="Add New Application" />
             <FilterSection searchQuery={""} onSearchChange={() => { }} searchPlaceholder="Search by Application No. or Applicant..." />
@@ -129,10 +129,10 @@ export function JobEnquiry() {
 
             <Drawer isOpen={isAdding} onClose={() => setIsAdding(false)} title={editingId ? 'Edit Job Application' : 'Add New Job Application'} size="xl">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="max-w-4xl mx-auto space-y-8">
+                    <div className="mx-auto w-full max-w-none space-y-8">
                         <div>
                             <h3 className="text-xl font-normal text-gray-800 dark:text-gray-200 mb-6 border-b pb-2 dark:border-white/10">Company & Position Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <RedLabelSelect
                                     label="Company (Unit)" required register={register} name="companyUnit"
                                     options={unitOptions}
@@ -159,7 +159,7 @@ export function JobEnquiry() {
 
                         <div>
                             <h3 className="text-xl font-normal text-gray-800 dark:text-gray-200 mb-6 border-b pb-2 dark:border-white/10">Applicant Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <RedLabelInput
                                     label="Applicant Full Name" required register={register} name="applicantName"
                                     placeholder="Enter Applicant Full Name"
@@ -187,7 +187,7 @@ export function JobEnquiry() {
 
                         <div>
                             <h3 className="text-xl font-normal text-gray-800 dark:text-gray-200 mb-6 border-b pb-2 dark:border-white/10">Status Details</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                            <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2 2xl:grid-cols-4">
                                 <RedLabelSelect
                                     label="Followup Status" register={register} name="followupStatus"
                                     options={[
@@ -206,7 +206,7 @@ export function JobEnquiry() {
                             </div>
                         </div>
 
-                        <div className="pt-6 flex justify-end gap-3 mt-auto border-t border-gray-200 dark:border-white/10">
+                        <div className="mt-auto flex flex-col justify-end gap-3 border-t border-gray-200 pt-6 dark:border-white/10 sm:flex-row">
                             <button
                                 type="button"
                                 onClick={() => setIsAdding(false)}

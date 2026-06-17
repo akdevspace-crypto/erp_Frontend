@@ -37,3 +37,22 @@ export interface RolePermission {
         }
     }
 }
+
+export interface LeaveRequest {
+    id: string
+    staffId: string
+    unitId?: string | null
+    unitName?: string | null
+    empId: string
+    name: string
+    department: string
+    role: string
+    leaveType: string
+    fromDate: string
+    toDate: string
+    reason?: string
+    status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | string
+    requestedAt?: string
+    decidedAt?: string
+    remarks?: string
+}

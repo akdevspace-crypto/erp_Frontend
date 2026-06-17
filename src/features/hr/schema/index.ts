@@ -20,6 +20,18 @@ export const staffSchema = z.object({
     email: z.string().email('Personal Email required').optional().or(z.literal('')),
     officialPhone: z.string().optional(),
     officialEmail: z.string().email('Official Email invalid').optional().or(z.literal('')),
+    monthlySalary: z.string().optional(),
+    fixedAllowance: z.string().optional(),
+    fixedDeduction: z.string().optional(),
+    salaryType: z.string().optional(),
+    exitDate: z.string().optional(),
+    exitReason: z.string().optional(),
+    exitRemarks: z.string().optional(),
+    settlementStatus: z.string().optional(),
+    settlementLastSalary: z.string().optional(),
+    settlementAllowance: z.string().optional(),
+    settlementDeduction: z.string().optional(),
+    settlementPayable: z.string().optional(),
     joiningDate: z.string().min(1, 'Joining date is required'),
     gender: z.string().min(1, 'Gender is required'),
     address: z.string().optional(),
@@ -65,4 +77,5 @@ export const staffSchema = z.object({
     }
 })
 
-export type StaffFormValues = z.infer<typeof staffSchema>
+export type StaffFormInput = z.input<typeof staffSchema>
+export type StaffFormValues = z.output<typeof staffSchema>
