@@ -160,7 +160,7 @@ export function ServiceHistory() {
                 {selectedService && (
                     <div className="space-y-4 text-left">
                         <div className="rounded-xl border border-primary-100 bg-primary-50 p-3">
-                            <p className="text-sm font-black text-gray-900">{selectedService.clientName || 'Client'}</p>
+                            <p className="text-sm font-extrabold text-gray-900">{selectedService.clientName || 'Client'}</p>
                             <p className="text-xs font-semibold text-gray-600">{selectedService.ref} - {selectedService.service}</p>
                         </div>
                         <label className="block text-sm font-bold text-gray-700">

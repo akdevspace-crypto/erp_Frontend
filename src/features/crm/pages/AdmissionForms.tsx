@@ -62,7 +62,7 @@ export function AdmissionForms() {
             header: 'Form ID',
             cell: (admission) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">FORM-{admission.refNo}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">FORM-{admission.refNo}</span>
                     <span className="text-xs text-gray-500">Admission {admission.id.slice(0, 8)}</span>
                 </div>
             )
@@ -148,7 +148,7 @@ export function AdmissionForms() {
                     <div className="flex items-center gap-3">
                         <ClipboardList className="h-5 w-5 text-primary-600" />
                         <div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{formRows.length}</p>
+                            <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{formRows.length}</p>
                             <p className="text-xs font-bold text-gray-500">Forms Generated</p>
                         </div>
                     </div>
@@ -157,7 +157,7 @@ export function AdmissionForms() {
                     <div className="flex items-center gap-3">
                         <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                         <div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{completeCount}</p>
+                            <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{completeCount}</p>
                             <p className="text-xs font-bold text-gray-500">Complete</p>
                         </div>
                     </div>
@@ -166,7 +166,7 @@ export function AdmissionForms() {
                     <div className="flex items-center gap-3">
                         <CircleDashed className="h-5 w-5 text-orange-500" />
                         <div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{pendingCount}</p>
+                            <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{pendingCount}</p>
                             <p className="text-xs font-bold text-gray-500">Needs Review</p>
                         </div>
                     </div>
@@ -189,7 +189,7 @@ export function AdmissionForms() {
                 actions={(admission) => (
                     <button
                         onClick={() => openPortalAccess(admission)}
-                        className="inline-flex items-center rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs font-black text-primary-700 hover:border-primary-400 hover:bg-primary-100"
+                        className="inline-flex items-center rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs font-extrabold text-primary-700 hover:border-primary-400 hover:bg-primary-100"
                     >
                         <KeyRound className="mr-1.5 h-3.5 w-3.5" />
                         Enable Login
@@ -208,7 +208,7 @@ export function AdmissionForms() {
             >
                 <div className="mt-3 space-y-4 text-left">
                     <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-900">
-                        <p className="font-black">{portalAdmission?.clientName}</p>
+                        <p className="font-extrabold">{portalAdmission?.clientName}</p>
                         <p className="mt-1 text-xs font-medium">
                             {portalAdmission?.refNo} - {portalAdmission?.patientName} - {portalAdmission?.service}
                         </p>

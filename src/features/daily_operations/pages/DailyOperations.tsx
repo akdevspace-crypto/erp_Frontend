@@ -188,7 +188,7 @@ export function DailyOperations() {
 
             <div className={`grid gap-3 ${patientFilterVisible ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
                 <label className="min-w-0 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                    <span className="text-xs font-black uppercase tracking-wide text-slate-500">Date</span>
+                    <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Date</span>
                     <input
                         type="date"
                         value={date}
@@ -197,7 +197,7 @@ export function DailyOperations() {
                     />
                 </label>
                 <label className="min-w-0 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                    <span className="text-xs font-black uppercase tracking-wide text-slate-500">Department</span>
+                    <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Department</span>
                     <select
                         value={departmentFilter}
                         onChange={(event) => {
@@ -215,7 +215,7 @@ export function DailyOperations() {
                 </label>
                 {patientFilterVisible ? (
                     <label className="min-w-0 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                        <span className="text-xs font-black uppercase tracking-wide text-slate-500">Patient</span>
+                        <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Patient</span>
                         <select
                             value={selectedPatientAllocationId}
                             onChange={(event) => setSelectedPatientAllocationId(event.target.value)}
@@ -247,7 +247,7 @@ export function DailyOperations() {
                         key={section}
                         type="button"
                         onClick={() => setActiveSection(section)}
-                        className={`rounded-xl px-4 py-2 text-sm font-black shadow-sm transition ${activeSection === section ? 'bg-primary-700 text-white' : 'bg-white text-slate-700 hover:bg-primary-50'}`}
+                        className={`rounded-xl px-4 py-2 text-sm font-extrabold shadow-sm transition ${activeSection === section ? 'bg-primary-700 text-white' : 'bg-white text-slate-700 hover:bg-primary-50'}`}
                     >
                         {section}
                     </button>
@@ -257,14 +257,14 @@ export function DailyOperations() {
             {(activeSection === 'Patient Care Register' || activeSection === 'Nursing Register') && (
                 <form onSubmit={postChargeable} className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex flex-col gap-1">
-                        <h2 className="text-base font-black text-slate-900">Patient Chargeable Expenses</h2>
+                        <h2 className="text-base font-extrabold text-slate-900">Patient Chargeable Expenses</h2>
                         <p className="text-xs font-semibold text-slate-500">
                             Add only billable patient items such as medicine, doctor fees, consumables, lab, equipment, external bills, or approved extra care.
                         </p>
                     </div>
                     <div className="grid gap-4 lg:grid-cols-[minmax(260px,1.2fr)_minmax(150px,180px)_minmax(190px,230px)_minmax(240px,1fr)]">
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Patient / Service</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Patient / Service</span>
                             <select
                                 value={chargeableForm.allocationId}
                                 onChange={(event) => setChargeableForm((prev) => ({ ...prev, allocationId: event.target.value }))}
@@ -280,7 +280,7 @@ export function DailyOperations() {
                             </select>
                         </label>
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Department</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Department</span>
                             <select
                                 value={chargeableForm.department}
                                 onChange={(event) => setChargeableForm((prev) => ({ ...prev, department: event.target.value as 'Patient Care' | 'Nursing' }))}
@@ -291,7 +291,7 @@ export function DailyOperations() {
                             </select>
                         </label>
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Charge Category</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Charge Category</span>
                             <select
                                 value={chargeableForm.category}
                                 onChange={(event) => setChargeableForm((prev) => ({ ...prev, category: event.target.value }))}
@@ -321,8 +321,8 @@ export function DailyOperations() {
                             placeholder="Rate"
                         />
                         <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
-                            <p className="text-xs font-black uppercase tracking-wide text-emerald-700">Amount</p>
-                            <p className="mt-1 text-sm font-black text-emerald-900">
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">Amount</p>
+                            <p className="mt-1 text-sm font-extrabold text-emerald-900">
                                 Rs {(Number(chargeableForm.quantity || 0) * Number(chargeableForm.rate || 0)).toFixed(2)}
                             </p>
                         </div>
@@ -341,7 +341,7 @@ export function DailyOperations() {
                                 || Number(chargeableForm.quantity || 0) <= 0
                                 || Number(chargeableForm.rate || 0) < 0
                             }
-                            className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50 lg:mt-[21px]"
+                            className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50 lg:mt-[21px]"
                         >
                             <Plus className="h-4 w-4" />
                             {postChargeableExpense.isPending ? 'Posting...' : 'Post Charge'}
@@ -354,7 +354,7 @@ export function DailyOperations() {
                 <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                            <h2 className="text-base font-black text-slate-900">{activeSection}</h2>
+                            <h2 className="text-base font-extrabold text-slate-900">{activeSection}</h2>
                             <p className="text-xs font-semibold text-slate-500">
                                 {selectedPatient ? `${selectedPatient.patientName} - ${selectedPatient.serviceLabel}` : `${completionRate}% completed today`}
                             </p>
@@ -402,13 +402,13 @@ export function DailyOperations() {
                 <form onSubmit={createManualTask} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
                         <Plus className="h-5 w-5 text-primary-600" />
-                        <h2 className="text-base font-black text-slate-900">Manual Extra Task</h2>
+                        <h2 className="text-base font-extrabold text-slate-900">Manual Extra Task</h2>
                     </div>
                     <div className="grid gap-4 lg:grid-cols-[minmax(170px,220px)_minmax(260px,1fr)_minmax(220px,280px)_minmax(240px,1fr)_minmax(170px,220px)]">
                         <SelectField label="Department" value={manualDepartment} onChange={setManualDepartment} options={departments} />
                         <TextField label="Task" value={manualTitle} onChange={setManualTitle} placeholder="Repair room TV, extra cleaning, stock verification..." />
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Assigned To</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Assigned To</span>
                             <select
                                 value={manualStaffId}
                                 onChange={(event) => setManualStaffId(event.target.value)}
@@ -422,7 +422,7 @@ export function DailyOperations() {
                         <button
                             type="submit"
                             disabled={createTask.isPending || !manualTitle.trim()}
-                            className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-600 text-sm font-black text-white shadow-sm hover:bg-primary-700 disabled:opacity-50 lg:mt-[21px]"
+                            className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-600 text-sm font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:opacity-50 lg:mt-[21px]"
                         >
                             <Plus className="h-4 w-4" />
                             {createTask.isPending ? 'Adding...' : 'Add Extra Task'}
@@ -435,12 +435,12 @@ export function DailyOperations() {
                 <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
                         <ClipboardCheck className="h-5 w-5 text-emerald-700" />
-                        <h2 className="text-base font-black text-slate-900">Admin Review</h2>
+                        <h2 className="text-base font-extrabold text-slate-900">Admin Review</h2>
                     </div>
                     <div className="grid gap-2 md:grid-cols-2">
                         {summary.byDepartment.map((item) => (
                             <div key={item.department} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                <p className="font-black text-slate-900">{item.department}</p>
+                                <p className="font-extrabold text-slate-900">{item.department}</p>
                                 <p className="mt-1 text-xs font-semibold text-slate-500">{item.completed}/{item.total} completed · {item.pending} pending · {item.missed} issue</p>
                             </div>
                         ))}
@@ -450,10 +450,10 @@ export function DailyOperations() {
                 <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                     <div className="mb-4 flex items-center gap-2">
                         <FileText className="h-5 w-5 text-blue-700" />
-                        <h2 className="text-base font-black text-slate-900">End-of-Day Report</h2>
+                        <h2 className="text-base font-extrabold text-slate-900">End-of-Day Report</h2>
                     </div>
                     <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                        <p className="text-sm font-black text-blue-900">{summary.completed} of {summary.total} tasks completed</p>
+                        <p className="text-sm font-extrabold text-blue-900">{summary.completed} of {summary.total} tasks completed</p>
                         <p className="mt-1 text-xs font-semibold text-blue-800">{summary.missed} missed/issues and {summary.pending} pending tasks need follow-up.</p>
                     </div>
                     <div className="mt-3 max-h-36 space-y-2 overflow-auto">
@@ -489,7 +489,7 @@ function DepartmentSummaryTable({ rows }: { rows: Array<{ department: string; to
                 <tbody>
                     {rows.map((row) => (
                         <tr key={row.department} className="border-t border-slate-100">
-                            <td className="px-3 py-3 font-black text-slate-900">{row.department}</td>
+                            <td className="px-3 py-3 font-extrabold text-slate-900">{row.department}</td>
                             <td className="px-3 py-3 font-bold">{row.total}</td>
                             <td className="px-3 py-3 font-bold text-emerald-700">{row.completed}</td>
                             <td className="px-3 py-3 font-bold text-amber-700">{row.pending}</td>
@@ -530,7 +530,7 @@ function TaskUpdateTable({
                     {tasks.map((task) => (
                         <tr key={task.id} className="border-b border-slate-100 align-top">
                             <td className="px-3 py-3">
-                                <p className="font-black text-slate-900">{task.title}</p>
+                                <p className="font-extrabold text-slate-900">{task.title}</p>
                                 <p className="mt-1 text-xs font-semibold text-slate-500">
                                     {task.department} - {phaseLabels[task.phase] || 'Department Updates'} - {task.source === 'DEFAULT' ? 'Routine' : 'Manual'}
                                 </p>
@@ -590,11 +590,11 @@ function RegisterTable({
                         {tasks.map((task) => (
                             <tr key={task.id} className="border-b border-slate-100 align-top">
                                 <td className="px-3 py-3">
-                                    <p className="font-black text-slate-900">{selectedPatient?.patientName || 'All patients'}</p>
+                                    <p className="font-extrabold text-slate-900">{selectedPatient?.patientName || 'All patients'}</p>
                                     <p className="text-xs font-semibold text-slate-500">{selectedPatient?.allocationRef || 'Routine scope'}</p>
                                 </td>
                                 <td className="px-3 py-3">
-                                    <p className="font-black text-slate-900">{task.title}</p>
+                                    <p className="font-extrabold text-slate-900">{task.title}</p>
                                     <p className="text-xs font-semibold text-slate-500">{phaseLabels[task.phase] || 'Department Updates'}</p>
                                 </td>
                                 <td className="px-3 py-3"><StaffSelect task={task} activeStaff={activeStaff} updateAssignedStaff={updateAssignedStaff} /></td>
@@ -644,7 +644,7 @@ function AlertCard({ title, items }: { title: string; items: DailyOperationTask[
         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
             <div className="mb-2 flex items-center gap-2">
                 <Activity className="h-4 w-4 text-primary-700" />
-                <p className="text-sm font-black text-slate-900">{title}</p>
+                <p className="text-sm font-extrabold text-slate-900">{title}</p>
             </div>
             <div className="max-h-44 space-y-2 overflow-auto">
                 {items.slice(0, 8).map((item) => (
@@ -662,16 +662,16 @@ function EndOfDaySummary({ summary }: { summary: any }) {
     return (
         <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                <p className="text-xs font-black uppercase tracking-wide text-emerald-700">Completed</p>
-                <p className="mt-2 text-3xl font-black text-emerald-900">{summary.completed}</p>
+                <p className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">Completed</p>
+                <p className="mt-2 text-3xl font-extrabold text-emerald-900">{summary.completed}</p>
             </div>
             <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                <p className="text-xs font-black uppercase tracking-wide text-amber-700">Pending / Follow Tomorrow</p>
-                <p className="mt-2 text-3xl font-black text-amber-900">{summary.pending}</p>
+                <p className="text-xs font-extrabold uppercase tracking-wide text-amber-700">Pending / Follow Tomorrow</p>
+                <p className="mt-2 text-3xl font-extrabold text-amber-900">{summary.pending}</p>
             </div>
             <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4">
-                <p className="text-xs font-black uppercase tracking-wide text-rose-700">Missed / Issue</p>
-                <p className="mt-2 text-3xl font-black text-rose-900">{summary.missed}</p>
+                <p className="text-xs font-extrabold uppercase tracking-wide text-rose-700">Missed / Issue</p>
+                <p className="mt-2 text-3xl font-extrabold text-rose-900">{summary.missed}</p>
             </div>
         </div>
     )
@@ -734,8 +734,8 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: 's
     return (
         <div className={`rounded-2xl border p-4 shadow-sm ${colors[tone]}`}>
             <Clock className="h-4 w-4" />
-            <p className="mt-2 text-2xl font-black">{value}</p>
-            <p className="text-xs font-black uppercase tracking-wide">{label}</p>
+            <p className="mt-2 text-2xl font-extrabold">{value}</p>
+            <p className="text-xs font-extrabold uppercase tracking-wide">{label}</p>
         </div>
     )
 }
@@ -743,7 +743,7 @@ function Metric({ label, value, tone }: { label: string; value: number; tone: 's
 function TextField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
     return (
         <label className="block">
-            <span className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</span>
+            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">{label}</span>
             <input
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
@@ -757,7 +757,7 @@ function TextField({ label, value, onChange, placeholder }: { label: string; val
 function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
     return (
         <label className="block">
-            <span className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</span>
+            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">{label}</span>
             <select
                 value={value}
                 onChange={(event) => onChange(event.target.value)}

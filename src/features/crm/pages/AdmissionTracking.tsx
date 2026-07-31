@@ -118,7 +118,7 @@ export function AdmissionTracking() {
             sortable: true,
             cell: (admission) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{admission.refNo}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{admission.refNo}</span>
                     <span className="text-xs font-medium text-gray-500">From enquiry</span>
                 </div>
             )
@@ -186,20 +186,20 @@ export function AdmissionTracking() {
                             <HeartPulse className="h-5 w-5" />
                         </div>
                         <div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{admissions.length}</p>
+                            <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{admissions.length}</p>
                             <p className="text-xs font-bold text-gray-500">Total Admissions</p>
                         </div>
                     </div>
                 </div>
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
-                    <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{admissions.filter((item) => item.status === 'ACTIVE').length}</p>
+                    <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{admissions.filter((item) => item.status === 'ACTIVE').length}</p>
                     <p className="text-xs font-bold text-gray-500">Active Cases</p>
                 </div>
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
                     <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-primary-600" />
                         <div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{admissions.filter((item) => !item.patientHealthCondition).length}</p>
+                            <p className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{admissions.filter((item) => !item.patientHealthCondition).length}</p>
                             <p className="text-xs font-bold text-gray-500">Clinical Notes Pending</p>
                         </div>
                     </div>
@@ -240,7 +240,7 @@ export function AdmissionTracking() {
             >
                 <div className="mt-3 space-y-4 text-left">
                     <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-900">
-                        <p className="font-black">{handoffAdmission?.patientName}</p>
+                        <p className="font-extrabold">{handoffAdmission?.patientName}</p>
                         <p className="mt-1 text-xs font-medium">
                             {handoffAdmission?.refNo} · {handoffAdmission?.service} · {handoffAdmission?.clientName}
                         </p>

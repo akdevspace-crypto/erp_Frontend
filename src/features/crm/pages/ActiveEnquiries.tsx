@@ -153,7 +153,7 @@ export function ActiveEnquiries() {
             sortable: true,
             cell: (enquiry) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{enquiry.refNo}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{enquiry.refNo}</span>
                     <span className="text-xs font-medium text-gray-500">{new Date(enquiry.createdAt).toLocaleDateString()}</span>
                 </div>
             )
@@ -224,7 +224,7 @@ export function ActiveEnquiries() {
                     <div className="flex flex-col">
                         <StatusHighlighter value={qualification.conversionReadiness} />
                         {qualification.isReadyToConvert && (
-                            <span className="mt-1 text-xs font-black text-emerald-600">Action required</span>
+                            <span className="mt-1 text-xs font-extrabold text-emerald-600">Action required</span>
                         )}
                     </div>
                 )
@@ -311,7 +311,7 @@ export function ActiveEnquiries() {
                         </span>
                         <button
                             onClick={() => navigate(`/crm/admission-tracking?search=${encodeURIComponent(convertedSearchMatch.refNo)}`)}
-                            className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-primary-700"
+                            className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-primary-700"
                         >
                             Open Admission Tracking
                         </button>
@@ -357,7 +357,7 @@ export function ActiveEnquiries() {
             >
                 <div className="mt-3 space-y-4 text-left">
                     <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-900">
-                        <div className="flex items-center gap-2 font-black">
+                        <div className="flex items-center gap-2 font-extrabold">
                             <ClipboardList className="h-4 w-4" />
                             {selectedEnquiry?.refNo} - {selectedEnquiry?.clientName}
                         </div>

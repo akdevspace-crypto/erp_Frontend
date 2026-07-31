@@ -114,7 +114,7 @@ export function PendingFeedback() {
             {closedService && (
                 <div className="mb-4 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="text-sm font-black text-emerald-900">Feedback collected</p>
+                        <p className="text-sm font-extrabold text-emerald-900">Feedback collected</p>
                         <p className="text-sm font-semibold text-emerald-700">
                             Continue to renewal follow-up for {closedService.clientName || closedService.ref}.
                         </p>
@@ -124,7 +124,7 @@ export function PendingFeedback() {
                             ...(routeUnitId ? { unitId: routeUnitId } : {}),
                             search: closedService.allocationRef || closedService.ref || closedService.clientName || ''
                         }).toString()}`}
-                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-emerald-800"
+                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white hover:bg-emerald-800"
                     >
                         Open Renewal
                     </Link>
@@ -156,7 +156,7 @@ export function PendingFeedback() {
                 {selectedService && (
                     <div className="space-y-4 text-left">
                         <div className="rounded-xl border border-primary-100 bg-primary-50 p-3">
-                            <p className="text-sm font-black text-gray-900">{selectedService.clientName || 'Client'}</p>
+                            <p className="text-sm font-extrabold text-gray-900">{selectedService.clientName || 'Client'}</p>
                             <p className="text-xs font-semibold text-gray-600">{selectedService.ref} - {selectedService.service}</p>
                         </div>
                         <label className="block text-sm font-bold text-gray-700">
