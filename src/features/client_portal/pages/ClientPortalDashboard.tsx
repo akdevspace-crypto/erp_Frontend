@@ -19,7 +19,7 @@ const formatDateTime = (value?: string | null) => {
 
 const DetailBox = ({ label, value }: { label: string; value?: ReactNode }) => (
     <div className="rounded-lg border border-gray-200 bg-white p-3">
-        <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">{label}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400">{label}</p>
         <div className="mt-1 text-sm font-bold text-gray-900">{value || '-'}</div>
     </div>
 )
@@ -56,30 +56,30 @@ export function ClientPortalDashboard() {
                     breadcrumbs={[{ label: 'Client Portal' }, { label: 'Dashboard' }]}
                 />
                 <div className="flex flex-wrap gap-2">
-                    <Link to="/client-portal/services" className="rounded-full bg-primary-600 px-4 py-2 text-xs font-black text-white shadow-sm">My Services</Link>
-                    <Link to="/client-portal/complaints" className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-700 shadow-sm">Complaints</Link>
+                    <Link to="/client-portal/services" className="rounded-full bg-primary-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm">My Services</Link>
+                    <Link to="/client-portal/complaints" className="rounded-full border border-gray-200 bg-white px-4 py-2 text-xs font-extrabold text-gray-700 shadow-sm">Complaints</Link>
                 </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div className="rounded-lg border border-primary-100 bg-white p-4 shadow-sm">
                     <HandHelping className="h-5 w-5 text-primary-700" />
-                    <p className="mt-3 text-2xl font-black">{isLoading ? '-' : data?.metrics.services || 0}</p>
+                    <p className="mt-3 text-2xl font-extrabold">{isLoading ? '-' : data?.metrics.services || 0}</p>
                     <p className="text-xs font-bold uppercase tracking-wide text-gray-500">My Services</p>
                 </div>
                 <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
                     <CreditCard className="h-5 w-5 text-emerald-700" />
-                    <p className="mt-3 text-2xl font-black text-emerald-900">{isLoading ? '-' : data?.metrics.paidServices || 0}</p>
+                    <p className="mt-3 text-2xl font-extrabold text-emerald-900">{isLoading ? '-' : data?.metrics.paidServices || 0}</p>
                     <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Paid Services</p>
                 </div>
                 <div className="rounded-lg border border-amber-100 bg-amber-50 p-4">
                     <AlertCircle className="h-5 w-5 text-amber-700" />
-                    <p className="mt-3 text-2xl font-black text-amber-900">{isLoading ? '-' : data?.metrics.pendingFeedback || 0}</p>
+                    <p className="mt-3 text-2xl font-extrabold text-amber-900">{isLoading ? '-' : data?.metrics.pendingFeedback || 0}</p>
                     <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Pending Feedback</p>
                 </div>
                 <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
                     <CheckCircle2 className="h-5 w-5 text-sky-700" />
-                    <p className="mt-3 text-2xl font-black text-sky-900">{isLoading ? '-' : data?.metrics.openComplaints || 0}</p>
+                    <p className="mt-3 text-2xl font-extrabold text-sky-900">{isLoading ? '-' : data?.metrics.openComplaints || 0}</p>
                     <p className="text-xs font-bold uppercase tracking-wide text-sky-700">Open Complaints</p>
                 </div>
             </div>
@@ -91,7 +91,7 @@ export function ClientPortalDashboard() {
                             <ReceiptText className="h-5 w-5" />
                         </div>
                         <div>
-                            <h3 className="text-base font-black text-gray-900">Payment Summary</h3>
+                            <h3 className="text-base font-extrabold text-gray-900">Payment Summary</h3>
                             <p className="text-sm font-semibold text-gray-500">Invoice and receipt totals from your linked live services.</p>
                         </div>
                     </div>
@@ -110,7 +110,7 @@ export function ClientPortalDashboard() {
                             <CalendarClock className="h-5 w-5" />
                         </div>
                         <div>
-                            <h3 className="text-base font-black text-gray-900">Renewal Summary</h3>
+                            <h3 className="text-base font-extrabold text-gray-900">Renewal Summary</h3>
                             <p className="text-sm font-semibold text-gray-500">Follow-up and repeat-service status from live service history.</p>
                         </div>
                     </div>
@@ -131,7 +131,7 @@ export function ClientPortalDashboard() {
                 actions={(row) => (
                     <button
                         onClick={() => setDetails(row)}
-                        className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-black text-gray-700 shadow-sm hover:border-primary-200 hover:text-primary-700"
+                        className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-extrabold text-gray-700 shadow-sm hover:border-primary-200 hover:text-primary-700"
                     >
                         <Eye className="h-3.5 w-3.5" />
                         Details
@@ -144,8 +144,8 @@ export function ClientPortalDashboard() {
                 {details && (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-primary-100 bg-primary-50 p-4">
-                            <p className="text-[11px] font-black uppercase tracking-wide text-primary-700">{details.allocationRef || details.ref || '-'}</p>
-                            <h3 className="mt-1 text-lg font-black text-gray-900">{details.service || 'Care Service'}</h3>
+                            <p className="text-[11px] font-extrabold uppercase tracking-wide text-primary-700">{details.allocationRef || details.ref || '-'}</p>
+                            <h3 className="mt-1 text-lg font-extrabold text-gray-900">{details.service || 'Care Service'}</h3>
                             <p className="text-sm font-semibold text-gray-600">{details.patientName || details.clientName || 'Client'}</p>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
@@ -162,7 +162,7 @@ export function ClientPortalDashboard() {
                             <DetailBox label="Renewal Enquiry" value={details.renewalConvertedEnquiryRefNo || '-'} />
                         </div>
                         <div className="flex justify-end gap-2">
-                            <Link to="/client-portal/services" className="rounded-md bg-primary-600 px-4 py-2 text-sm font-black text-white">Open Services</Link>
+                            <Link to="/client-portal/services" className="rounded-md bg-primary-600 px-4 py-2 text-sm font-extrabold text-white">Open Services</Link>
                             <button onClick={() => setDetails(null)} className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold">Close</button>
                         </div>
                     </div>

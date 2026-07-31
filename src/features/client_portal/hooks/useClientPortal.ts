@@ -28,6 +28,21 @@ export const useClientPortalMedicines = () => useQuery({
     queryFn: clientPortalService.getMedicines
 })
 
+export const useClientPortalVitals = (month?: string) => useQuery({
+    queryKey: ['client-portal', 'vitals', month],
+    queryFn: () => clientPortalService.getVitals(month)
+})
+
+export const useClientPortalADL = () => useQuery({
+    queryKey: ['client-portal', 'adl'],
+    queryFn: clientPortalService.getADL
+})
+
+export const useClientPortalNutrition = () => useQuery({
+    queryKey: ['client-portal', 'nutrition'],
+    queryFn: clientPortalService.getNutrition
+})
+
 const getErrorMessage = (error: unknown, fallback: string) => error instanceof AxiosError
     ? error.response?.data?.message || fallback
     : fallback

@@ -12,7 +12,7 @@ import { Select } from '../../../components/Select'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { api } from '../../../lib/axios'
 
-type AdminFileGroup = 'UNCF Documents' | 'Staff Files' | 'Client Files' | 'Finance Files' | 'UEC Licence Files' | 'Admin Record Books' | 'Nursing Files' | 'Watchman Files'
+type AdminFileGroup = 'UNCF Documents' | 'Staff Files' | 'Client Files' | 'Finance Files' | 'UEC Licence Files' | 'UEC Documents' | 'Admin Record Books' | 'Nursing Files' | 'Watchman Files'
 type AdminFileStatus = 'Not Uploaded' | 'Received' | 'Verified' | 'Archived'
 
 interface AdminFileRecord {
@@ -68,6 +68,9 @@ const fileTypes: Array<{ group: AdminFileGroup, value: string }> = [
     { group: 'UEC Licence Files', value: 'DSW Certificate' },
     { group: 'UEC Licence Files', value: 'Rental Deed' },
     { group: 'UEC Licence Files', value: 'Promissory Note' },
+    { group: 'UEC Documents', value: 'Resident Agreement' },
+    { group: 'UEC Documents', value: 'Policy Guidelines' },
+    { group: 'UEC Documents', value: 'Compliance Report' },
     { group: 'Admin Record Books', value: 'Important Contact / Yellow Pages' },
     { group: 'Admin Record Books', value: 'Day Book Record' },
     { group: 'Admin Record Books', value: 'Inmate Attendance Record' },
@@ -138,7 +141,7 @@ const createSeedRecords = (): AdminFileRecord[] => fileTypes.map((item, index) =
 }))
 
 const normalizeGroup = (group: string): AdminFileGroup => {
-    if (group === 'UEC Documents') return 'Staff Files'
+    if (group === 'UEC Documents') return 'UEC Documents'
     if (groupOptions.some((option) => option.value === group && option.value !== 'ALL')) return group as AdminFileGroup
     return 'UNCF Documents'
 }
@@ -425,7 +428,7 @@ export function AdminFileRegister() {
         if (location.pathname.includes('/staff-files')) return 'Staff Files'
         if (location.pathname.includes('/client-files')) return 'Client Files'
         if (location.pathname.includes('/finance-files')) return 'Finance Files'
-        if (location.pathname.includes('/uec-documents')) return 'Staff Files'
+        if (location.pathname.includes('/uec-documents')) return 'UEC Documents'
         if (location.pathname.includes('/uec-licence-files')) return 'UEC Licence Files'
         if (location.pathname.includes('/record-books')) return 'Admin Record Books'
         if (location.pathname.includes('/nursing-files')) return 'Nursing Files'
@@ -694,7 +697,7 @@ export function AdminFileRegister() {
                             href={record.uploadedFileUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs font-semibold text-[#3f5f6a] hover:underline"
+                            className="text-xs font-semibold text-[#0F969C] hover:underline"
                         >
                             View uploaded file
                         </a>
@@ -731,7 +734,7 @@ export function AdminFileRegister() {
                     {isOperationalRecord(record) ? (
                         <button
                             onClick={() => openOperationalRecord(record)}
-                            className={`p-1.5 text-white rounded ${record.isAutoFetched ? 'bg-[#3f5f6a] hover:bg-[#1f3b4d]' : 'bg-gray-400 hover:bg-gray-500'}`}
+                            className={`p-1.5 text-white rounded ${record.isAutoFetched ? 'bg-[#0F969C] hover:bg-[#294D61]' : 'bg-gray-400 hover:bg-gray-500'}`}
                             title={record.isAutoFetched ? 'View operational record' : 'Document view not connected yet'}
                         >
                             <Eye className="h-4 w-4" />
@@ -780,7 +783,7 @@ export function AdminFileRegister() {
                             }}
                             className={`rounded-lg border p-4 text-left transition-colors ${
                                 isActive
-                                    ? 'border-[#3f5f6a] bg-[#eef4f2] text-[#1f3b4d] shadow-sm dark:border-[#8fb1b9] dark:bg-white/10 dark:text-white'
+                                    ? 'border-[#0F969C] bg-[#F7FAFC] text-[#294D61] shadow-sm dark:border-[#6DA5C0] dark:bg-white/10 dark:text-white'
                                     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5'
                             }`}
                         >
@@ -794,7 +797,7 @@ export function AdminFileRegister() {
                                         <div className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">{section.description}</div>
                                     </div>
                                 </div>
-                                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#1f3b4d] shadow-sm dark:bg-white/10 dark:text-white">
+                                <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#294D61] shadow-sm dark:bg-white/10 dark:text-white">
                                     {count}
                                 </span>
                             </div>
@@ -933,7 +936,7 @@ export function AdminFileRegister() {
                                 type="file"
                                 accept=".pdf,.jpg,.jpeg,.png,.docx"
                                 onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 file:mr-3 file:rounded-lg file:border-0 file:bg-[#f2f5ea] file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-[#1f3b4d] hover:bg-white focus:border-[#3f5f6a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20 dark:border-white/10 dark:bg-black dark:text-gray-100 dark:hover:bg-white/5"
+                                className="block w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 file:mr-3 file:rounded-lg file:border-0 file:bg-[#F7FAFC] file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-[#294D61] hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 dark:border-white/10 dark:bg-black dark:text-gray-100 dark:hover:bg-white/5"
                             />
                             <p className="mt-1 text-xs text-gray-500">Allowed: PDF, JPG, PNG, DOCX. Maximum size: 5 MB.</p>
                         </div>
@@ -944,7 +947,7 @@ export function AdminFileRegister() {
                         <textarea
                             value={formData.remarks}
                             onChange={(event) => setFormData((prev) => ({ ...prev, remarks: event.target.value }))}
-                            className="h-24 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 hover:bg-white focus:border-[#3f5f6a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20 dark:border-white/10 dark:bg-black dark:text-gray-100 dark:hover:bg-white/5"
+                            className="h-24 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 transition-all placeholder:text-gray-400 hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 dark:border-white/10 dark:bg-black dark:text-gray-100 dark:hover:bg-white/5"
                             placeholder="Notes about verification, pending items, or physical file location"
                         />
                     </div>
@@ -960,7 +963,7 @@ export function AdminFileRegister() {
                         <button
                             type="submit"
                             disabled={isUploading}
-                            className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d]"
+                            className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61]"
                         >
                             {isUploading ? 'Saving...' : editingId ? 'Update Entry' : 'Save Entry'}
                         </button>

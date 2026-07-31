@@ -34,7 +34,7 @@ export function ClientPortalMedicines() {
                         <Pill className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-gray-900">{item.medicineName}</p>
+                        <p className="font-extrabold text-gray-900">{item.medicineName}</p>
                         <p className="text-xs font-semibold text-gray-500">{item.patientName}</p>
                     </div>
                 </div>
@@ -59,7 +59,7 @@ export function ClientPortalMedicines() {
                     {(item.times || []).map((slot) => {
                         const given = item.administeredSlots?.includes(slot)
                         return (
-                            <span key={slot} className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black ${given ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                            <span key={slot} className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-extrabold ${given ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                                 {given ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
                                 {slot} {given ? 'Given' : 'Pending'}
                             </span>
@@ -123,8 +123,8 @@ function SummaryCard({ label, value, tone }: { label: string; value: number; ton
 
     return (
         <div className={`rounded-lg border p-4 ${classes[tone]}`}>
-            <p className="text-2xl font-black">{value}</p>
-            <p className="mt-1 text-xs font-black uppercase tracking-wide">{label}</p>
+            <p className="text-2xl font-extrabold">{value}</p>
+            <p className="mt-1 text-xs font-extrabold uppercase tracking-wide">{label}</p>
         </div>
     )
 }

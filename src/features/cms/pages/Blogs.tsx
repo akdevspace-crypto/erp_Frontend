@@ -146,7 +146,7 @@ export function Blogs() {
             <div className="mb-4 flex items-center justify-end">
                 <button
                     onClick={handleAdd}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#3f5f6a] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(63,95,106,0.24)] hover:bg-[#1f3b4d] transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#0F969C] text-white font-semibold rounded-2xl shadow-[0_10px_24px_rgba(15,150,156,0.24)] hover:bg-[#294D61] transition-colors"
                 >
                     + Add New Blog
                 </button>
@@ -234,7 +234,7 @@ export function Blogs() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-4 py-2 bg-[#3f5f6a] text-white rounded-md hover:bg-[#1f3b4d] font-medium shadow-sm disabled:opacity-50 transition-colors"
+                            className="px-4 py-2 bg-[#0F969C] text-white rounded-md hover:bg-[#294D61] font-medium shadow-sm disabled:opacity-50 transition-colors"
                         >
                             {isSubmitting ? 'Saving...' : editingId ? 'Update Blog' : 'Submit Blog'}
                         </button>

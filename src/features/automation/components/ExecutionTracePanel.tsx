@@ -49,7 +49,7 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
     if (loading) return (
         <div className="p-8 flex flex-col items-center justify-center space-y-4 animate-pulse">
             <Cpu className="text-primary-400 animate-spin" size={32} />
-            <p className="text-gray-400 font-black text-xs uppercase tracking-widest">Reconstructing Logic Trace...</p>
+            <p className="text-gray-400 font-extrabold text-xs uppercase tracking-widest">Reconstructing Logic Trace...</p>
         </div>
     );
 
@@ -74,16 +74,16 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                 </div>
                 <div className="relative flex justify-between items-end">
                     <div>
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.25em] opacity-60 mb-2">Final Automation Score</h4>
+                        <h4 className="text-[10px] font-extrabold uppercase tracking-[0.25em] opacity-60 mb-2">Final Automation Score</h4>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-5xl font-black">{trace.finalScore}</span>
+                            <span className="text-5xl font-extrabold">{trace.finalScore}</span>
                             <span className="text-xl font-bold opacity-80 uppercase tracking-widest">{trace.label}</span>
                         </div>
                     </div>
                     <div className="text-right">
                         <div className="bg-white/20 px-4 py-2 rounded-2xl backdrop-blur-md flex items-center gap-2 border border-white/20">
                             <ShieldCheck size={18} />
-                            <span className="text-xs font-black uppercase tracking-widest">Verified Logic</span>
+                            <span className="text-xs font-extrabold uppercase tracking-widest">Verified Logic</span>
                         </div>
                     </div>
                 </div>
@@ -96,7 +96,7 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                         <BarChart3 className="text-orange-500" size={16} />
                     </div>
                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-300">Rule Evaluation Matrix</h3>
+                        <h3 className="text-xs font-extrabold uppercase tracking-widest text-gray-600 dark:text-gray-300">Rule Evaluation Matrix</h3>
                         <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Audit of conditional logic matches</p>
                     </div>
                 </div>
@@ -112,12 +112,12 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                                     {rule.matched ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                                 </div>
                                 <div>
-                                    <h5 className="text-sm font-black uppercase tracking-tight text-gray-800 dark:text-gray-200">{rule.name}</h5>
+                                    <h5 className="text-sm font-extrabold uppercase tracking-tight text-gray-800 dark:text-gray-200">{rule.name}</h5>
                                     <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Action: {rule.action?.replace('_', ' ')}</p>
                                 </div>
                             </div>
                             {rule.scoreContribution !== 0 && (
-                                <div className={`text-sm font-mono font-black ${rule.scoreContribution! > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                <div className={`text-sm font-mono font-extrabold ${rule.scoreContribution! > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {rule.scoreContribution! > 0 ? `+${rule.scoreContribution}` : rule.scoreContribution}
                                 </div>
                             )}
@@ -131,7 +131,7 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                 <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-3xl border dark:border-white/10">
                     <div className="flex items-center gap-2 mb-2">
                         <Clock className="text-gray-400" size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Time to Decision</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Time to Decision</span>
                     </div>
                     <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
                         {Math.max(0, new Date(trace.timestamps.completed).getTime() - new Date(trace.timestamps.started).getTime())}ms
@@ -140,7 +140,7 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                 <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-3xl border dark:border-white/10">
                     <div className="flex items-center gap-2 mb-2">
                         <Activity className="text-gray-400" size={14} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Decision Point</span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Decision Point</span>
                     </div>
                     <p className="text-xs font-bold text-gray-700 dark:text-gray-300">
                         {new Date(trace.timestamps.completed).toLocaleTimeString()}
@@ -153,7 +153,7 @@ export const ExecutionTracePanel = ({ entityId }: { entityId: string }) => {
                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:rotate-12 transition-all duration-1000">
                     <Activity size={100} />
                 </div>
-                <h4 className="text-[10px] font-black uppercase tracking-[0.25em] text-primary-500 mb-4 flex items-center gap-2">
+                <h4 className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-primary-500 mb-4 flex items-center gap-2">
                     <Zap size={14} /> Autonomous Actions Issued
                 </h4>
                 <div className="space-y-2">

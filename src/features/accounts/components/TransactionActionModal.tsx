@@ -57,8 +57,8 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-            <div className="relative w-full max-w-lg bg-white dark:bg-[#0a0a0a] border border-gray-200 dark:border-white/10 shadow-2xl rounded-2xl overflow-hidden z-10">
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/2">
+            <div className="relative z-10 flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0a0a0a]">
+                <div className="flex shrink-0 items-center justify-between p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/2">
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         {type === 'VIEW' && <><Eye className="w-5 h-5 text-yellow-500" /> Transaction Details</>}
                         {type === 'EDIT' && <><Edit2 className="w-5 h-5 text-primary-500" /> Edit Transaction</>}
@@ -69,7 +69,7 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="min-h-0 flex-1 overflow-y-auto p-6">
                     {type === 'DELETE' ? (
                         <div className="space-y-4">
                             <p className="text-gray-600 dark:text-gray-400">
@@ -90,9 +90,9 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
                                     <div className="mb-3 flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-xs font-bold uppercase tracking-wide text-primary-700">Service Receipt</p>
-                                            <p className="text-lg font-black text-gray-900">{transaction.receiptNo || transaction.receiptNoRaw || transaction.invoiceNo}</p>
+                                            <p className="text-lg font-extrabold text-gray-900">{transaction.receiptNo || transaction.receiptNoRaw || transaction.invoiceNo}</p>
                                         </div>
-                                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-primary-700 shadow-sm">
+                                        <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-primary-700 shadow-sm">
                                             {transaction.metadata?.paymentStatus || 'POSTED'}
                                         </span>
                                     </div>
@@ -164,7 +164,7 @@ export function TransactionActionModal({ isOpen, onClose, transaction, type, onC
                     )}
                 </div>
 
-                <div className="p-4 border-t border-gray-100 dark:border-white/5 flex justify-end gap-3 bg-gray-50/30 dark:bg-white/1">
+                <div className="shrink-0 p-4 border-t border-gray-100 dark:border-white/5 flex justify-end gap-3 bg-gray-50/30 dark:bg-white/1">
                     <button
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"

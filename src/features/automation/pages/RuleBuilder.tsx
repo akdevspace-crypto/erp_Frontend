@@ -252,7 +252,7 @@ export const RuleBuilder = () => {
     );
 
     return (
-        <div className="flex h-full min-h-0 w-full min-w-0 flex-col space-y-5 overflow-hidden p-4 dark:bg-black sm:p-6 xl:space-y-6 2xl:space-y-8">
+        <div className="flex min-h-full w-full min-w-0 flex-col space-y-5 p-4 dark:bg-black sm:p-6 xl:space-y-6 2xl:space-y-8">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-shrink-0">
                 <div className="flex items-center gap-3">
@@ -260,7 +260,7 @@ export const RuleBuilder = () => {
                         <Zap className="text-primary-500" size={32} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                             Automation Engine
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 font-medium">Fine-tune your business intelligence rules.</p>
@@ -288,9 +288,9 @@ export const RuleBuilder = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-12 xl:gap-6 2xl:gap-8">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 xl:gap-6 2xl:gap-8">
                 {/* Left Sidebar: Rule List */}
-                <div className="flex min-h-0 flex-col space-y-4 overflow-hidden lg:col-span-4">
+                <div className="flex flex-col space-y-4 lg:col-span-4">
                     {/* Module Selectors */}
                     <div className="flex p-1 bg-gray-100 dark:bg-white/5 border dark:border-white/10 rounded-xl flex-shrink-0">
                         {['enquiry', 'accounts', 'hr'].map(mod => (
@@ -305,7 +305,7 @@ export const RuleBuilder = () => {
                     </div>
 
                     {/* Scrollable Rule Cards */}
-                    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-3 pr-2">
                         {loading && !editingRule ? (
                             <div className="animate-pulse space-y-3">
                                 {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-24 bg-gray-100 dark:bg-white/5 rounded-2xl"></div>)}
@@ -323,7 +323,7 @@ export const RuleBuilder = () => {
                                     className={`group p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${editingRule?.id === rule.id ? 'border-primary-500 bg-primary-50/20 dark:bg-primary-500/10 shadow-md' : 'bg-white dark:bg-black border-gray-100 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 hover:shadow-xl'}`}
                                 >
                                     {!rule.status && (
-                                        <div className="absolute top-0 right-0 px-3 py-1 bg-red-500/10 text-red-500 text-[9px] font-black uppercase rounded-bl-xl tracking-widest">
+                                        <div className="absolute top-0 right-0 px-3 py-1 bg-red-500/10 text-red-500 text-[9px] font-extrabold uppercase rounded-bl-xl tracking-widest">
                                             Paused
                                         </div>
                                     )}
@@ -368,26 +368,26 @@ export const RuleBuilder = () => {
                 </div>
 
                 {/* Right Panel: Editor */}
-                <div className="relative flex min-h-0 flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl dark:border-white/10 dark:bg-black lg:col-span-8">
+                <div className="relative flex min-h-[560px] flex-col rounded-3xl border border-gray-100 bg-white shadow-2xl dark:border-white/10 dark:bg-black lg:col-span-8">
                     {editingRule ? (
                         <div className="flex h-full min-h-0 flex-col animate-in fade-in slide-in-from-right-4 duration-300">
                             {/* Editor Header */}
                             <div className="p-6 border-b dark:border-white/10 bg-gray-50/50 dark:bg-black flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-xl font-black tracking-tight flex items-center gap-3">
+                                    <h2 className="text-xl font-extrabold tracking-tight flex items-center gap-3">
                                         {editingRule.id ? 'Refine Logic' : 'New Strategic Rule'}
-                                        <span className="text-[10px] bg-primary-500 text-white px-2 py-0.5 rounded-full uppercase font-black tracking-widest">{activeModule}</span>
+                                        <span className="text-[10px] bg-primary-500 text-white px-2 py-0.5 rounded-full uppercase font-extrabold tracking-widest">{activeModule}</span>
                                     </h2>
                                 </div>
                                 <button onClick={() => setEditingRule(null)} className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-200 dark:hover:bg-white/5 rounded-full transition-all">&times;</button>
                             </div>
 
                             {/* Editor Body */}
-                            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4 custom-scrollbar sm:p-6 2xl:space-y-8">
+                            <div className="space-y-6 p-4 sm:p-6 2xl:space-y-8">
                                 {/* Configuration Row */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="md:col-span-2 space-y-2">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                                        <label className="text-xs font-extrabold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                                             <Info size={12} /> Rule Label
                                         </label>
                                         <input
@@ -398,7 +398,7 @@ export const RuleBuilder = () => {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                                        <label className="text-xs font-extrabold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                                             Priority
                                         </label>
                                         <input
@@ -418,13 +418,13 @@ export const RuleBuilder = () => {
                                                 <Filter className="text-orange-500" size={16} />
                                             </div>
                                             <div>
-                                                <h3 className="font-black text-sm uppercase tracking-widest text-gray-600 dark:text-gray-300">Conditions</h3>
+                                                <h3 className="font-extrabold text-sm uppercase tracking-widest text-gray-600 dark:text-gray-300">Conditions</h3>
                                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">If these requirements match...</p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={addCondition}
-                                            className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 hover:bg-primary-500 hover:text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+                                            className="px-3 py-1.5 bg-gray-100 dark:bg-white/5 hover:bg-primary-500 hover:text-white rounded-lg text-[10px] font-extrabold uppercase tracking-widest transition-all flex items-center gap-1.5"
                                         >
                                             <Plus size={12} /> Add Condition
                                         </button>
@@ -450,13 +450,13 @@ export const RuleBuilder = () => {
                                             <Play className="text-green-500" size={16} />
                                         </div>
                                         <div>
-                                            <h3 className="font-black text-sm uppercase tracking-widest text-gray-600 dark:text-gray-300">Action Output</h3>
+                                            <h3 className="font-extrabold text-sm uppercase tracking-widest text-gray-600 dark:text-gray-300">Action Output</h3>
                                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Then perform the following...</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-4 rounded-[2rem] border border-gray-100 bg-gradient-to-br from-gray-50 to-white p-4 shadow-sm transition-all dark:from-black dark:to-black dark:border-white/10 sm:flex-row sm:p-6">
                                         <div className="flex-grow space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Task Action</label>
+                                            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest ml-1">Task Action</label>
                                             <select
                                                 value={editingRule.action}
                                                 onChange={e => setEditingRule({ ...editingRule, action: e.target.value })}
@@ -466,7 +466,7 @@ export const RuleBuilder = () => {
                                             </select>
                                         </div>
                                         <div className="flex-grow space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Value Payload</label>
+                                            <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest ml-1">Value Payload</label>
                                             <input
                                                 value={editingRule.actionValue}
                                                 onChange={e => setEditingRule({ ...editingRule, actionValue: e.target.value })}
@@ -482,7 +482,7 @@ export const RuleBuilder = () => {
                                     <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                                         <FileJson size={120} />
                                     </div>
-                                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em] opacity-60 mb-4 flex items-center gap-2">
+                                    <h4 className="text-[11px] font-extrabold uppercase tracking-[0.2em] opacity-60 mb-4 flex items-center gap-2">
                                         <Layout size={14} /> Intelligence Overview
                                     </h4>
                                     <div className="space-y-4 relative">
@@ -501,7 +501,7 @@ export const RuleBuilder = () => {
                                                 <span className="text-white/40 uppercase text-xs tracking-widest flex-shrink-0">Then Execute</span>
                                                 <div className="bg-white text-primary-600 px-6 py-3 rounded-2xl flex items-center gap-3 shadow-xl transform group-hover:-translate-y-1 transition-transform">
                                                     <Zap size={18} />
-                                                    <span className="uppercase text-xs font-black tracking-widest">{ACTIONS.find(a => a.value === editingRule.action)?.label}</span>
+                                                    <span className="uppercase text-xs font-extrabold tracking-widest">{ACTIONS.find(a => a.value === editingRule.action)?.label}</span>
                                                     <div className="w-1 h-4 bg-primary-200 rounded-full"></div>
                                                     <span className="font-mono">{editingRule.actionValue}</span>
                                                 </div>
@@ -515,7 +515,7 @@ export const RuleBuilder = () => {
                             <div className="flex flex-col items-center justify-between gap-4 border-t bg-gray-50/50 p-4 dark:border-white/10 dark:bg-black sm:flex-row sm:p-6 2xl:p-8">
                                 <button
                                     onClick={() => setShowTestModal(true)}
-                                    className="w-full sm:w-auto px-6 py-3 border dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest transition-all"
+                                    className="w-full sm:w-auto px-6 py-3 border dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 flex items-center justify-center gap-2 font-extrabold text-xs uppercase tracking-widest transition-all"
                                 >
                                     <Play size={16} className="text-blue-500" />
                                     Debug Logic
@@ -523,14 +523,14 @@ export const RuleBuilder = () => {
                                 <div className="flex gap-4 w-full sm:w-auto">
                                     <button
                                         onClick={() => setEditingRule(null)}
-                                        className="flex-1 sm:flex-initial px-6 py-3 text-gray-400 hover:text-gray-600 font-black text-xs uppercase tracking-widest"
+                                        className="flex-1 sm:flex-initial px-6 py-3 text-gray-400 hover:text-gray-600 font-extrabold text-xs uppercase tracking-widest"
                                     >
                                         Dismiss
                                     </button>
                                     <button
                                         onClick={handleSave}
                                         disabled={loading || !editingRule.name}
-                                        className="flex-[2] sm:flex-initial bg-primary-600 hover:bg-primary-500 text-white px-12 py-3 rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl shadow-primary-500/20 disabled:opacity-50 transition-all active:scale-95"
+                                        className="flex-[2] sm:flex-initial bg-primary-600 hover:bg-primary-500 text-white px-12 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl shadow-primary-500/20 disabled:opacity-50 transition-all active:scale-95"
                                     >
                                         <Save size={18} />
                                         Commit Rule
@@ -547,7 +547,7 @@ export const RuleBuilder = () => {
                                 <Zap className="absolute -bottom-2 -right-2 text-primary-500" size={32} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase tracking-widest">Awaiting Selection</h3>
+                                <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight uppercase tracking-widest">Awaiting Selection</h3>
                                 <p className="max-w-xs mx-auto text-sm font-medium text-gray-500 mt-2">Select a strategic rule from the panel to manage or innovate new business automation.</p>
                             </div>
                         </div>
@@ -558,23 +558,23 @@ export const RuleBuilder = () => {
             {/* Test Logic Modal */}
             {showTestModal && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-sans">
-                    <div className="bg-white dark:bg-black w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-white/10 animate-in zoom-in-95 duration-200">
-                        <div className="p-8 border-b dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-black">
+                    <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[3rem] border border-gray-100 bg-white shadow-2xl animate-in zoom-in-95 duration-200 dark:border-white/10 dark:bg-black">
+                        <div className="flex shrink-0 items-center justify-between border-b bg-gray-50 p-8 dark:border-white/10 dark:bg-black">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                                     <Play size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black tracking-tight">Debug Automation Logic</h3>
+                                    <h3 className="text-xl font-extrabold tracking-tight">Debug Automation Logic</h3>
                                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Verify rule against sample event payload</p>
                                 </div>
                             </div>
                             <button onClick={() => { setShowTestModal(false); setTestResult(null); }} className="p-2 hover:bg-gray-200 dark:hover:bg-white/5 rounded-full transition-all">&times;</button>
                         </div>
 
-                        <div className="p-8 space-y-6">
+                        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-8">
                             <div className="space-y-3">
-                                <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                <label className="text-xs font-extrabold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                                     <FileJson size={14} /> Sample Request Payload (JSON)
                                 </label>
                                 <textarea
@@ -590,24 +590,24 @@ export const RuleBuilder = () => {
                                         {testResult.triggered ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-black uppercase tracking-tight">{testResult.triggered ? 'Rule Triggered!' : 'Conditions Not Met'}</h4>
+                                        <h4 className="text-lg font-extrabold uppercase tracking-tight">{testResult.triggered ? 'Rule Triggered!' : 'Conditions Not Met'}</h4>
                                         <p className="text-sm opacity-80 font-medium">{testResult.triggered ? 'The system would execute the defined action for this input.' : 'The criteria did not match the provided payload.'}</p>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <div className="p-8 bg-gray-50 dark:bg-black border-t dark:border-white/10 flex justify-end gap-4">
+                        <div className="shrink-0 p-8 bg-gray-50 dark:bg-black border-t dark:border-white/10 flex justify-end gap-4">
                             <button
                                 onClick={() => { setShowTestModal(false); setTestResult(null); }}
-                                className="px-6 py-3 text-gray-400 hover:text-gray-600 font-black text-[10px] uppercase tracking-widest"
+                                className="px-6 py-3 text-gray-400 hover:text-gray-600 font-extrabold text-[10px] uppercase tracking-widest"
                             >
                                 Close
                             </button>
                             <button
                                 onClick={runTest}
                                 disabled={isTesting}
-                                className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95"
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-10 py-3 rounded-2xl font-extrabold text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-xl shadow-blue-500/20 disabled:opacity-50 transition-all active:scale-95"
                             >
                                 {isTesting ? 'Evaluating...' : 'Run Simulation'}
                             </button>

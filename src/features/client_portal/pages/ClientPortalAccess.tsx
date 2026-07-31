@@ -56,18 +56,18 @@ export function ClientPortalAccess() {
             <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
                     <Users className="mb-4 h-5 w-5 text-primary-600" />
-                    <p className="text-2xl font-black">{portalUsers.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide text-gray-500">Total Portal Members</p>
+                    <p className="text-2xl font-extrabold">{portalUsers.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-gray-500">Total Portal Members</p>
                 </div>
                 <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-5 shadow-sm">
                     <UserRoundCheck className="mb-4 h-5 w-5 text-emerald-700" />
-                    <p className="text-2xl font-black">{activeCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide text-emerald-700">Active Login Access</p>
+                    <p className="text-2xl font-extrabold">{activeCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">Active Login Access</p>
                 </div>
                 <div className="rounded-lg border border-amber-100 bg-amber-50 p-5 shadow-sm">
                     <UserRoundCheck className="mb-4 h-5 w-5 text-amber-700" />
-                    <p className="text-2xl font-black">{inactiveCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide text-amber-700">Disabled Access</p>
+                    <p className="text-2xl font-extrabold">{inactiveCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-amber-700">Disabled Access</p>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@ export function ClientPortalAccess() {
                             ) : filteredUsers.length ? filteredUsers.map((user, index) => (
                                 <tr key={user.id} className="border-b border-gray-100">
                                     <td className="px-4 py-4">{index + 1}</td>
-                                    <td className="px-4 py-4 font-black">{fullName(user)}</td>
+                                    <td className="px-4 py-4 font-extrabold">{fullName(user)}</td>
                                     <td className="px-4 py-4 text-primary-700">{user.email}</td>
                                     <td className="px-4 py-4">{user.mobile || '-'}</td>
                                     <td className="px-4 py-4">{user.role?.name || '-'}</td>
@@ -113,7 +113,7 @@ export function ClientPortalAccess() {
                                     <td className="px-4 py-4">
                                         <button
                                             onClick={() => setSelectedUser(user)}
-                                            className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-3 py-2 text-xs font-black text-white shadow-sm"
+                                            className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-3 py-2 text-xs font-extrabold text-white shadow-sm"
                                         >
                                             <Eye className="h-4 w-4" />
                                             View
@@ -139,7 +139,7 @@ export function ClientPortalAccess() {
                 {selectedUser ? (
                     <div className="space-y-4">
                         <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
-                            <p className="text-lg font-black text-gray-900">{fullName(selectedUser)}</p>
+                            <p className="text-lg font-extrabold text-gray-900">{fullName(selectedUser)}</p>
                             <p className="text-sm font-semibold text-primary-700">{selectedUser.role?.name || 'Client Portal Member'}</p>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
@@ -163,7 +163,7 @@ export function ClientPortalAccess() {
 function Detail({ label, value }: { label: string; value: string }) {
     return (
         <div className="rounded-xl border border-gray-100 bg-white p-4">
-            <p className="text-xs font-black uppercase tracking-wide text-gray-400">{label}</p>
+            <p className="text-xs font-extrabold uppercase tracking-wide text-gray-400">{label}</p>
             <p className="mt-2 text-sm font-bold text-gray-900">{value}</p>
         </div>
     )

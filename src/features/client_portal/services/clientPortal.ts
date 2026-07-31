@@ -138,5 +138,17 @@ export const clientPortalService = {
     createComplaint: async (data: { category: string; priority: string; description: string }) => {
         const res = await api.post('/client-portal/complaints', data)
         return res.data.data
+    },
+    getVitals: async (month?: string): Promise<any[]> => {
+        const res = await api.get('/client-portal/vitals', { params: { month } })
+        return Array.isArray(res.data.data) ? res.data.data : []
+    },
+    getADL: async (): Promise<any[]> => {
+        const res = await api.get('/client-portal/adl')
+        return Array.isArray(res.data.data) ? res.data.data : []
+    },
+    getNutrition: async (): Promise<any[]> => {
+        const res = await api.get('/client-portal/nutrition')
+        return Array.isArray(res.data.data) ? res.data.data : []
     }
 }

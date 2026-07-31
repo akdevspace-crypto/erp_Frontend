@@ -14,7 +14,7 @@ const formatDateTime = (value?: string | null) => {
 
 const InfoBox = ({ label, value }: { label: string; value?: ReactNode }) => (
     <div className="rounded-lg border border-gray-200 bg-white p-3">
-        <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">{label}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400">{label}</p>
         <div className="mt-1 text-sm font-bold text-gray-900">{value || '-'}</div>
     </div>
 )
@@ -43,8 +43,8 @@ export function ClientPortalProfile() {
                             <User className="h-7 w-7" />
                         </div>
                         <div>
-                            <p className="text-xs font-black uppercase tracking-wide text-primary-700">Linked Client</p>
-                            <h2 className="mt-1 text-2xl font-black text-gray-900">{isSummaryLoading ? 'Loading...' : clients[0]?.name || 'No linked client'}</h2>
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-primary-700">Linked Client</p>
+                            <h2 className="mt-1 text-2xl font-extrabold text-gray-900">{isSummaryLoading ? 'Loading...' : clients[0]?.name || 'No linked client'}</h2>
                             <p className="text-sm font-semibold text-gray-500">{clients[0]?.refNo || 'Matched by login email or mobile'}</p>
                         </div>
                     </div>
@@ -69,8 +69,8 @@ export function ClientPortalProfile() {
                             <Users className="h-7 w-7" />
                         </div>
                         <div>
-                            <p className="text-xs font-black uppercase tracking-wide text-sky-700">Linked Patient</p>
-                            <h2 className="mt-1 text-2xl font-black text-gray-900">{isServicesLoading ? 'Loading...' : patientNames[0] || 'No patient service linked'}</h2>
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-sky-700">Linked Patient</p>
+                            <h2 className="mt-1 text-2xl font-extrabold text-gray-900">{isServicesLoading ? 'Loading...' : patientNames[0] || 'No patient service linked'}</h2>
                             <p className="text-sm font-semibold text-gray-500">{latestService?.service || 'Patient appears after a service is completed and linked'}</p>
                         </div>
                     </div>
@@ -90,7 +90,7 @@ export function ClientPortalProfile() {
 
             <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-1">
-                    <h3 className="text-lg font-black text-gray-900">Linked Services</h3>
+                    <h3 className="text-lg font-extrabold text-gray-900">Linked Services</h3>
                     <p className="text-sm font-semibold text-gray-500">Only live services matched to this login email or mobile are shown.</p>
                 </div>
 
@@ -102,7 +102,7 @@ export function ClientPortalProfile() {
                     ) : services.map((service) => (
                         <div key={service.id} className="grid gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4 md:grid-cols-[1.2fr_1fr_1fr_auto] md:items-center">
                             <div>
-                                <p className="text-sm font-black text-gray-900">{service.allocationRef || service.ref || '-'}</p>
+                                <p className="text-sm font-extrabold text-gray-900">{service.allocationRef || service.ref || '-'}</p>
                                 <p className="text-xs font-bold text-gray-500">{service.service || 'Care Service'} - {service.patientName || service.clientName || 'Patient'}</p>
                             </div>
                             <p className="text-sm font-bold text-gray-700">{service.allocatedDetails || 'Staff pending'}</p>

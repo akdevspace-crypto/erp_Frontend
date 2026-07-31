@@ -67,7 +67,7 @@ export function AssignStaffModal({ isOpen, allocation, isSaving, onClose, onAssi
         >
             <div className="mt-3 space-y-4 text-left">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-sm text-primary-900">
-                    <p className="font-black">{allocation?.clientName || 'Client'}</p>
+                    <p className="font-extrabold">{allocation?.clientName || 'Client'}</p>
                     <p className="mt-1 text-xs font-medium">
                         {allocation?.ref || '-'} - {allocation?.service || 'Care allocation'} - {allocation?.patient || 'Patient pending'}
                     </p>

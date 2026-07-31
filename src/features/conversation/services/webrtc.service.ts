@@ -10,12 +10,12 @@ export class WebRTCService {
     private onCallEndedCallback?: () => void;
     private currentUserId: string;
     private targetUserId: string;
-    
+
     constructor(currentUserId: string, targetUserId: string) {
         this.currentUserId = currentUserId;
         this.targetUserId = targetUserId;
 
-        const socketUrl = (import.meta.env.VITE_SOCKET_URL || 'https://n32rn7gl-4000.inc1.devtunnels.ms').replace(/\/$/, '');
+        const socketUrl = (import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000').replace(/\/$/, '');
 
         // Connect to the new /calls namespace
         this.socket = io(`${socketUrl}/calls`, {
@@ -131,7 +131,7 @@ export class WebRTCService {
             this.localStream.getTracks().forEach(track => track.stop());
             this.localStream = null;
         }
-        
+
         if (this.peerConnection) {
             this.peerConnection.close();
             this.peerConnection = null;

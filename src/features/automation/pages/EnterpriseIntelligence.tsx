@@ -95,7 +95,7 @@ const ModuleStatusCard = ({ title, value, desc, icon }: any) => (
             <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter">{title}</span>
             {icon}
         </div>
-        <div className="text-xl font-black text-gray-900 dark:text-gray-100">{value}</div>
+        <div className="text-xl font-extrabold text-gray-900 dark:text-gray-100">{value}</div>
         <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">{desc}</div>
     </Card>
 );

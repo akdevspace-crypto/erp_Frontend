@@ -54,7 +54,7 @@ export function HomeCare() {
                 <div className="flex gap-2">
                     <button
                         onClick={() => setSelectedAllocation(row)}
-                        className="px-3 py-1.5 bg-[#3f5f6a] hover:bg-[#1f3b4d] text-white text-xs font-bold rounded shadow-sm transition-all active:scale-95"
+                        className="px-3 py-1.5 bg-[#0F969C] hover:bg-[#294D61] text-white text-xs font-bold rounded shadow-sm transition-all active:scale-95"
                     >
                         {row.status === 'Allocated' ? 'Reassign' : 'Allocate'}
                     </button>

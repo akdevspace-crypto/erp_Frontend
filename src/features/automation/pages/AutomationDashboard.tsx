@@ -106,7 +106,7 @@ const MetricCard = ({ title, value, icon, trend }: MetricCardProps) => (
             <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{title}</span>
             {icon}
         </div>
-        <div className="text-2xl font-black text-gray-900 dark:text-gray-100">{value}</div>
+        <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{value}</div>
         <div className="text-xs text-gray-400 dark:text-gray-500 font-medium">{trend}</div>
     </Card>
 );

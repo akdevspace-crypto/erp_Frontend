@@ -167,7 +167,7 @@ export function ClientPortalNotifications() {
                         <Bell className="h-5 w-5" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-gray-900">Action Alerts</h3>
+                        <h3 className="text-lg font-extrabold text-gray-900">Action Alerts</h3>
                         <p className="text-sm font-semibold text-gray-500">Generated from the same database-backed portal data shown in your services and complaints.</p>
                     </div>
                 </div>
@@ -189,10 +189,10 @@ export function ClientPortalNotifications() {
                                     <Icon className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-black">{notification.title}</p>
+                                    <p className="text-sm font-extrabold">{notification.title}</p>
                                     <p className="text-sm font-semibold opacity-80">{notification.detail}</p>
                                 </div>
-                                <p className="text-xs font-black opacity-70">{formatDateTime(notification.date)}</p>
+                                <p className="text-xs font-extrabold opacity-70">{formatDateTime(notification.date)}</p>
                             </Link>
                         )
                     })}
@@ -205,8 +205,8 @@ export function ClientPortalNotifications() {
 function SummaryCard({ label, value, tone }: { label: string; value: number | string; tone: PortalNotification['tone'] }) {
     return (
         <div className={`rounded-lg border p-4 ${toneClass[tone]}`}>
-            <p className="text-2xl font-black">{value}</p>
-            <p className="mt-1 text-xs font-black uppercase tracking-wide opacity-80">{label}</p>
+            <p className="text-2xl font-extrabold">{value}</p>
+            <p className="mt-1 text-xs font-extrabold uppercase tracking-wide opacity-80">{label}</p>
         </div>
     )
 }

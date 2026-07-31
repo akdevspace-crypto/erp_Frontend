@@ -111,9 +111,9 @@ export function Login() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80')] bg-cover bg-center">
+        <div className="min-h-screen w-full flex items-center justify-center bg-gray-50 py-6 px-3 sm:px-6 lg:px-8 bg-[url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80')] bg-cover bg-center">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl relative z-10 border border-gray-100">
+            <div className="mx-auto w-full max-w-md space-y-6 sm:space-y-8 bg-white p-5 sm:p-8 lg:p-10 rounded-2xl shadow-2xl relative z-10 border border-gray-100">
                 <div>
                     <div className="mx-auto h-16 w-16 bg-primary-100 rounded-2xl flex items-center justify-center shadow-inner">
                         <LogIn className="h-8 w-8 text-primary-600" />

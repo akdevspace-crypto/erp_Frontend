@@ -18,7 +18,7 @@ const formatDateTime = (value?: string | null) => {
 
 const DetailBox = ({ label, value, wide = false }: { label: string; value?: ReactNode; wide?: boolean }) => (
     <div className={`rounded-lg border border-gray-200 bg-white p-3 ${wide ? 'sm:col-span-2' : ''}`}>
-        <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">{label}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-gray-400">{label}</p>
         <div className="mt-1 text-sm font-bold text-gray-900">{value || '-'}</div>
     </div>
 )
@@ -41,7 +41,7 @@ const DummyQr = () => {
 }
 
 const RenewalStep = ({ label, done }: { label: string; done: boolean }) => (
-    <div className={`rounded-lg border px-3 py-2 text-center text-xs font-black ${done ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-gray-200 bg-white text-gray-400'}`}>
+    <div className={`rounded-lg border px-3 py-2 text-center text-xs font-extrabold ${done ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-gray-200 bg-white text-gray-400'}`}>
         {label}
     </div>
 )
@@ -97,21 +97,21 @@ export function ClientPortalServices() {
                     <>
                         <button
                             onClick={() => setDetails(row)}
-                            className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-black text-gray-700 shadow-sm hover:border-primary-200 hover:text-primary-700"
+                            className="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-extrabold text-gray-700 shadow-sm hover:border-primary-200 hover:text-primary-700"
                         >
                             <Eye className="h-3.5 w-3.5" />
                             Details
                         </button>
                         <button
                             onClick={() => setBilling(row)}
-                            className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 shadow-sm hover:border-emerald-300"
+                            className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-700 shadow-sm hover:border-emerald-300"
                         >
                             <FileText className="h-3.5 w-3.5" />
                             Invoice
                         </button>
                         <button
                             onClick={() => setRenewal(row)}
-                            className="inline-flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 shadow-sm hover:border-amber-300"
+                            className="inline-flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700 shadow-sm hover:border-amber-300"
                         >
                             <CalendarClock className="h-3.5 w-3.5" />
                             Renewal
@@ -119,7 +119,7 @@ export function ClientPortalServices() {
                         <button
                             onClick={() => setSelected(row)}
                             disabled={row.paymentStatus !== 'PAID' || row.feedbackStatus === 'COLLECTED'}
-                            className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-xs font-black text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+                            className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-xs font-extrabold text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
                         >
                             <MessageSquare className="h-3.5 w-3.5" />
                             Feedback
@@ -132,8 +132,8 @@ export function ClientPortalServices() {
                 {details && (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-primary-100 bg-primary-50 p-4">
-                            <p className="text-[11px] font-black uppercase tracking-wide text-primary-700">Service</p>
-                            <h3 className="mt-1 text-lg font-black text-gray-900">{details.service || 'Care Service'}</h3>
+                            <p className="text-[11px] font-extrabold uppercase tracking-wide text-primary-700">Service</p>
+                            <h3 className="mt-1 text-lg font-extrabold text-gray-900">{details.service || 'Care Service'}</h3>
                             <p className="text-sm font-semibold text-gray-600">{details.allocationRef || details.ref || '-'} - {details.patientName || details.clientName || 'Client'}</p>
                         </div>
 
@@ -172,8 +172,8 @@ export function ClientPortalServices() {
                 {renewal && (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
-                            <p className="text-[11px] font-black uppercase tracking-wide text-amber-700">Renewal Status</p>
-                            <h3 className="mt-1 text-lg font-black text-gray-900">{renewal.renewalFollowUpStatus || 'Not scheduled'}</h3>
+                            <p className="text-[11px] font-extrabold uppercase tracking-wide text-amber-700">Renewal Status</p>
+                            <h3 className="mt-1 text-lg font-extrabold text-gray-900">{renewal.renewalFollowUpStatus || 'Not scheduled'}</h3>
                             <p className="text-sm font-semibold text-gray-600">{renewal.allocationRef || renewal.ref || '-'} - {renewal.service || 'Care Service'}</p>
                         </div>
 
@@ -188,7 +188,7 @@ export function ClientPortalServices() {
                         </div>
 
                         <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                            <p className="text-xs font-black uppercase tracking-wide text-gray-500">Renewal Progress</p>
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-gray-500">Renewal Progress</p>
                             <div className="mt-3 grid gap-2 sm:grid-cols-3">
                                 <RenewalStep label="Scheduled" done={Boolean(renewal.renewalFollowUpStatus || renewal.renewalFollowUpScheduledAt)} />
                                 <RenewalStep label="Contacted" done={Boolean(renewal.renewalFollowUpOutcome || renewal.renewalFollowUpAt)} />
@@ -211,40 +211,40 @@ export function ClientPortalServices() {
                 {billing && (
                     <div className="space-y-4">
                         <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                            <p className="text-[11px] font-black uppercase tracking-wide text-emerald-700">Current Payment</p>
-                            <h3 className="mt-1 text-lg font-black text-gray-900">{billing.invoiceNo || 'Invoice not generated'}</h3>
+                            <p className="text-[11px] font-extrabold uppercase tracking-wide text-emerald-700">Current Payment</p>
+                            <h3 className="mt-1 text-lg font-extrabold text-gray-900">{billing.invoiceNo || 'Invoice not generated'}</h3>
                             <p className="text-sm font-semibold text-gray-600">{billing.allocationRef || billing.ref || '-'} - {billing.service || 'Care Service'}</p>
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
                             <div className="rounded-xl border border-slate-200 bg-white p-4">
-                                <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">Amount To Pay Now</p>
-                                <p className="mt-1 text-3xl font-black text-emerald-700">{money(payableAmount(billing))}</p>
-                                <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
+                                <p className="text-[11px] font-extrabold uppercase tracking-wide text-slate-400">Amount To Pay Now</p>
+                                <p className="mt-1 text-3xl font-extrabold text-emerald-700">{money(payableAmount(billing))}</p>
+                                <div className="mt-3 flex flex-wrap gap-2 text-xs font-extrabold">
                                     <StatusHighlighter value={billing.paymentStatus || 'Pending'} />
                                     <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">{billing.invoiceNo || '-'}</span>
                                 </div>
                             </div>
                             <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-4">
                                 <DummyQr />
-                                <p className="mt-2 text-center text-xs font-black text-slate-600">
+                                <p className="mt-2 text-center text-xs font-extrabold text-slate-600">
                                     {payableAmount(billing) > 0 ? 'Scan to pay current amount' : 'Payment completed'}
                                 </p>
                             </div>
                         </div>
 
                         <div className="rounded-xl border border-slate-200 bg-white p-4">
-                            <p className="text-xs font-black uppercase tracking-wide text-slate-500">Why You Are Paying</p>
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Why You Are Paying</p>
                             {billing.billingItems?.length ? (
                                 <div className="mt-3 divide-y divide-slate-100">
                                     {billing.billingItems.map((item, index) => (
                                         <div key={`${item.costNo || index}`} className="flex items-start justify-between gap-3 py-3">
                                             <div>
-                                                <p className="text-sm font-black text-slate-900">{item.category || 'Care Cost'}</p>
+                                                <p className="text-sm font-extrabold text-slate-900">{item.category || 'Care Cost'}</p>
                                                 <p className="text-xs font-semibold text-slate-500">{item.description || item.costNo || '-'}</p>
                                                 <p className="mt-1 text-[11px] font-bold text-slate-400">Qty {Number(item.quantity || 0)} x {money(item.rate)}</p>
                                             </div>
-                                            <p className="text-sm font-black text-slate-900">{money(item.amount)}</p>
+                                            <p className="text-sm font-extrabold text-slate-900">{money(item.amount)}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -272,18 +272,18 @@ export function ClientPortalServices() {
             <Modal isOpen={Boolean(selected)} onClose={() => setSelected(null)} title="Service Feedback">
                 <div className="space-y-4">
                     <div>
-                        <label className="text-xs font-black uppercase tracking-wide text-gray-500">Rating</label>
+                        <label className="text-xs font-extrabold uppercase tracking-wide text-gray-500">Rating</label>
                         <select value={rating} onChange={(event) => setRating(Number(event.target.value))} className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm">
                             {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value}/5</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs font-black uppercase tracking-wide text-gray-500">Comments</label>
+                        <label className="text-xs font-extrabold uppercase tracking-wide text-gray-500">Comments</label>
                         <textarea value={comments} onChange={(event) => setComments(event.target.value)} className="mt-1 min-h-[110px] w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" />
                     </div>
                     <div className="flex justify-end gap-2">
                         <button onClick={() => setSelected(null)} className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold">Cancel</button>
-                        <button onClick={submitFeedback} disabled={feedbackMutation.isPending} className="rounded-md bg-primary-600 px-4 py-2 text-sm font-black text-white disabled:opacity-60">Submit</button>
+                        <button onClick={submitFeedback} disabled={feedbackMutation.isPending} className="rounded-md bg-primary-600 px-4 py-2 text-sm font-extrabold text-white disabled:opacity-60">Submit</button>
                     </div>
                 </div>
             </Modal>
