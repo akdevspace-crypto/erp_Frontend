@@ -292,6 +292,10 @@ export function PatientDailyCost() {
         () => selectedInvoiceEntry ? services.find((service) => service.allocationId === selectedInvoiceEntry.allocationId) || null : null,
         [selectedInvoiceEntry, services]
     )
+    const receiptService = useMemo(
+        () => receiptInvoice ? services.find((service) => service.allocationId === receiptInvoice.allocationId) || billingService : billingService,
+        [billingService, receiptInvoice, services]
+    )
     const billingPatientLabel = selectedInvoiceEntry
         ? `${selectedInvoiceEntry.patientName} - ${selectedInvoiceEntry.serviceType.replace(/_/g, ' ')}`
         : 'No ledger row selected'
@@ -552,13 +556,12 @@ export function PatientDailyCost() {
 
     const openWhatsApp = () => {
         if (!receiptInvoice) return
-        const invoiceService = services.find((service) => service.allocationId === receiptInvoice?.allocationId) || billingService
-        const mobile = normalizeWhatsAppNumber(invoiceService?.familyContact)
+        const mobile = normalizeWhatsAppNumber(receiptService?.familyContact)
         const period = `${formatDate(periodFrom)} to ${formatDate(periodTo)}`
         const message = [
             'Dear Family,',
             '',
-            `Please find the monthly invoice for ${receiptInvoice.metadata?.patientName || invoiceService?.patientName || 'the patient'} for ${period}.`,
+            `Please find the monthly invoice for ${receiptInvoice.metadata?.patientName || receiptService?.patientName || 'the patient'} for ${period}.`,
             '',
             `Amount Due: ${formatMoney(receiptInvoice.amount)}`,
             '',
@@ -573,79 +576,36 @@ export function PatientDailyCost() {
         if (!receiptInvoice) return
         const metadata = receiptInvoice.metadata || {}
         const summary = Array.isArray(metadata.chargeSummary) ? metadata.chargeSummary : groupedCharges
-        const patientName = metadata.patientName || billingService?.patientName || '-'
-        const clientName = metadata.clientName || receiptInvoice.clientName || billingService?.clientName || '-'
-        const serviceType = String(metadata.serviceType || billingService?.serviceLabel || '-').replace(/_/g, ' ')
+        const patientName = metadata.patientName || receiptService?.patientName || '-'
+        const clientName = metadata.clientName || receiptInvoice.clientName || receiptService?.clientName || '-'
+        const serviceType = String(metadata.serviceType || receiptService?.serviceLabel || '-').replace(/_/g, ' ')
         const billingFrom = metadata.billingPeriodFrom || periodFrom
         const billingTo = metadata.billingPeriodTo || periodTo
         const status = String(metadata.invoiceWorkflowStatus || receiptInvoice.status || 'Generated').replace(/_/g, ' ')
         const generatedAt = new Date()
         const upi = metadata.upiId || upiId
         const accountHolder = 'Universal Elder Care'
-        const contactNumber = billingService?.familyContact || '-'
+        const contactNumber = receiptService?.familyContact || '-'
         const amount = Number(receiptInvoice.amount || 0)
         const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(receiptInvoice.refNo || 'Monthly Patient Invoice')}`
         const qrSrc = qrImageUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`
-        const logoSrc = `${window.location.origin}/logo.png`
+        const logoSrc = `${window.location.origin}/logo-uec.png`
         const generatedBy = currentUser?.name || currentUser?.email || 'System'
 
-        const summaryNames = [
-            'Accommodation Charges',
-            'Care Service Charges',
-            'Medicine Charges',
-            'Doctor Consultation Charges',
-            'Consumable Charges',
-            'Lab Charges',
-            'Other Charges'
-        ]
-        const summaryRows = summaryNames.map((name) => {
-            const entryAmount = receiptEntries.length
-                ? receiptEntries
-                    .filter((entry) => chargeGroupForCategory(entry.category) === name)
-                    .reduce((sum, entry) => sum + Number(entry.amount || 0), 0)
-                : 0
-            const direct = summary.find((item: any) => String(item.name).toLowerCase() === name.toLowerCase())
-            return { name, amount: Number((receiptEntries.length ? entryAmount : Number(direct?.amount || 0)).toFixed(2)) }
-        })
-        const subtotal = summaryRows.reduce((sum, row) => sum + Number(row.amount || 0), 0)
-        const sourceSummary = Array.from(receiptEntries.reduce((map, entry) => {
-            const source = formatSource(entry.sourceType)
-            const current = map.get(source) || { name: source, entries: 0, amount: 0 }
-            current.entries += 1
-            current.amount = Number((current.amount + Number(entry.amount || 0)).toFixed(2))
-            map.set(source, current)
-            return map
-        }, new Map<string, { name: string; entries: number; amount: number }>()).values())
-
-        const serviceCounts = [
-            { service: 'Medicine Administration', count: receiptEntries.filter((entry) => /medicine|tablet|syrup|injection/i.test(`${entry.category} ${entry.description}`)).length },
-            { service: 'Doctor Consultations', count: receiptEntries.filter((entry) => /doctor|consult/i.test(`${entry.category} ${entry.description}`)).length },
-            { service: 'Vitals Monitoring', count: receiptEntries.filter((entry) => /vital|bp|sugar|temperature/i.test(`${entry.category} ${entry.description}`)).length },
-            { service: 'Hygiene Checks', count: receiptEntries.filter((entry) => /hygiene|diaper|bath|clean/i.test(`${entry.category} ${entry.description}`)).length },
-            { service: 'Feeding Assistance', count: receiptEntries.filter((entry) => /food|diet|feeding|meal/i.test(`${entry.category} ${entry.description}`)).length },
-            { service: 'Mobility Assistance', count: receiptEntries.filter((entry) => /mobility|walk|transport|ambulance/i.test(`${entry.category} ${entry.description}`)).length }
-        ]
-
-        const supportingBills = receiptEntries
-            .filter((entry) => entry.metadata?.uploadedBill?.originalName)
-            .map((entry) => ({
-                name: entry.metadata?.uploadedBill?.originalName || 'Uploaded bill',
-                category: entry.category,
-                date: formatDate(entry.costDate),
-                amount: Number(entry.amount || 0)
-            }))
-
-        const tableRows = receiptEntries.map((entry) => `
-            <tr>
-                <td>${htmlEscape(formatDate(entry.costDate))}</td>
-                <td>${htmlEscape(formatSource(entry.sourceType))}</td>
-                <td>${htmlEscape(entry.category)}</td>
-                <td>${htmlEscape(entry.description)}</td>
-                <td class="num">${htmlEscape(Number(entry.quantity || 0))}</td>
-                <td class="num">${htmlEscape(invoiceMoney(entry.rate))}</td>
-                <td class="num strong">${htmlEscape(invoiceMoney(entry.amount))}</td>
-            </tr>
-        `).join('') || '<tr><td colspan="7" class="empty">No itemized ledger rows available.</td></tr>'
+        const getSum = (regex: RegExp) => {
+            const sum = receiptEntries.filter((e) => regex.test(`${e.category} ${e.description}`)).reduce((s, e) => s + Number(e.amount || 0), 0)
+            return sum > 0 ? sum : ''
+        }
+        const getQty = (regex: RegExp) => {
+            const qty = receiptEntries.filter((e) => regex.test(`${e.category} ${e.description}`)).reduce((s, e) => s + Number(e.quantity || 0), 0)
+            return qty > 0 ? qty : ''
+        }
+        
+        const uncfSubsidy = getSum(/uncf|subsidy/i) || 0
+        const totalPayable = Number(receiptInvoice.amount || 0) - Number(uncfSubsidy)
+        
+        const currentMonthName = generatedAt.toLocaleString('default', { month: 'long' })
+        const currentYear = generatedAt.getFullYear()
 
         const html = `<!doctype html>
 <html>
@@ -689,20 +649,39 @@ export function PatientDailyCost() {
         .signature { height: 72px; border-bottom: 1px solid #94a3b8; display: flex; align-items: end; justify-content: center; color: #64748b; font-weight: 700; }
         .empty { text-align: center; color: #64748b; }
         @media print { body { background: #fff; } .sheet { width: auto; min-height: auto; padding: 0; } .no-print { display: none; } }
+        .custom-layout { font-size: 13px; line-height: 1.6; color: #111827; margin-top: 20px; }
+        .custom-layout .text-center { text-align: center; }
+        .custom-layout .bold { font-weight: bold; }
+        .custom-layout .italic { font-style: italic; }
+        .custom-layout .mt-2 { margin-top: 8px; }
+        .custom-layout .mt-4 { margin-top: 16px; }
+        .custom-layout .mb-4 { margin-bottom: 16px; }
+        .custom-layout .flex-between { display: flex; justify-content: space-between; }
+        .custom-layout .list-item { margin-left: 20px; }
+        .custom-layout .materials-list { margin-left: 20px; font-weight: bold; }
+        .custom-layout .box-info { background: #f8fafc; padding: 12px; border-left: 4px solid #0f766e; margin: 16px 0; }
+        .custom-layout .tamil-text { font-size: 11px; margin-top: 4px; color: #b91c1c; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="sheet">
         <div class="header">
             <div class="brand">
-                <img class="logo" src="${htmlEscape(logoSrc)}" />
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <img class="logo" src="${htmlEscape(logoSrc)}" />
+                    <strong style="font-size: 10px; margin-top: 4px; color: #64748b;">(A Unit Of UNCF)</strong>
+                </div>
                 <div>
                     <h1>Universal Elder Care</h1>
-                    <div class="muted">UNI Senth<br/>Organization Address: Configure in Unit Master<br/>Contact: Accounts Department | Email: accounts@universaleldercare.in<br/>Website: www.universaleldercare.in</div>
+                    <div class="muted">
+                        #12/12, Wooden House, Saraswati Nagar, Perumal Nagar,<br/>Kovaipudur, Tamil Nadu, India 641042<br/>
+                        Email: universaleldercare2010@gmail.com<br/>
+                        Contact: 0422 260 5077 / +91 78715 31066
+                    </div>
                 </div>
             </div>
             <div class="title">
-                <h2>Monthly Patient Invoice</h2>
+                <h2>Patient Service Bill</h2>
                 <div class="badge">${htmlEscape(status)}</div>
             </div>
         </div>
@@ -711,80 +690,159 @@ export function PatientDailyCost() {
             <div class="box">
                 <h3>Patient Details</h3>
                 <div class="kv"><span>Patient Name</span><span>${htmlEscape(patientName)}</span></div>
-                <div class="kv"><span>Patient ID</span><span>${htmlEscape(billingService?.patientId || metadata.patientId || '-')}</span></div>
+                <div class="kv"><span>Age / Sex</span><span>- / -</span></div>
+                <div class="kv"><span>DOB</span><span>-</span></div>
+                <div class="kv"><span>Patient ID</span><span>${htmlEscape(receiptService?.patientId || metadata.patientId || '-')}</span></div>
                 <div class="kv"><span>Service Type</span><span>${htmlEscape(serviceType)}</span></div>
-                <div class="kv"><span>Family Contact</span><span>${htmlEscape(clientName)}</span></div>
-                <div class="kv"><span>Contact Number</span><span>${htmlEscape(billingService?.familyContact || '-')}</span></div>
             </div>
             <div class="box">
-                <h3>Invoice Details</h3>
-                <div class="kv"><span>Invoice Number</span><span>${htmlEscape(receiptInvoice.refNo || '-')}</span></div>
-                <div class="kv"><span>Invoice Date</span><span>${htmlEscape(formatDate(receiptInvoice.date || generatedAt.toISOString()))}</span></div>
+                <h3>Guardian Details</h3>
+                <div class="kv"><span>Bill ID</span><span>${htmlEscape(receiptInvoice.refNo || '-')}</span></div>
+                <div class="kv"><span>Bill Date</span><span>${htmlEscape(formatDate(receiptInvoice.date || generatedAt.toISOString()))}</span></div>
+                <div class="kv"><span>Guardian Name</span><span>${htmlEscape(clientName)}</span></div>
+                <div class="kv"><span>Contact Number</span><span>${htmlEscape(receiptService?.familyContact || '-')}</span></div>
+                <div class="kv"><span>Address</span><span>-</span></div>
                 <div class="kv"><span>Billing Period</span><span>${htmlEscape(`${formatDate(billingFrom)} to ${formatDate(billingTo)}`)}</span></div>
-                <div class="kv"><span>Due Date</span><span>${htmlEscape(formatDate(billingTo))}</span></div>
-                <div class="kv"><span>Invoice Status</span><span>${htmlEscape(status)}</span></div>
             </div>
         </div>
 
-        <div class="section">
-            <h3>Charge Summary</h3>
-            <table>
-                <thead><tr><th>Category</th><th class="num">Amount</th></tr></thead>
-                <tbody>
-                    ${summaryRows.map((row) => `<tr><td>${htmlEscape(row.name)}</td><td class="num">${htmlEscape(invoiceMoney(row.amount))}</td></tr>`).join('')}
-                    <tr class="total-row"><td>Subtotal</td><td class="num">${htmlEscape(invoiceMoney(subtotal))}</td></tr>
-                    <tr class="total-row"><td>Grand Total</td><td class="num">${htmlEscape(invoiceMoney(receiptInvoice.amount))}</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Services Provided During Billing Period</h3>
-            <table>
-                <thead><tr><th>Service</th><th class="num">Count</th></tr></thead>
-                <tbody>${serviceCounts.map((item) => `<tr><td>${htmlEscape(item.service)}</td><td class="num">${htmlEscape(item.count)}</td></tr>`).join('')}</tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Billing Source Breakdown</h3>
-            <table>
-                <thead><tr><th>Source</th><th class="num">Entries</th><th class="num">Amount</th></tr></thead>
-                <tbody>
-                    ${sourceSummary.length ? sourceSummary.map((item) => `<tr><td>${htmlEscape(item.name)}</td><td class="num">${htmlEscape(item.entries)}</td><td class="num">${htmlEscape(invoiceMoney(item.amount))}</td></tr>`).join('') : '<tr><td colspan="3" class="empty">No source breakdown available.</td></tr>'}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Itemized Expense Table</h3>
-            <table>
-                <thead><tr><th>Date</th><th>Source</th><th>Category</th><th>Item</th><th class="num">Quantity</th><th class="num">Unit Cost</th><th class="num">Amount</th></tr></thead>
-                <tbody>${tableRows}</tbody>
-            </table>
-        </div>
-
-        <div class="section">
-            <h3>Supporting Documents Summary</h3>
-            <table>
-                <thead><tr><th>Bill Name</th><th>Category</th><th>Date</th><th class="num">Amount</th></tr></thead>
-                <tbody>
-                    ${supportingBills.length ? supportingBills.map((bill) => `<tr><td>${htmlEscape(bill.name)}</td><td>${htmlEscape(bill.category)}</td><td>${htmlEscape(bill.date)}</td><td class="num">${htmlEscape(invoiceMoney(bill.amount))}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">No uploaded supporting bills linked to this invoice.</td></tr>'}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="payment-total">
-            <div class="box">
-                <h3>Payment Details</h3>
-                <div class="kv"><span>UPI ID</span><span>${htmlEscape(upi)}</span></div>
-                <div class="kv"><span>Account Holder</span><span>${htmlEscape(accountHolder)}</span></div>
-                <div class="kv"><span>Contact Number</span><span>${htmlEscape(contactNumber)}</span></div>
-                <p class="muted">Scan the QR code or use the UPI ID to complete payment.</p>
             </div>
-            <div class="qr">
-                <img src="${htmlEscape(qrSrc)}" />
-                <div class="muted">UPI QR Code</div>
+        </div>
+
+        <div class="custom-layout">
+            <div class="text-center mb-4">
+                <h2 style="margin: 0; font-size: 18px; font-weight: 900;">UNIVERSAL ELDER CARE</h2>
+                <div class="italic">(A Unit UNCF)</div>
+                <div class="bold italic" style="text-transform: capitalize;">${htmlEscape(currentMonthName)} - ${currentYear}</div>
+            </div>
+
+            <div class="bold mb-4">
+                NAME : ${htmlEscape(patientName)}
+            </div>
+
+            <div class="mb-4">
+                Monthly bed charge - ${htmlEscape(getSum(/bed charge|accommodation|rent/i))}
+            </div>
+
+            <div class="bold">BALANCE</div>
+            <div class="list-item">a) Amount - ${htmlEscape(getSum(/balance/i))}</div>
+            <div class="list-item">b) Monthly essential - ${htmlEscape(getSum(/monthly essential/i))}</div>
+            <div class="list-item">c) Diapers - Rs ${htmlEscape(getSum(/diaper/i))} / No ${htmlEscape(getQty(/diaper/i))}</div>
+            <div class="list-item">d) Gloves - Rs ${htmlEscape(getSum(/glove/i))} / No ${htmlEscape(getQty(/glove/i))}</div>
+            <div class="list-item">e) Mask - Rs ${htmlEscape(getSum(/mask/i))} / No ${htmlEscape(getQty(/mask/i))}</div>
+            <div class="list-item">f) Under pad - Rs ${htmlEscape(getSum(/under pad|underpad/i))} / No ${htmlEscape(getQty(/under pad|underpad/i))}</div>
+            <div class="list-item mb-4">g) Monthly essential - ${htmlEscape(getSum(/monthly essential/i))}</div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>Laundry - ${htmlEscape(getSum(/laundry/i) || '1800')}</div>
+                <div>Eb - ${htmlEscape(getSum(/eb|electricity/i) || '700')}</div>
+                <div>Hospital vist - ${htmlEscape(getSum(/hospital/i))}</div>
+                <div>Amblunce or transport - ${htmlEscape(getSum(/ambulance|transport/i))}</div>
+                <div>Doctor check up - ${htmlEscape(getSum(/doctor/i) || '500')}</div>
+                <div>Physiotherapy - ${htmlEscape(getSum(/physio/i))} (session) usually per session charge is 700rs but we have opted for monthly package.</div>
+                <div>Psychiatric counseling - ${htmlEscape(getSum(/psychiatric|counseling/i))}</div>
+                <div>Nursing - ${htmlEscape(getSum(/nursing/i))}</div>
+                <div>Attender(outside) - ${htmlEscape(getSum(/attender/i))}</div>
+                <div>Care giver day - ${htmlEscape(getSum(/care giver day|day care/i))}</div>
+                <div>Care given night - ${htmlEscape(getSum(/care given night|night care/i))}</div>
+                <div>Dressing - ${htmlEscape(getSum(/dressing/i))}</div>
+                <div>First aid - ${htmlEscape(getSum(/first aid/i))}</div>
+                <div>Special care - ${htmlEscape(getSum(/special care/i))}</div>
+                <div>Medicine - ${htmlEscape(getSum(/medicine/i) || '00Rs')}</div>
+                <div>Diapers - Rs ${htmlEscape(getSum(/diaper/i))} / No ${htmlEscape(getQty(/diaper/i))}</div>
+                <div>Gloves - Rs ${htmlEscape(getSum(/glove/i))} / No ${htmlEscape(getQty(/glove/i))}</div>
+                <div>Mask - Rs ${htmlEscape(getSum(/mask/i))} / No ${htmlEscape(getQty(/mask/i))}</div>
+                <div>Underpad - Rs ${htmlEscape(getSum(/under pad|underpad/i))} / No ${htmlEscape(getQty(/under pad|underpad/i))}</div>
+                <div>Bedwipes - Rs ${htmlEscape(getSum(/bedwipe|bed wipe/i))} / No ${htmlEscape(getQty(/bedwipe|bed wipe/i))}</div>
+                <div>CATHETER - ${htmlEscape(getSum(/catheter/i))}</div>
+                <div>Uro Bag - ${htmlEscape(getSum(/uro bag/i))}</div>
+                <div>Rubber sheet - ${htmlEscape(getSum(/rubber sheet/i))}</div>
+                <div>O² - ${htmlEscape(getSum(/o2|oxygen/i))}</div>
+                <div>NEBULIZER - ${htmlEscape(getSum(/nebulizer/i))}</div>
+                <div>Lab - ${htmlEscape(getSum(/lab|test/i) || '300')}</div>
+                <div>MILK - ${htmlEscape(getSum(/milk/i) || '500')}</div>
+                <div>Juice prepration - ${htmlEscape(getSum(/juice/i))}</div>
+                <div>Extra snacks - ${htmlEscape(getSum(/snack/i) || '300Rs')}</div>
+                <div>HERBAL DRINKS - ${htmlEscape(getSum(/herbal/i) || '200')}</div>
+                <div>NewDress - ${htmlEscape(getSum(/dress/i))}</div>
+                <div>NewTowel - ${htmlEscape(getSum(/towel/i))}</div>
+                <div>NewBedspread - ${htmlEscape(getSum(/bedspread/i))}</div>
+                <div>NewBlanket - ${htmlEscape(getSum(/blanket/i))}</div>
+                <div>NewPillow cover - ${htmlEscape(getSum(/pillow/i))}</div>
+                <div>Stitching - ${htmlEscape(getSum(/stitching/i))}</div>
+                <div>Tv&Allout - ${htmlEscape(getSum(/tv|allout/i) || '300')}</div>
+                <div>Cleaning - ${htmlEscape(getSum(/cleaning/i))}</div>
+                <div>Breakage - ${htmlEscape(getSum(/breakage/i))}</div>
+                <div>Airbed new - ${htmlEscape(getSum(/airbed/i))}</div>
+                <div>Beauty service (haircut /saving/nail trimming ) - ${htmlEscape(getSum(/beauty|haircut|trimming/i) || '600rs')}</div>
+                <div>Gas - ${htmlEscape(getSum(/gas/i) || '1000')}</div>
+            </div>
+
+            <div class="mt-4 mb-4">
+                <div class="bold">MONTHLY ESSENTIALS - 1000rs or should send before 5th of every month.</div>
+                <div>1) Toothpaste(or) tooth powder & Toothbrush</div>
+                <div>2) Bathing soap 2no</div>
+                <div>3) Talcum powder 100gm</div>
+                <div>4) Viboothi (sacred Ash)</div>
+                <div>5) Coconut oil 200ml</div>
+                <div>6) Washing powder 1kg</div>
+                <div>7) Fabric freshener 500ml</div>
+                <div>8) Detol 1000ml</div>
+                <div>9) sanitisor 500ml</div>
+            </div>
+
+            <div>LATE FEE - ${htmlEscape(getSum(/late fee/i))}</div>
+            <div class="mb-4">Complains - </div>
+
+            <div class="bold mt-4 mb-4" style="font-size: 14px; background: #ecfdf5; padding: 10px; border-radius: 8px; border: 1px solid #059669; color: #065f46;">
+                Total. ${htmlEscape(invoiceMoney(receiptInvoice.amount))} - Uncf subsidy ${htmlEscape(uncfSubsidy)} /- ( Bed charge ,Laundry , Eb ,Caregiver , ) = total payable = ${htmlEscape(totalPayable)}/-
+            </div>
+
+            <div class="box-info">
+                <div class="bold">Total materials should be given 5th of every month ,if not penalty will be added .</div>
+                <div class="materials-list">
+                    <div>Diaper - ${htmlEscape(getQty(/diaper/i))} No</div>
+                    <div>Gloves - ${htmlEscape(getQty(/glove/i))} No</div>
+                    <div>Mask - ${htmlEscape(getQty(/mask/i))} No</div>
+                    <div>UnderPad - ${htmlEscape(getQty(/under pad|underpad/i))} No</div>
+                    <div>Rubber sheet - ${htmlEscape(getQty(/rubber sheet/i))} No</div>
+                    <div>Medicine - </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <div class="bold italic">Feedbacks and issues :</div>
+                <div>Please write letter (post or direct letter to UEC) and mail <span class="bold">universaleldercare2010@gmail.com</span>.</div>
+                <div>please follow up with us .within one or two week issues or queries are cleared.</div>
+            </div>
+
+            <div class="mt-4 bold text-center">
+                It will be kind enough if we receive the payments within "5th of every month " it will be Supportive to get the materials.<br/>
+                After 10th of every month late payment will be collected.
+            </div>
+
+            <div class="payment-total" style="grid-template-columns: 1fr auto;">
+                <div class="box">
+                    <h3>payment facilities</h3>
+                    <div class="bold">Net banking or UPI Google pay, Phone pe</div>
+                    <br/>
+                    <div class="bold italic">After payment kindly send</div>
+                    <ol style="margin: 4px 0; padding-left: 20px;">
+                        <li>transfer id</li>
+                        <li>screenshot of payment</li>
+                        <li>transferred date</li>
+                        <li>transferred amount</li>
+                    </ol>
+                    <div class="bold mt-2" style="color: #b91c1c;">
+                        IF PAYMENT RECEIPT HAVEN'T SENT TO THE SAME NUMBER , IT WONT BE ACCOUNTABLE , THE AMOUNT WILL BE ADDED IN NEXT MONTH BILL.<br/>
+                        <span class="tamil-text">பணம் செலுத்தும் ரசீது இந்த எண்ணுக்கு அனுப்பப்படாவிட்டால், அது கணக்கிடப்படாது, அடுத்த மாத கணக்கில் தொகை சேர்க்கப்படும்.</span>
+                    </div>
+                </div>
+                <div class="qr" style="width: 180px;">
+                    <img src="${htmlEscape(qrSrc)}" style="width: 150px; height: 150px;" />
+                    <div class="muted">UPI QR Code</div>
+                    <div class="bold" style="font-size: 10px; margin-top: 4px;">${htmlEscape(upi)}</div>
+                </div>
             </div>
         </div>
 
@@ -902,7 +960,7 @@ export function PatientDailyCost() {
         markSent.mutate({
             invoiceId: receiptInvoice.id,
             sentVia,
-            familyContact: billingService?.familyContact || ''
+            familyContact: receiptService?.familyContact || ''
         }, {
             onSuccess: () => setReceiptInvoice(null)
         })
@@ -932,7 +990,7 @@ export function PatientDailyCost() {
             header: 'Patient / Service',
             cell: (group) => (
                 <div className="min-w-[220px] whitespace-normal">
-                    <p className="font-black text-slate-900">{group.patientName}</p>
+                    <p className="font-extrabold text-slate-900">{group.patientName}</p>
                     <p className="text-xs font-semibold text-slate-500">{group.serviceType.replace(/_/g, ' ')}</p>
                 </div>
             )
@@ -962,12 +1020,12 @@ export function PatientDailyCost() {
             header: 'Items',
             cell: (group) => (
                 <div className="min-w-[170px]">
-                    <p className="font-black text-slate-900">{group.entries.length} entries</p>
+                    <p className="font-extrabold text-slate-900">{group.entries.length} entries</p>
                     <p className="text-xs font-semibold text-slate-500">{group.draftEntries.length} draft for billing</p>
                 </div>
             )
         },
-        { key: 'amount', header: 'Amount', cell: (group) => <span className="font-black">{formatMoney(group.draftTotal || group.total)}</span> },
+        { key: 'amount', header: 'Amount', cell: (group) => <span className="font-extrabold">{formatMoney(group.draftTotal || group.total)}</span> },
         { key: 'status', header: 'Invoice Status', cell: (group) => <StatusHighlighter value={group.status} /> },
         {
             key: 'actions',
@@ -976,7 +1034,7 @@ export function PatientDailyCost() {
                 <button
                     type="button"
                     onClick={() => setSelectedMonthlyGroup(group)}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 text-xs font-black text-primary-700 hover:bg-primary-100"
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                 >
                     <Eye className="h-4 w-4" />
                     View
@@ -992,13 +1050,13 @@ export function PatientDailyCost() {
             header: 'Patient / Bill',
             cell: (sheet) => (
                 <div className="min-w-[220px]">
-                    <p className="font-black text-slate-900">{sheet.patientName}</p>
+                    <p className="font-extrabold text-slate-900">{sheet.patientName}</p>
                     <p className="text-xs font-semibold text-slate-500">{sheet.billLabel}</p>
                     <p className="text-xs font-semibold text-slate-400">{String(sheet.serviceType || '').replace(/_/g, ' ')}</p>
                 </div>
             )
         },
-        { key: 'entries', header: 'Entries', cell: (sheet) => <span className="block min-w-[90px] font-black text-slate-700">{sheet.entries.length}</span> },
+        { key: 'entries', header: 'Entries', cell: (sheet) => <span className="block min-w-[90px] font-extrabold text-slate-700">{sheet.entries.length}</span> },
         {
             key: 'summary',
             header: 'Daily Summary',
@@ -1018,7 +1076,7 @@ export function PatientDailyCost() {
             key: 'total',
             header: 'Daily Cost',
             sortable: true,
-            cell: (sheet) => <span className="block min-w-[150px] text-sm font-black text-emerald-700">{formatMoney(sheet.total)}</span>
+            cell: (sheet) => <span className="block min-w-[150px] text-sm font-extrabold text-emerald-700">{formatMoney(sheet.total)}</span>
         },
         {
             key: 'actions',
@@ -1028,7 +1086,7 @@ export function PatientDailyCost() {
                     <button
                         type="button"
                         onClick={() => setSelectedDailySheet(sheet)}
-                        className="inline-flex h-9 min-w-[126px] items-center justify-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-3 text-xs font-black text-primary-700 transition hover:bg-primary-100"
+                        className="inline-flex h-9 min-w-[126px] items-center justify-center gap-2 rounded-xl border border-primary-200 bg-primary-50 px-3 text-xs font-extrabold text-primary-700 transition hover:bg-primary-100"
                     >
                         <Eye className="h-4 w-4" />
                         View Sheet
@@ -1036,7 +1094,7 @@ export function PatientDailyCost() {
                     <button
                         type="button"
                         onClick={() => downloadDailySheetPdf(sheet)}
-                        className="inline-flex h-9 min-w-[126px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                        className="inline-flex h-9 min-w-[126px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50"
                     >
                         <Download className="h-4 w-4" />
                         Download
@@ -1066,7 +1124,7 @@ export function PatientDailyCost() {
                         key={tab.key}
                         type="button"
                         onClick={() => setActiveTab(tab.key)}
-                        className={`h-10 rounded-xl px-4 text-sm font-black transition ${
+                        className={`h-10 rounded-xl px-4 text-sm font-extrabold transition ${
                             activeTab === tab.key
                                 ? 'bg-primary-700 text-white shadow-sm'
                                 : 'bg-slate-50 text-slate-700 hover:bg-primary-50 hover:text-primary-700'
@@ -1081,17 +1139,17 @@ export function PatientDailyCost() {
             <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                 <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-400">Patient Daily Expense Sheets</p>
-                        <h2 className="mt-1 text-lg font-black text-slate-900">Grouped patient bill verification</h2>
+                        <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Patient Daily Expense Sheets</p>
+                        <h2 className="mt-1 text-lg font-extrabold text-slate-900">Grouped patient bill verification</h2>
                         <p className="mt-1 text-sm font-semibold text-slate-500">
                             Enquiry completion charges appear as one bill with service, medicine, and staff lines inside.
                         </p>
                     </div>
                     <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-right">
-                        <p className="text-xs font-black uppercase tracking-wide text-emerald-700">
+                        <p className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">
                             Monthly Summary ({formatDate(periodFrom)} - {formatDate(periodTo)})
                         </p>
-                        <p className="mt-1 text-2xl font-black text-emerald-900">{formatMoney(monthlySheetTotal)}</p>
+                        <p className="mt-1 text-2xl font-extrabold text-emerald-900">{formatMoney(monthlySheetTotal)}</p>
                     </div>
                 </div>
                 <div className="min-h-[320px]">
@@ -1112,15 +1170,15 @@ export function PatientDailyCost() {
             <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                 <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-400">Invoice Payment Tracking</p>
-                        <h2 className="mt-1 text-lg font-black text-slate-900">Monthly invoice lifecycle</h2>
+                        <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Invoice Payment Tracking</p>
+                        <h2 className="mt-1 text-lg font-extrabold text-slate-900">Monthly invoice lifecycle</h2>
                         <p className="mt-1 text-sm font-semibold text-slate-500">
                             Check whether generated monthly patient invoices are sent, partially paid, or fully paid.
                         </p>
                     </div>
                     <a
                         href="/finance/invoice"
-                        className="inline-flex h-10 items-center justify-center rounded-xl border border-primary-200 bg-primary-50 px-4 text-xs font-black text-primary-700 hover:bg-primary-100"
+                        className="inline-flex h-10 items-center justify-center rounded-xl border border-primary-200 bg-primary-50 px-4 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                     >
                         Open Finance Invoice
                     </a>
@@ -1144,16 +1202,16 @@ export function PatientDailyCost() {
                             {invoiceLifecycleRows.map((invoice) => (
                                 <tr key={invoice.id} className="border-t border-slate-100">
                                     <td className="px-4 py-3">
-                                        <p className="font-black text-primary-700">{invoice.invoiceRefNo}</p>
+                                        <p className="font-extrabold text-primary-700">{invoice.invoiceRefNo}</p>
                                         <p className="text-xs font-semibold text-slate-500">{invoice.invoiceStatus}</p>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <p className="font-black text-slate-900">{invoice.patientName}</p>
+                                        <p className="font-extrabold text-slate-900">{invoice.patientName}</p>
                                         <p className="text-xs font-semibold text-slate-500">{String(invoice.serviceType || '').replace(/_/g, ' ')}</p>
                                     </td>
-                                    <td className="px-4 py-3 text-right font-black">{formatMoney(invoice.amount)}</td>
-                                    <td className="px-4 py-3 text-right font-black text-emerald-700">{formatMoney(invoice.paidAmount)}</td>
-                                    <td className="px-4 py-3 text-right font-black text-amber-700">{formatMoney(invoice.balanceAmount)}</td>
+                                    <td className="px-4 py-3 text-right font-extrabold">{formatMoney(invoice.amount)}</td>
+                                    <td className="px-4 py-3 text-right font-extrabold text-emerald-700">{formatMoney(invoice.paidAmount)}</td>
+                                    <td className="px-4 py-3 text-right font-extrabold text-amber-700">{formatMoney(invoice.balanceAmount)}</td>
                                     <td className="px-4 py-3">
                                         <StatusHighlighter value={invoice.sentAt ? `Sent - ${invoice.sentVia}` : 'Generated'} />
                                         {invoice.sentAt && <p className="mt-1 text-xs font-semibold text-slate-500">{formatDate(invoice.sentAt)}</p>}
@@ -1187,12 +1245,12 @@ export function PatientDailyCost() {
                 <form onSubmit={addCost} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                     <div className="mb-5 flex items-center gap-2">
                         <Plus className="h-5 w-5 text-primary-600" />
-                        <h2 className="text-base font-black text-slate-900">Add Ledger Expense</h2>
+                        <h2 className="text-base font-extrabold text-slate-900">Add Ledger Expense</h2>
                     </div>
 
                     <div className="space-y-4">
                         <label className="block">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Patient / Service</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Patient / Service</span>
                             <select
                                 value={manualAllocationId}
                                 onChange={(event) => {
@@ -1216,7 +1274,7 @@ export function PatientDailyCost() {
                         <div className="grid gap-4 sm:grid-cols-2">
                             <Field label="Date" type="date" value={costDate} onChange={setCostDate} />
                             <label className="block">
-                                <span className="text-xs font-black uppercase tracking-wide text-slate-500">Category</span>
+                                <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Category</span>
                                 <select
                                     value={category}
                                     onChange={(event) => setCategory(event.target.value)}
@@ -1229,7 +1287,7 @@ export function PatientDailyCost() {
 
                         {isMedicineCategory ? (
                             <label className="block">
-                                <span className="text-xs font-black uppercase tracking-wide text-slate-500">Medicine / Bill Item</span>
+                                <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Medicine / Bill Item</span>
                                 <input
                                     list="patient-billing-medicine-catalog"
                                     value={description}
@@ -1264,14 +1322,14 @@ export function PatientDailyCost() {
                             <Field label="Rate" type="number" value={rate} onChange={setRate} min="0" step="0.01" />
                         </div>
 
-                        <div className="rounded-xl border border-primary-100 bg-primary-50 px-3 py-2 text-sm font-black text-primary-800">
+                        <div className="rounded-xl border border-primary-100 bg-primary-50 px-3 py-2 text-sm font-extrabold text-primary-800">
                             Amount: {formatMoney(Number(quantity || 0) * Number(rate || 0))}
                         </div>
 
                         <button
                             type="submit"
                             disabled={createEntry.isPending || !manualAllocationId || !description.trim() || Number(quantity || 0) <= 0}
-                            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-600 text-sm font-black text-white shadow-sm hover:bg-primary-700 disabled:opacity-50"
+                            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary-600 text-sm font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:opacity-50"
                         >
                             <Plus className="h-4 w-4" />
                             {createEntry.isPending ? 'Adding...' : 'Add Ledger Entry'}
@@ -1279,19 +1337,19 @@ export function PatientDailyCost() {
 
                         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-3">
                             <label className="block">
-                                <span className="text-xs font-black uppercase tracking-wide text-slate-500">Upload Bill / Invoice</span>
+                                <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Upload Bill / Invoice</span>
                                 <input
                                     type="file"
                                     accept=".pdf,.jpg,.jpeg,.png"
                                     onChange={(event) => setBillFile(event.target.files?.[0] || null)}
-                                    className="mt-2 block w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-black file:text-primary-700"
+                                    className="mt-2 block w-full text-xs font-bold text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-extrabold file:text-primary-700"
                                 />
                             </label>
                             <button
                                 type="button"
                                 onClick={uploadBill}
                                 disabled={uploadBillEntry.isPending || !manualAllocationId || !description.trim() || !billFile || Number(quantity || 0) <= 0}
-                                className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-800 text-sm font-black text-white shadow-sm hover:bg-slate-900 disabled:opacity-50"
+                                className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-slate-800 text-sm font-extrabold text-white shadow-sm hover:bg-slate-900 disabled:opacity-50"
                             >
                                 <Upload className="h-4 w-4" />
                                 {uploadBillEntry.isPending ? 'Uploading...' : 'Upload Bill & Add Ledger'}
@@ -1312,12 +1370,12 @@ export function PatientDailyCost() {
             {activeTab === 'monthly' && (
                 <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
                     <div className="mb-5 flex flex-col gap-2">
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-400">Monthly Billing Groups</p>
-                        <h2 className="text-base font-black text-slate-900">Select patient/month groups for monthly invoice</h2>
+                        <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Monthly Billing Groups</p>
+                        <h2 className="text-base font-extrabold text-slate-900">Select patient/month groups for monthly invoice</h2>
                     </div>
                     <div className="mb-5 grid min-w-0 items-end gap-4 lg:grid-cols-2 2xl:grid-cols-[minmax(220px,0.85fr)_minmax(190px,240px)_minmax(150px,185px)_minmax(150px,185px)_minmax(165px,205px)_minmax(185px,230px)]">
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Search</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Search</span>
                             <input
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
@@ -1326,7 +1384,7 @@ export function PatientDailyCost() {
                             />
                         </label>
                         <label className="block min-w-0">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Bill Source</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Bill Source</span>
                             <select
                                 value={sourceFilter}
                                 onChange={(event) => setSourceFilter(event.target.value)}
@@ -1342,24 +1400,24 @@ export function PatientDailyCost() {
                         <Field label="Period From" type="date" value={periodFrom} onChange={setPeriodFrom} />
                         <Field label="Period To" type="date" value={periodTo} onChange={setPeriodTo} />
                         <div className="min-w-0">
-                            <span className="invisible block text-xs font-black uppercase tracking-wide">Action</span>
+                            <span className="invisible block text-xs font-extrabold uppercase tracking-wide">Action</span>
                             <button
                                 type="button"
                                 onClick={downloadMonthlySummaryPdf}
                                 disabled={!monthlyInvoiceGroups.length}
-                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
                             >
                                 <Download className="h-4 w-4" />
                                 Download Month
                             </button>
                         </div>
                         <div className="min-w-0">
-                            <span className="invisible block text-xs font-black uppercase tracking-wide">Action</span>
+                            <span className="invisible block text-xs font-extrabold uppercase tracking-wide">Action</span>
                             <button
                                 type="button"
                                 onClick={createInvoice}
                                 disabled={!periodLedgerEntries.length || totals.selected <= 0 || generateInvoice.isPending}
-                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
                             >
                                 <FileText className="h-4 w-4" />
                                 {selectedInvoiceEntry ? `Generate For ${selectedInvoiceEntry.patientName}` : 'Select Rows First'}
@@ -1400,36 +1458,36 @@ export function PatientDailyCost() {
                     <div className="mt-4 max-h-[68vh] space-y-5 overflow-y-auto pr-2 text-left">
                         <div className="grid gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-bold text-slate-700 md:grid-cols-4">
                             <div>
-                                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Patient</p>
-                                <p className="mt-1 text-base font-black text-slate-900">{selectedMonthlyGroup.patientName}</p>
+                                <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Patient</p>
+                                <p className="mt-1 text-base font-extrabold text-slate-900">{selectedMonthlyGroup.patientName}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Period</p>
+                                <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Period</p>
                                 <p className="mt-1">{formatDate(selectedMonthlyGroup.periodFrom)} - {formatDate(selectedMonthlyGroup.periodTo)}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Entries</p>
+                                <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Entries</p>
                                 <p className="mt-1">{selectedMonthlyGroup.entries.length}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-wide text-slate-400">Draft Total</p>
-                                <p className="mt-1 text-base font-black text-primary-700">{formatMoney(selectedMonthlyGroup.draftTotal || selectedMonthlyGroup.total)}</p>
+                                <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Draft Total</p>
+                                <p className="mt-1 text-base font-extrabold text-primary-700">{formatMoney(selectedMonthlyGroup.draftTotal || selectedMonthlyGroup.total)}</p>
                             </div>
                         </div>
 
                         <div className="rounded-2xl border border-slate-100 bg-white p-4">
-                            <p className="mb-3 text-xs font-black uppercase tracking-wide text-slate-500">Source Breakdown</p>
+                            <p className="mb-3 text-xs font-extrabold uppercase tracking-wide text-slate-500">Source Breakdown</p>
                             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                                 {selectedMonthlyGroup.sourceSummary.map((source) => (
                                     <div key={source.name} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
-                                                <p className="font-black text-slate-900">{source.name}</p>
+                                                <p className="font-extrabold text-slate-900">{source.name}</p>
                                                 <p className="mt-1 text-xs font-semibold text-slate-500">
                                                     {source.entries} entries, {source.draftEntries} draft
                                                 </p>
                                             </div>
-                                            <p className="whitespace-nowrap text-sm font-black text-primary-700">
+                                            <p className="whitespace-nowrap text-sm font-extrabold text-primary-700">
                                                 {formatMoney(source.draftAmount || source.amount)}
                                             </p>
                                         </div>
@@ -1442,14 +1500,14 @@ export function PatientDailyCost() {
                             <table className="min-w-[980px] divide-y divide-slate-100 text-sm sm:min-w-full">
                                 <thead className="sticky top-0 z-10 bg-slate-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">Date</th>
-                                        <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">Source</th>
-                                        <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">Item</th>
-                                        <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">Category</th>
-                                        <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">Qty</th>
-                                        <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">Rate</th>
-                                        <th className="px-4 py-3 text-right text-xs font-black uppercase tracking-wide text-slate-500">Amount</th>
-                                        <th className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Date</th>
+                                        <th className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Source</th>
+                                        <th className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Item</th>
+                                        <th className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Category</th>
+                                        <th className="px-4 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-500">Qty</th>
+                                        <th className="px-4 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-500">Rate</th>
+                                        <th className="px-4 py-3 text-right text-xs font-extrabold uppercase tracking-wide text-slate-500">Amount</th>
+                                        <th className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -1457,11 +1515,11 @@ export function PatientDailyCost() {
                                         <tr key={entry.id}>
                                             <td className="px-4 py-3 font-semibold text-slate-700">{formatDate(entry.costDate)}</td>
                                             <td className="px-4 py-3"><StatusHighlighter value={formatSource(entry.sourceType)} /></td>
-                                            <td className="px-4 py-3 font-black text-slate-900">{entry.description}</td>
+                                            <td className="px-4 py-3 font-extrabold text-slate-900">{entry.description}</td>
                                             <td className="px-4 py-3 text-slate-600">{entry.category}</td>
                                             <td className="px-4 py-3 text-right font-semibold">{Number(entry.quantity || 0)}</td>
                                             <td className="px-4 py-3 text-right">{formatMoney(entry.rate)}</td>
-                                            <td className="px-4 py-3 text-right font-black">{formatMoney(entry.amount)}</td>
+                                            <td className="px-4 py-3 text-right font-extrabold">{formatMoney(entry.amount)}</td>
                                             <td className="px-4 py-3"><StatusHighlighter value={entry.invoiceRefNo ? `${entry.status} - ${entry.invoiceRefNo}` : 'Draft'} /></td>
                                         </tr>
                                     ))}
@@ -1483,8 +1541,8 @@ export function PatientDailyCost() {
                 {selectedDailySheet ? (
                     <div className="mt-4 space-y-5 text-left">
                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                            <p className="text-xs font-black uppercase tracking-wide text-slate-400">Patient</p>
-                            <p className="text-lg font-black text-slate-900">{selectedDailySheet.patientName}</p>
+                            <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Patient</p>
+                            <p className="text-lg font-extrabold text-slate-900">{selectedDailySheet.patientName}</p>
                             <p className="text-sm font-bold text-slate-600">
                                 {selectedDailySheet.billLabel} - {selectedDailySheet.periodTo && selectedDailySheet.periodTo !== selectedDailySheet.date
                                     ? `${formatDate(selectedDailySheet.date)} to ${formatDate(selectedDailySheet.periodTo)}`
@@ -1495,7 +1553,7 @@ export function PatientDailyCost() {
                         <button
                             type="button"
                             onClick={() => downloadDailySheetPdf(selectedDailySheet)}
-                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50"
+                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50"
                         >
                             <Download className="h-4 w-4" />
                             Download Daily Sheet
@@ -1506,7 +1564,7 @@ export function PatientDailyCost() {
                                 <thead className="bg-slate-50">
                                     <tr>
                                         {['Time', 'Category', 'Item', 'Qty', 'Rate', 'Amount', 'Source'].map((header) => (
-                                            <th key={header} className="px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-500">
+                                            <th key={header} className="px-4 py-3 text-left text-xs font-extrabold uppercase tracking-wide text-slate-500">
                                                 {header}
                                             </th>
                                         ))}
@@ -1520,7 +1578,7 @@ export function PatientDailyCost() {
                                             <td className="min-w-[180px] px-4 py-3 text-slate-600">{entry.description}</td>
                                             <td className="whitespace-nowrap px-4 py-3 font-bold text-slate-700">{Number(entry.quantity || 0)}</td>
                                             <td className="whitespace-nowrap px-4 py-3 text-right font-bold text-slate-700">{formatMoney(entry.rate)}</td>
-                                            <td className="whitespace-nowrap px-4 py-3 text-right font-black text-slate-900">{formatMoney(entry.amount)}</td>
+                                            <td className="whitespace-nowrap px-4 py-3 text-right font-extrabold text-slate-900">{formatMoney(entry.amount)}</td>
                                             <td className="whitespace-nowrap px-4 py-3 font-bold text-slate-600">{formatSource(entry.sourceType)}</td>
                                         </tr>
                                     ))}
@@ -1529,7 +1587,7 @@ export function PatientDailyCost() {
                         </div>
 
                         <div className="rounded-2xl border border-slate-100 bg-white p-4">
-                            <p className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">Daily Summary</p>
+                            <p className="mb-2 text-xs font-extrabold uppercase tracking-wide text-slate-500">Daily Summary</p>
                             <div className="space-y-2">
                                 {selectedDailySheet.summary.map((item) => (
                                     <div key={item.name} className="grid grid-cols-[minmax(160px,1fr)_minmax(120px,auto)] items-center gap-6 text-sm font-bold text-slate-700">
@@ -1538,7 +1596,7 @@ export function PatientDailyCost() {
                                     </div>
                                 ))}
                                 <div className="border-t border-slate-200 pt-2">
-                                    <div className="grid grid-cols-[minmax(160px,1fr)_minmax(120px,auto)] items-center gap-6 text-base font-black text-slate-900">
+                                    <div className="grid grid-cols-[minmax(160px,1fr)_minmax(120px,auto)] items-center gap-6 text-base font-extrabold text-slate-900">
                                         <span>Daily Total</span>
                                         <span className="whitespace-nowrap text-right">{formatMoney(selectedDailySheet.total)}</span>
                                     </div>
@@ -1563,15 +1621,15 @@ export function PatientDailyCost() {
                         <div className="rounded-2xl border border-slate-200 bg-white p-4">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-xs font-black uppercase tracking-wide text-slate-400">Invoice</p>
-                                    <p className="text-xl font-black text-slate-900">{receiptInvoice.refNo}</p>
+                                    <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Invoice</p>
+                                    <p className="text-xl font-extrabold text-slate-900">{receiptInvoice.refNo}</p>
                                     <p className="text-sm font-bold text-slate-600">{receiptInvoice.clientName}</p>
-                                    <p className="mt-2 text-2xl font-black text-emerald-700">{formatMoney(receiptInvoice.amount)}</p>
+                                    <p className="mt-2 text-2xl font-extrabold text-emerald-700">{formatMoney(receiptInvoice.amount)}</p>
                                     <p className="mt-1 text-xs font-bold text-slate-500">
                                         {formatDate(receiptInvoice.metadata?.billingPeriodFrom || periodFrom)} to {formatDate(receiptInvoice.metadata?.billingPeriodTo || periodTo)}
                                     </p>
                                 </div>
-                                <div className="flex h-32 w-32 items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-center text-xs font-black text-slate-500">
+                                <div className="flex h-32 w-32 items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-center text-xs font-extrabold text-slate-500">
                                     {qrImageUrl ? <img src={qrImageUrl} alt="GPay QR" className="h-full w-full rounded-xl object-cover" /> : <DummyQr />}
                                 </div>
                             </div>
@@ -1579,7 +1637,7 @@ export function PatientDailyCost() {
                         </div>
 
                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                            <p className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">Monthly Charge Breakdown</p>
+                            <p className="mb-2 text-xs font-extrabold uppercase tracking-wide text-slate-500">Monthly Charge Breakdown</p>
                             {(receiptInvoice.metadata?.chargeSummary || groupedCharges).map((item: any) => (
                                 <div key={item.name} className="flex items-center justify-between py-1 text-sm font-bold text-slate-700">
                                     <span>{item.name}</span>
@@ -1594,7 +1652,7 @@ export function PatientDailyCost() {
                         </div>
 
                         <label className="block">
-                            <span className="text-xs font-black uppercase tracking-wide text-slate-500">Send / Tracking Mode</span>
+                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Send / Tracking Mode</span>
                             <select
                                 value={sentVia}
                                 onChange={(event) => setSentVia(event.target.value)}
@@ -1615,7 +1673,7 @@ export function PatientDailyCost() {
                             <button
                                 type="button"
                                 onClick={downloadInvoicePdf}
-                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50"
                             >
                                 <Download className="h-4 w-4" />
                                 Download PDF
@@ -1623,7 +1681,7 @@ export function PatientDailyCost() {
                             <button
                                 type="button"
                                 onClick={openWhatsApp}
-                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 text-sm font-black text-white shadow-sm hover:bg-emerald-800"
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-700 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-800"
                             >
                                 <Send className="h-4 w-4" />
                                 Send To Family
@@ -1648,7 +1706,7 @@ function DummyQr() {
                     return <span key={index} className={pattern ? 'rounded-[1px] bg-slate-800' : 'rounded-[1px] bg-slate-100'} />
                 })}
             </div>
-            <span className="mt-1 text-[10px] font-black uppercase tracking-wide text-slate-500">Dummy GPay QR</span>
+            <span className="mt-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-500">Dummy GPay QR</span>
         </div>
     )
 }
@@ -1664,7 +1722,7 @@ function Field({ label, value, onChange, type = 'text', placeholder, min, step }
 }) {
     return (
         <label className="block">
-            <span className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</span>
+            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">{label}</span>
             <input
                 type={type}
                 min={min}
@@ -1688,8 +1746,8 @@ function SummaryCard({ icon: Icon, label, value, tone }: { icon: any; label: str
     return (
         <div className={`rounded-2xl border p-4 shadow-sm ${tones[tone]}`}>
             <Icon className="h-5 w-5" />
-            <p className="mt-3 text-2xl font-black">{value}</p>
-            <p className="text-xs font-black uppercase tracking-wide">{label}</p>
+            <p className="mt-3 text-2xl font-extrabold">{value}</p>
+            <p className="text-xs font-extrabold uppercase tracking-wide">{label}</p>
         </div>
     )
 }

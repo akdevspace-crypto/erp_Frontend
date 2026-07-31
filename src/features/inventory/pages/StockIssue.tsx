@@ -137,7 +137,7 @@ export function StockIssue() {
             header: 'Requested Item',
             cell: (request) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{request.productName}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{request.productName}</span>
                     <span className="text-xs font-semibold text-gray-500">{request.category}</span>
                 </div>
             )
@@ -183,7 +183,7 @@ export function StockIssue() {
                             type="button"
                             onClick={() => handleApprove(request)}
                             disabled={!canApprove || approveIssueRequest.isPending || rejectIssueRequest.isPending}
-                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
                         >
                             Approve
                         </button>
@@ -191,7 +191,7 @@ export function StockIssue() {
                             type="button"
                             onClick={() => handleReject(request)}
                             disabled={approveIssueRequest.isPending || rejectIssueRequest.isPending}
-                            className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                            className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
                         >
                             Reject
                         </button>
@@ -211,7 +211,7 @@ export function StockIssue() {
             header: 'Product',
             cell: (item) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{item.product?.name || 'Unknown Product'}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{item.product?.name || 'Unknown Product'}</span>
                     <span className="text-xs font-semibold text-gray-500">{item.product?.category || '-'}</span>
                 </div>
             )
@@ -234,7 +234,7 @@ export function StockIssue() {
                 <button
                     type="button"
                     onClick={() => openDrawer(item.productId)}
-                    className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 transition hover:bg-rose-100"
+                    className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-700 transition hover:bg-rose-100"
                 >
                     Request Issue
                 </button>
@@ -407,7 +407,7 @@ export function StockIssue() {
                         <button
                             type="submit"
                             disabled={!canRequestIssue || createIssueRequest.isPending || productOptions.length === 0 || (isPatientCareIssue && (!formData.allocationId || issueRate <= 0))}
-                            className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60"
+                            className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60"
                         >
                             Save Request
                         </button>

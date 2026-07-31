@@ -75,7 +75,7 @@ export function WasteManagement() {
                         <Recycle className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{record.category}</p>
+                        <p className="font-extrabold text-slate-950">{record.category}</p>
                         <p className="text-xs font-semibold text-slate-500">{record.source}</p>
                     </div>
                 </div>
@@ -91,14 +91,14 @@ export function WasteManagement() {
             sortable: false,
             cell: (record) => {
                 const nextStatus = getNextStatus(record.status)
-                if (!nextStatus) return <span className="text-sm font-black text-slate-500">Closed</span>
+                if (!nextStatus) return <span className="text-sm font-extrabold text-slate-500">Closed</span>
 
                 return (
                     <button
                         type="button"
                         onClick={() => updateWaste.mutate({ entityId: record.entityId, status: nextStatus })}
                         disabled={updateWaste.isPending}
-                        className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         Mark {nextStatus}
                     </button>
@@ -117,7 +117,7 @@ export function WasteManagement() {
                     <button
                         type="button"
                         onClick={() => setIsModalOpen(true)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-primary-700"
+                        className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-primary-700"
                     >
                         <Plus className="h-4 w-4" />
                         Add Waste Record
@@ -127,20 +127,20 @@ export function WasteManagement() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{wasteRecords.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Records</p>
+                    <p className="text-2xl font-extrabold">{wasteRecords.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Records</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{activeCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Active Disposal</p>
+                    <p className="text-2xl font-extrabold">{activeCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Active Disposal</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{completedCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Completed</p>
+                    <p className="text-2xl font-extrabold">{completedCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Completed</p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sky-700 shadow-sm">
-                    <p className="text-2xl font-black">{totalQuantity}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Kg</p>
+                    <p className="text-2xl font-extrabold">{totalQuantity}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Kg</p>
                 </div>
             </div>
 
@@ -165,12 +165,12 @@ export function WasteManagement() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
-                    <form onSubmit={submitWaste} className="w-full max-w-xl rounded-3xl bg-white shadow-2xl">
-                        <div className="border-b border-slate-100 px-6 py-5">
-                            <h2 className="text-xl font-black text-slate-950">Add Waste Record</h2>
+                    <form onSubmit={submitWaste} className="flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+                        <div className="shrink-0 border-b border-slate-100 px-6 py-5">
+                            <h2 className="text-xl font-extrabold text-slate-950">Add Waste Record</h2>
                         </div>
-                        <div className="grid gap-4 px-6 py-5">
-                            <label className="grid gap-2 text-sm font-black text-slate-700">
+                        <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto px-6 py-5">
+                            <label className="grid gap-2 text-sm font-extrabold text-slate-700">
                                 Waste Category
                                 <select
                                     value={form.category}
@@ -185,7 +185,7 @@ export function WasteManagement() {
                                     <option>Rag Waste</option>
                                 </select>
                             </label>
-                            <label className="grid gap-2 text-sm font-black text-slate-700">
+                            <label className="grid gap-2 text-sm font-extrabold text-slate-700">
                                 Source / Area
                                 <input
                                     value={form.source}
@@ -195,7 +195,7 @@ export function WasteManagement() {
                                 />
                             </label>
                             <div className="grid gap-4 sm:grid-cols-2">
-                                <label className="grid gap-2 text-sm font-black text-slate-700">
+                                <label className="grid gap-2 text-sm font-extrabold text-slate-700">
                                     Quantity Kg
                                     <input
                                         type="number"
@@ -205,7 +205,7 @@ export function WasteManagement() {
                                         className="rounded-xl border border-slate-200 px-4 py-3 font-semibold outline-none focus:border-primary-400"
                                     />
                                 </label>
-                                <label className="grid gap-2 text-sm font-black text-slate-700">
+                                <label className="grid gap-2 text-sm font-extrabold text-slate-700">
                                     Disposal Method
                                     <input
                                         value={form.disposalMethod}
@@ -214,7 +214,7 @@ export function WasteManagement() {
                                     />
                                 </label>
                             </div>
-                            <label className="grid gap-2 text-sm font-black text-slate-700">
+                            <label className="grid gap-2 text-sm font-extrabold text-slate-700">
                                 Remarks
                                 <textarea
                                     value={form.remarks}
@@ -224,18 +224,18 @@ export function WasteManagement() {
                                 />
                             </label>
                         </div>
-                        <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-5">
+                        <div className="flex shrink-0 justify-end gap-3 border-t border-slate-100 px-6 py-5">
                             <button
                                 type="button"
                                 onClick={() => setIsModalOpen(false)}
-                                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 hover:bg-slate-50"
+                                className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={createWaste.isPending || !form.source.trim()}
-                                className="rounded-xl bg-primary-600 px-4 py-3 text-sm font-black text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="rounded-xl bg-primary-600 px-4 py-3 text-sm font-extrabold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 Save Waste
                             </button>

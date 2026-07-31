@@ -136,7 +136,7 @@ export function StockManagement() {
             header: 'Product',
             cell: (item) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{item.product?.name || 'Unknown Product'}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{item.product?.name || 'Unknown Product'}</span>
                     <span className="text-xs font-semibold text-gray-500">{item.product?.category || '-'}</span>
                 </div>
             )
@@ -160,14 +160,14 @@ export function StockManagement() {
                     <button
                         type="button"
                         onClick={() => openStockDrawer('IN', item.productId)}
-                        className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 transition hover:bg-emerald-100"
+                        className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-100"
                     >
                         Stock In
                     </button>
                     <button
                         type="button"
                         onClick={() => openStockDrawer('OUT', item.productId)}
-                        className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 transition hover:bg-rose-100"
+                        className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-700 transition hover:bg-rose-100"
                     >
                         Stock Out
                     </button>
@@ -203,8 +203,8 @@ export function StockManagement() {
                     { label: 'Out of Stock', value: stockSummary.outOfStock }
                 ].map((item) => (
                     <div key={item.label} className="rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-black">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
-                        <p className="mt-1 text-2xl font-black text-gray-900 dark:text-gray-100">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">{item.value}</p>
                     </div>
                 ))}
             </section>
@@ -315,7 +315,7 @@ export function StockManagement() {
                         <button
                             type="submit"
                             disabled={updateStock.isPending || productOptions.length === 0}
-                            className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60"
+                            className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60"
                         >
                             {updateStock.isPending ? 'Saving...' : 'Save Stock'}
                         </button>

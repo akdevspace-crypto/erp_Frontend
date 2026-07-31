@@ -216,7 +216,7 @@ export function Revenue() {
 
     const columns: Column<any>[] = [
         { key: 'sno', header: 'S.No', cell: (_row, index) => index + 1 },
-        { key: 'refNo', header: 'Invoice', cell: (row) => <span className="font-black text-primary-700">{row.refNo || '-'}</span> },
+        { key: 'refNo', header: 'Invoice', cell: (row) => <span className="font-extrabold text-primary-700">{row.refNo || '-'}</span> },
         { key: 'service', header: 'Service Details', cell: (row) => <span className="font-bold text-slate-900">{row.service}</span> },
         { key: 'clientName', header: 'Client Details', cell: (row) => <span className="font-semibold">{row.clientName}</span> },
         { key: 'guardian', header: 'Guardian / Contact', cell: (row) => row.guardian || '-' },
@@ -225,7 +225,7 @@ export function Revenue() {
             header: 'Revenue',
             cell: (row) => (
                 <div className="text-sm">
-                    <p className="font-black">{money(row.amount)}</p>
+                    <p className="font-extrabold">{money(row.amount)}</p>
                     <p className="text-xs font-semibold text-slate-500">Paid {money(row.paidAmount)} / Due {money(row.balanceAmount)}</p>
                 </div>
             )
@@ -244,23 +244,23 @@ export function Revenue() {
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
                     <IndianRupee className="mb-2 h-5 w-5" />
-                    <p className="text-2xl font-black">{money(totalRevenue)}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Billed</p>
+                    <p className="text-2xl font-extrabold">{money(totalRevenue)}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Billed</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{money(totalPaid)}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Collected</p>
+                    <p className="text-2xl font-extrabold">{money(totalPaid)}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Collected</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{money(totalDue)}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Pending</p>
+                    <p className="text-2xl font-extrabold">{money(totalDue)}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Pending</p>
                 </div>
             </div>
 
             <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <h2 className="text-base font-black text-slate-950">Care Giver's Total Revenue Form</h2>
+                        <h2 className="text-base font-extrabold text-slate-950">Care Giver's Total Revenue Form</h2>
                         <p className="text-sm font-semibold text-slate-500">Monthly used-items register stored in the same day-wise structure as the paper form.</p>
                     </div>
                     <button
@@ -276,7 +276,7 @@ export function Revenue() {
 
                 <div className="mb-4 grid gap-3 md:grid-cols-4">
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Patient / Service</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Patient / Service</span>
                         <select value={selectedServiceId} onChange={(event) => setSelectedServiceId(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold">
                             <option value="">Manual patient</option>
                             {patientServices.map((service) => (
@@ -285,16 +285,16 @@ export function Revenue() {
                         </select>
                     </label>
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Manual Name</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Manual Name</span>
                         <input value={manualPatientName} onChange={(event) => setManualPatientName(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold" placeholder={selectedService?.patientName || 'Inmate name'} />
                     </label>
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Month</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Month</span>
                         <input type="month" value={sheetMonth} onChange={(event) => setSheetMonth(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold" />
                     </label>
                     <div className="rounded-lg bg-slate-50 px-3 py-2">
-                        <p className="text-xs font-black uppercase text-slate-500">Sheet Total</p>
-                        <p className="text-lg font-black text-slate-900">{money(sheetTotal)}</p>
+                        <p className="text-xs font-extrabold uppercase text-slate-500">Sheet Total</p>
+                        <p className="text-lg font-extrabold text-slate-900">{money(sheetTotal)}</p>
                     </div>
                 </div>
 
@@ -337,7 +337,7 @@ export function Revenue() {
                                                 />
                                             </td>
                                         ))}
-                                        <td className="border border-slate-200 px-2 py-1 text-right font-black">{money(quantity * Number(item.rate || 0))}</td>
+                                        <td className="border border-slate-200 px-2 py-1 text-right font-extrabold">{money(quantity * Number(item.rate || 0))}</td>
                                     </tr>
                                 )
                             })}
@@ -353,7 +353,7 @@ export function Revenue() {
                         ['manager', 'Manager']
                     ] as const).map(([key, label]) => (
                         <label key={key} className="block">
-                            <span className="mb-1 block text-xs font-black uppercase text-slate-500">{label}</span>
+                            <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">{label}</span>
                             <input
                                 value={signatures[key]}
                                 onChange={(event) => setSignatures((prev) => ({ ...prev, [key]: event.target.value }))}

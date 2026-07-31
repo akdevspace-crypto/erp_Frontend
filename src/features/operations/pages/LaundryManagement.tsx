@@ -60,7 +60,7 @@ export function LaundryManagement() {
                         <Shirt className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{record.patient?.name || 'Patient'}</p>
+                        <p className="font-extrabold text-slate-950">{record.patient?.name || 'Patient'}</p>
                         <p className="text-xs font-semibold text-slate-500">Laundry record</p>
                     </div>
                 </div>
@@ -77,7 +77,7 @@ export function LaundryManagement() {
                 const nextStatus = currentIndex >= 0 ? laundryStatuses[currentIndex + 1] : 'WASHING'
 
                 if (!nextStatus) {
-                    return <span className="text-xs font-black text-emerald-700">Closed</span>
+                    return <span className="text-xs font-extrabold text-emerald-700">Closed</span>
                 }
 
                 return (
@@ -85,7 +85,7 @@ export function LaundryManagement() {
                         type="button"
                         onClick={() => updateLaundry.mutate({ id: record.id, status: nextStatus })}
                         disabled={updateLaundry.isPending}
-                        className="inline-flex items-center gap-2 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 transition hover:bg-primary-100 disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 transition hover:bg-primary-100 disabled:opacity-60"
                     >
                         <Workflow className="h-3.5 w-3.5" />
                         Move to {statusLabel(nextStatus)}
@@ -105,20 +105,20 @@ export function LaundryManagement() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{laundryRecords.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Records</p>
+                    <p className="text-2xl font-extrabold">{laundryRecords.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Records</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{openRecords}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Open Laundry</p>
+                    <p className="text-2xl font-extrabold">{openRecords}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Open Laundry</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{completedRecords}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Completed</p>
+                    <p className="text-2xl font-extrabold">{completedRecords}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Completed</p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sky-700 shadow-sm">
-                    <p className="text-2xl font-black">{patients.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Patients Available</p>
+                    <p className="text-2xl font-extrabold">{patients.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Patients Available</p>
                 </div>
             </div>
 
@@ -167,7 +167,7 @@ export function LaundryManagement() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createLaundry.isPending || !patients.length} className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createLaundry.isPending || !patients.length} className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             {createLaundry.isPending ? 'Saving...' : 'Save Laundry'}
                         </button>
                     </div>

@@ -151,7 +151,7 @@ export function AssetProducts() {
                         <Boxes className="h-5 w-5" />
                     </span>
                     <div className="min-w-0">
-                        <p className="truncate font-black text-slate-950">{asset.name}</p>
+                        <p className="truncate font-extrabold text-slate-950">{asset.name}</p>
                         <p className="text-xs font-semibold text-slate-500">{getAssetCode(asset)}</p>
                     </div>
                 </div>
@@ -161,7 +161,7 @@ export function AssetProducts() {
         {
             key: 'quantity',
             header: 'Count',
-            cell: (asset) => <span className="font-black text-slate-900">{Number(stockByProductId.get(asset.id)?.quantity || 0)}</span>
+            cell: (asset) => <span className="font-extrabold text-slate-900">{Number(stockByProductId.get(asset.id)?.quantity || 0)}</span>
         },
         {
             key: 'status',
@@ -181,7 +181,7 @@ export function AssetProducts() {
                 const latest = movementsByProductId.get(asset.id)?.[0]
                 return (
                     <div className="min-w-[170px]">
-                        <p className="text-sm font-black text-slate-900">{latest?.usageType || latest?.movementType || 'Stock Register'}</p>
+                        <p className="text-sm font-extrabold text-slate-900">{latest?.usageType || latest?.movementType || 'Stock Register'}</p>
                         <p className="text-xs font-semibold text-slate-500">{formatDate(latest?.createdAt || stockByProductId.get(asset.id)?.updatedAt)}</p>
                     </div>
                 )
@@ -203,7 +203,7 @@ export function AssetProducts() {
                 const latestPurchase = purchasesByProductId.get(asset.id)?.[0]
                 return (
                     <div className="min-w-[150px]">
-                        <p className="text-sm font-black text-slate-900">{latestPurchase?.vendor || '-'}</p>
+                        <p className="text-sm font-extrabold text-slate-900">{latestPurchase?.vendor || '-'}</p>
                         <p className="text-xs font-semibold text-slate-500">{formatDate(latestPurchase?.createdAt)}</p>
                     </div>
                 )
@@ -216,7 +216,7 @@ export function AssetProducts() {
                 <button
                     type="button"
                     onClick={() => openIssueDrawer(asset)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-black text-amber-700 transition hover:bg-amber-100"
+                    className="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700 transition hover:bg-amber-100"
                 >
                     <Wrench className="h-4 w-4" />
                     Issue
@@ -238,20 +238,20 @@ export function AssetProducts() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 <div className="rounded-xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{assets.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Asset Types</p>
+                    <p className="text-2xl font-extrabold">{assets.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Asset Types</p>
                 </div>
                 <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sky-700 shadow-sm">
-                    <p className="text-2xl font-black">{totalQuantity}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Count</p>
+                    <p className="text-2xl font-extrabold">{totalQuantity}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Count</p>
                 </div>
                 <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{assetsWithOpenIssue}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Open Issues</p>
+                    <p className="text-2xl font-extrabold">{assetsWithOpenIssue}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Open Issues</p>
                 </div>
                 <div className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-rose-700 shadow-sm">
-                    <p className="text-2xl font-black">{lowOrMissingAssets}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Missing / Empty</p>
+                    <p className="text-2xl font-extrabold">{lowOrMissingAssets}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Missing / Empty</p>
                 </div>
             </div>
 
@@ -268,7 +268,7 @@ export function AssetProducts() {
                 <button
                     type="button"
                     onClick={() => setRegisterOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#1f3b4d]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F969C] px-4 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#294D61]"
                 >
                     <PackagePlus className="h-4 w-4" />
                     Register Asset
@@ -309,7 +309,7 @@ export function AssetProducts() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setRegisterOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={isSavingAsset} className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={isSavingAsset} className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             {isSavingAsset ? 'Saving...' : 'Save Asset'}
                         </button>
                     </div>
@@ -364,7 +364,7 @@ export function AssetProducts() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setIssueOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createIssueRequest.isPending} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createIssueRequest.isPending} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             <ClipboardCheck className="h-4 w-4" />
                             {createIssueRequest.isPending ? 'Saving...' : 'Save Issue'}
                         </button>

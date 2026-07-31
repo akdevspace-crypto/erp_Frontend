@@ -60,7 +60,7 @@ export function FoodPreparation() {
                         <CookingPot className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{prep.nutrition?.patient?.name || 'Patient'}</p>
+                        <p className="font-extrabold text-slate-950">{prep.nutrition?.patient?.name || 'Patient'}</p>
                         <p className="text-xs font-semibold text-slate-500">Diet-based food preparation</p>
                     </div>
                 </div>
@@ -81,14 +81,14 @@ export function FoodPreparation() {
             sortable: false,
             cell: (prep) => {
                 const nextStatus = getNextStatus(prep.status)
-                if (!nextStatus) return <span className="text-sm font-black text-slate-500">Closed</span>
+                if (!nextStatus) return <span className="text-sm font-extrabold text-slate-500">Closed</span>
 
                 return (
                     <button
                         type="button"
                         onClick={() => updateMealPrep.mutate({ nutritionId: prep.nutritionId, status: nextStatus })}
                         disabled={updateMealPrep.isPending}
-                        className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-lg bg-primary-600 px-3 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         Mark {nextStatus}
                     </button>
@@ -99,7 +99,7 @@ export function FoodPreparation() {
 
     const stockColumns: Column<InventoryStock>[] = [
         { key: 'sno', header: 'S.No', cell: (_item, index) => index + 1, sortable: false },
-        { key: 'product', header: 'Ration Item', cell: (item) => <span className="font-black text-slate-950">{item.product?.name || 'Ration Item'}</span> },
+        { key: 'product', header: 'Ration Item', cell: (item) => <span className="font-extrabold text-slate-950">{item.product?.name || 'Ration Item'}</span> },
         { key: 'quantity', header: 'Current Qty', cell: (item) => item.quantity, sortable: true },
         { key: 'status', header: 'Stock Status', cell: (item) => <StatusHighlighter value={Number(item.quantity || 0) <= 10 ? 'Low Stock' : 'Available'} /> },
         { key: 'updatedAt', header: 'Last Updated', cell: (item) => formatDateTime(item.updatedAt), sortable: true }
@@ -115,20 +115,20 @@ export function FoodPreparation() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{mealPreps.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Meal Prep Items</p>
+                    <p className="text-2xl font-extrabold">{mealPreps.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Meal Prep Items</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{rationStock.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Ration Items</p>
+                    <p className="text-2xl font-extrabold">{rationStock.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Ration Items</p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sky-700 shadow-sm">
-                    <p className="text-2xl font-black">{totalRationQty}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Total Ration Qty</p>
+                    <p className="text-2xl font-extrabold">{totalRationQty}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Total Ration Qty</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{servedCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Served Meals</p>
+                    <p className="text-2xl font-extrabold">{servedCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Served Meals</p>
                 </div>
             </div>
 
@@ -155,7 +155,7 @@ export function FoodPreparation() {
 
             <section className="flex min-h-[300px] flex-col gap-3">
                 <div className="px-1">
-                    <h2 className="text-lg font-black text-slate-950">Ration Stock Readiness</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">Ration Stock Readiness</h2>
                     <p className="text-sm font-semibold text-slate-500">Live ration inventory available for kitchen operations.</p>
                 </div>
                 <DataTable

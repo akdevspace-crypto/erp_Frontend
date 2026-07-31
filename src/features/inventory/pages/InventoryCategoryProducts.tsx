@@ -93,7 +93,7 @@ export function InventoryCategoryProducts({
                         <Package className="h-4 w-4" />
                     </span>
                     <div className="flex flex-col">
-                        <span className="font-black text-gray-900 dark:text-gray-100">{product.name}</span>
+                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{product.name}</span>
                         <span className="text-xs font-semibold text-gray-500">Category: {categoryLabel}</span>
                     </div>
                 </div>
@@ -182,7 +182,7 @@ export function InventoryCategoryProducts({
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60"
+                            className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60"
                         >
                             {isSaving ? 'Saving...' : 'Save Product'}
                         </button>

@@ -26,6 +26,16 @@ export const useOperationsNutritionPlans = () => {
     })
 }
 
+export const useUpdateDietaryRestrictions = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string, data: any }) => operationsService.updateDietaryRestrictions(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['operations-nutrition-plans'] })
+        }
+    })
+}
+
 export const useMealPreps = () => {
     return useQuery({
         queryKey: ['operations-meal-preps'],

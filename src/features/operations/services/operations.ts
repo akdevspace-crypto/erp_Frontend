@@ -27,6 +27,11 @@ export const operationsService = {
         return response.data?.data || []
     },
 
+    updateDietaryRestrictions: async (id: string, data: any): Promise<any> => {
+        const response = await api.patch(`/operations/nutrition-plans/${id}/diet`, data)
+        return response.data?.data
+    },
+
     getMealPreps: async (): Promise<MealPrepRecord[]> => {
         const response = await api.get('/operations/meal-preps')
         return response.data?.data || []

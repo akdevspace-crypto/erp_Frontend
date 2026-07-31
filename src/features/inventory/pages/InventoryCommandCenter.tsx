@@ -200,12 +200,12 @@ export function InventoryCommandCenter() {
         { key: 'purpose', header: 'Purpose', cell: (item) => <div><p className="font-bold">{item.usageType}</p><p className="text-xs text-slate-500">{item.issuedTo || '-'}</p></div> },
         { key: 'status', header: 'Status', cell: (item) => <StatusHighlighter value={item.status} /> },
         { key: 'requestedAt', header: 'Requested', cell: (item) => formatDate(item.requestedAt) },
-        { key: 'action', header: 'Action', cell: (item) => item.status !== 'PENDING' ? <span className="text-xs font-bold text-slate-500">Closed</span> : canApproveIssue ? <div className="flex gap-2"><button className="rounded-lg bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700" onClick={() => approveIssue.mutate(item.id)}>Approve</button><button className="rounded-lg bg-rose-50 px-3 py-1 text-xs font-black text-rose-700" onClick={() => rejectIssue.mutate(item.id)}>Reject</button></div> : <span className="text-xs font-bold text-amber-600">Waiting</span> }
+        { key: 'action', header: 'Action', cell: (item) => item.status !== 'PENDING' ? <span className="text-xs font-bold text-slate-500">Closed</span> : canApproveIssue ? <div className="flex gap-2"><button className="rounded-lg bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700" onClick={() => approveIssue.mutate(item.id)}>Approve</button><button className="rounded-lg bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700" onClick={() => rejectIssue.mutate(item.id)}>Reject</button></div> : <span className="text-xs font-bold text-amber-600">Waiting</span> }
     ]
     const movementColumns: Column<InventoryStockMovement>[] = [
         { key: 'product', header: 'Product', cell: (item) => <ProductCell name={item.product?.name} category={item.product?.category} /> },
         { key: 'movementType', header: 'Movement', cell: (item) => <StatusHighlighter value={movementLabel[item.movementType]} /> },
-        { key: 'quantity', header: 'Qty', cell: (item) => <span className={item.signedQuantity < 0 ? 'font-black text-rose-600' : 'font-black text-emerald-700'}>{item.movementType === 'CURRENT_STOCK' ? '' : item.signedQuantity < 0 ? '-' : '+'}{item.quantity}</span> },
+        { key: 'quantity', header: 'Qty', cell: (item) => <span className={item.signedQuantity < 0 ? 'font-extrabold text-rose-600' : 'font-extrabold text-emerald-700'}>{item.movementType === 'CURRENT_STOCK' ? '' : item.signedQuantity < 0 ? '-' : '+'}{item.quantity}</span> },
         { key: 'reference', header: 'Reference', cell: (item) => [item.vendor, item.usageType, item.issuedTo, item.notes].filter(Boolean).join(' - ') || 'Current live stock' },
         { key: 'createdAt', header: 'Date', cell: (item) => formatDate(item.createdAt) }
     ]
@@ -234,18 +234,18 @@ export function InventoryCommandCenter() {
                 {metricCards.map(({ label, value, Icon }) => (
                     <div key={label} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                         <Icon className="h-4 w-4 text-primary-600" />
-                        <p className="mt-2 text-2xl font-black text-slate-950">{value}</p>
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</p>
+                        <p className="mt-2 text-2xl font-extrabold text-slate-950">{value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{label}</p>
                     </div>
                 ))}
             </div>
 
             <div className="mb-4 flex flex-wrap gap-2">
-                {tabs.map((tab) => <button key={tab} onClick={() => setActiveTab(tab)} className={`rounded-xl px-4 py-2 text-sm font-black ${activeTab === tab ? 'bg-[#3f5f6a] text-white' : 'bg-white text-slate-700 shadow-sm'}`}>{tab}</button>)}
-                <button onClick={() => setDrawer('product')} className="ml-auto inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-black text-white"><PackagePlus className="h-4 w-4" /> Product</button>
-                <button onClick={() => setDrawer('stock')} className="rounded-xl bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700">Stock In / Out</button>
-                {canRequestIssue && <button onClick={() => setDrawer('issue')} className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-black text-amber-700">Request Issue</button>}
-                <button onClick={() => setDrawer('purchase')} className="rounded-xl bg-sky-50 px-4 py-2 text-sm font-black text-sky-700">Purchase</button>
+                {tabs.map((tab) => <button key={tab} onClick={() => setActiveTab(tab)} className={`rounded-xl px-4 py-2 text-sm font-extrabold ${activeTab === tab ? 'bg-[#0F969C] text-white' : 'bg-white text-slate-700 shadow-sm'}`}>{tab}</button>)}
+                <button onClick={() => setDrawer('product')} className="ml-auto inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2 text-sm font-extrabold text-white"><PackagePlus className="h-4 w-4" /> Product</button>
+                <button onClick={() => setDrawer('stock')} className="rounded-xl bg-emerald-50 px-4 py-2 text-sm font-extrabold text-emerald-700">Stock In / Out</button>
+                {canRequestIssue && <button onClick={() => setDrawer('issue')} className="rounded-xl bg-amber-50 px-4 py-2 text-sm font-extrabold text-amber-700">Request Issue</button>}
+                <button onClick={() => setDrawer('purchase')} className="rounded-xl bg-sky-50 px-4 py-2 text-sm font-extrabold text-sky-700">Purchase</button>
             </div>
 
             {activeTab === 'Overview' && <Overview scope={getInventoryScopeLabel(inventoryScope)} stock={visibleStock.slice(0, 6)} issues={visibleIssues.slice(0, 6)} movements={visibleMovements.slice(0, 6)} />}
@@ -307,11 +307,11 @@ export function InventoryCommandCenter() {
 }
 
 function ProductCell({ name, category }: { name?: string | null; category?: string | null }) {
-    return <div><p className="font-black text-slate-950">{name || 'Unknown Product'}</p><p className="text-xs font-semibold text-slate-500">{category || '-'}</p></div>
+    return <div><p className="font-extrabold text-slate-950">{name || 'Unknown Product'}</p><p className="text-xs font-semibold text-slate-500">{category || '-'}</p></div>
 }
 
 function SubmitRow({ onCancel, loading, label }: { onCancel: () => void; loading: boolean; label: string }) {
-    return <div className="flex justify-end gap-3 pt-4"><button type="button" onClick={onCancel} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button><button type="submit" disabled={loading} className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">{loading ? 'Saving...' : label}</button></div>
+    return <div className="flex justify-end gap-3 pt-4"><button type="button" onClick={onCancel} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button><button type="submit" disabled={loading} className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">{loading ? 'Saving...' : label}</button></div>
 }
 
 function Overview({ scope, stock, issues, movements }: { scope: string; stock: InventoryStock[]; issues: InventoryStockIssueRequest[]; movements: InventoryStockMovement[] }) {
@@ -325,5 +325,5 @@ function Overview({ scope, stock, issues, movements }: { scope: string; stock: I
 }
 
 function OverviewPanel({ title, rows }: { title: string; rows: Array<{ title: string; detail: string; status: string }> }) {
-    return <section className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"><h2 className="text-lg font-black text-slate-950">{title}</h2><div className="mt-3 space-y-3">{rows.length ? rows.map((row, index) => <div key={`${row.title}-${index}`} className="rounded-lg border border-slate-100 p-3"><p className="font-black text-slate-900">{row.title}</p><p className="text-xs font-semibold text-slate-500">{row.detail}</p><p className="mt-2 text-xs font-black text-primary-700">{row.status}</p></div>) : <p className="text-sm font-semibold text-slate-500">No records in this scope.</p>}</div></section>
+    return <section className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm"><h2 className="text-lg font-extrabold text-slate-950">{title}</h2><div className="mt-3 space-y-3">{rows.length ? rows.map((row, index) => <div key={`${row.title}-${index}`} className="rounded-lg border border-slate-100 p-3"><p className="font-extrabold text-slate-900">{row.title}</p><p className="text-xs font-semibold text-slate-500">{row.detail}</p><p className="mt-2 text-xs font-extrabold text-primary-700">{row.status}</p></div>) : <p className="text-sm font-semibold text-slate-500">No records in this scope.</p>}</div></section>
 }

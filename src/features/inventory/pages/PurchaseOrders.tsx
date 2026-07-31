@@ -65,7 +65,7 @@ export function PurchaseOrders() {
             header: 'Product',
             cell: (purchase) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{purchase.product?.name || 'Unknown Product'}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{purchase.product?.name || 'Unknown Product'}</span>
                     <span className="text-xs font-semibold text-gray-500">{purchase.product?.category || '-'}</span>
                 </div>
             )
@@ -160,7 +160,7 @@ export function PurchaseOrders() {
                         <button
                             type="submit"
                             disabled={createPurchase.isPending || productOptions.length === 0}
-                            className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60"
+                            className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60"
                         >
                             {createPurchase.isPending ? 'Saving...' : 'Save Purchase'}
                         </button>

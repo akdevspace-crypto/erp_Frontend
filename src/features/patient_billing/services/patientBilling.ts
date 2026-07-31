@@ -132,7 +132,7 @@ export const patientBillingService = {
     },
 
     getEntries: async (): Promise<PatientDailyCost[]> => {
-        const response = await api.get('/patient-billing/entries')
+        const response = await api.get('/patient-billing/entries', { params: { scope: 'all' } })
         return response.data?.data || []
     },
 

@@ -82,41 +82,22 @@ export function Vitals() {
     const { data: healthcarePatients = [], isLoading: patientsLoading } = useHealthcarePatients()
     const { data: inHouseAllocations = [], isLoading: allocationsLoading } = useInHouseAllocations()
     const { data: vitals = [], isLoading: vitalsLoading } = useVitalSigns()
-    const { data: charts = [] } = useCaregiverVitalCharts(chartMonth, selectedPatientId || undefined)
     const saveChart = useSaveCaregiverVitalChart()
 
     const patients = useMemo<HealthcarePatient[]>(() => {
-        const byId = new Map<string, HealthcarePatient>()
+        const inHousePatientIds = new Set(inHouseAllocations.map((allocation: any) => allocation.patientId).filter(Boolean))
 
-        healthcarePatients.forEach((patient) => byId.set(patient.id, patient))
-
-        inHouseAllocations.forEach((allocation: any) => {
-            const patientId = allocation.patientId
-            const patientName = allocation.patient && allocation.patient !== '-' ? allocation.patient : allocation.clientName
-            if (!patientId || !patientName || byId.has(patientId)) return
-
-            byId.set(patientId, {
-                id: patientId,
-                name: patientName,
-                patientAge: allocation.patientAge || '',
-                patientGender: allocation.patientGender || '',
-                tenantId: '',
-                unitId: allocation.unitId || '',
-                admissions: [{
-                    id: allocation.id,
-                    status: allocation.status,
-                    service: allocation.service,
-                    admittedAt: allocation.startDate || null
-                }],
-                createdAt: allocation.startDate || new Date().toISOString(),
-                updatedAt: allocation.startDate || new Date().toISOString()
-            })
+        return [...healthcarePatients].sort((first, second) => {
+            const firstIsInHouse = inHousePatientIds.has(first.id)
+            const secondIsInHouse = inHousePatientIds.has(second.id)
+            if (firstIsInHouse !== secondIsInHouse) return firstIsInHouse ? -1 : 1
+            return first.name.localeCompare(second.name)
         })
-
-        return Array.from(byId.values()).sort((first, second) => first.name.localeCompare(second.name))
     }, [healthcarePatients, inHouseAllocations])
 
     const selectedPatient = patients.find((patient) => patient.id === selectedPatientId)
+    const selectedPatientUnitId = selectedPatient?.unitId || null
+    const { data: charts = [] } = useCaregiverVitalCharts(chartMonth, selectedPatientId || undefined, selectedPatientUnitId)
     const selectedChart = charts[0]
     const filteredPatientOptions = useMemo(() => {
         const query = patientSearch.trim().toLowerCase()
@@ -201,16 +182,24 @@ export function Vitals() {
 
     const handleSaveChart = async () => {
         if (!selectedPatient) return
-        await saveChart.mutateAsync({
+        const payload = {
             patientId: selectedPatient.id,
             patientName: selectedPatient.name,
+            unitId: selectedPatient.unitId,
             age,
             sex,
             month: chartMonth,
             entries,
             signatures,
             status: 'DRAFT'
-        })
+        }
+
+        if (import.meta.env.DEV) {
+            console.debug('[INHOUSE_VITALS][selected-patient]', selectedPatient)
+            console.debug('[INHOUSE_VITALS][save-payload]', payload)
+        }
+
+        await saveChart.mutateAsync(payload)
     }
 
     const handleSelectPatient = (patient: HealthcarePatient) => {
@@ -232,7 +221,7 @@ export function Vitals() {
                         <HeartPulse className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{row.patient.name}</p>
+                        <p className="font-extrabold text-slate-950">{row.patient.name}</p>
                         <p className="text-xs font-semibold text-slate-500">Registered patient</p>
                     </div>
                 </div>
@@ -260,27 +249,27 @@ export function Vitals() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{patients.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Patients</p>
+                    <p className="text-2xl font-extrabold">{patients.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Patients</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{stableCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Stable</p>
+                    <p className="text-2xl font-extrabold">{stableCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Stable</p>
                 </div>
                 <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-rose-700 shadow-sm">
-                    <p className="text-2xl font-black">{criticalCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Critical</p>
+                    <p className="text-2xl font-extrabold">{criticalCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Critical</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{missingCount}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">No Vitals</p>
+                    <p className="text-2xl font-extrabold">{missingCount}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">No Vitals</p>
                 </div>
             </div>
 
             <section className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                        <h2 className="text-base font-black text-slate-950">Care Giver's Vital Sign Chart</h2>
+                        <h2 className="text-base font-extrabold text-slate-950">Care Giver's Vital Sign Chart</h2>
                         <p className="text-sm font-semibold text-slate-500">Stored month-wise in the same structure as the paper register.</p>
                     </div>
                     <button
@@ -296,7 +285,7 @@ export function Vitals() {
 
                 <div className="mb-4 grid gap-3 md:grid-cols-5">
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Inmate</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Inmate</span>
                         <div className="relative">
                             <button
                                 type="button"
@@ -340,19 +329,19 @@ export function Vitals() {
                         </div>
                     </label>
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Month</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Month</span>
                         <input type="month" value={chartMonth} onChange={(event) => setChartMonth(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold" />
                     </label>
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Age</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Age</span>
                         <input value={age} onChange={(event) => setAge(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold" />
                     </label>
                     <label className="block">
-                        <span className="mb-1 block text-xs font-black uppercase text-slate-500">Sex</span>
+                        <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">Sex</span>
                         <input value={sex} onChange={(event) => setSex(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold" />
                     </label>
                 <div className="rounded-lg bg-slate-50 px-3 py-2">
-                    <p className="text-xs font-black uppercase text-slate-500">Patient ID</p>
+                    <p className="text-xs font-extrabold uppercase text-slate-500">Patient ID</p>
                     <p className="truncate text-sm font-bold text-slate-900">{selectedPatient?.id || '-'}</p>
                 </div>
                 </div>
@@ -370,7 +359,7 @@ export function Vitals() {
                         <tbody>
                             {entries.map((entry) => (
                                 <tr key={entry.day}>
-                                    <td className="border border-slate-200 px-2 py-1 font-black text-slate-700">{entry.day}</td>
+                                    <td className="border border-slate-200 px-2 py-1 font-extrabold text-slate-700">{entry.day}</td>
                                     {chartFields.map((field) => (
                                         <td key={field.key} className="border border-slate-200 p-1">
                                             <input
@@ -389,7 +378,7 @@ export function Vitals() {
                 <div className="mt-4 grid gap-3 md:grid-cols-4">
                     {(['doctor', 'nurse', 'attender', 'manager'] as const).map((key) => (
                         <label key={key} className="block">
-                            <span className="mb-1 block text-xs font-black uppercase text-slate-500">{key}</span>
+                            <span className="mb-1 block text-xs font-extrabold uppercase text-slate-500">{key}</span>
                             <input
                                 value={signatures[key]}
                                 onChange={(event) => setSignatures((prev) => ({ ...prev, [key]: event.target.value }))}

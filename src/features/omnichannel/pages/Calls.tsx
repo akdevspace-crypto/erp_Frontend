@@ -110,7 +110,7 @@ export function Calls() {
                 ].map(([label, value]) => (
                     <div key={label} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{label}</p>
-                        <p className="mt-2 text-xl font-black text-slate-900 dark:text-white">{value}</p>
+                        <p className="mt-2 text-xl font-extrabold text-slate-900 dark:text-white">{value}</p>
                     </div>
                 ))}
             </div>

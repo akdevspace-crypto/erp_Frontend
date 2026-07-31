@@ -87,7 +87,7 @@ const staffFullName = (assignment: MedicalAssignment) => {
 
 const medicalStaffName = (staff: MedicalStaff) => `${staff.firstName} ${staff.lastName || ''}`.trim()
 
-const statusActionClass = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm hover:border-[#3f5f6a] hover:text-[#3f5f6a] dark:border-white/10 dark:bg-black dark:text-gray-300'
+const statusActionClass = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm hover:border-[#0F969C] hover:text-[#0F969C] dark:border-white/10 dark:bg-black dark:text-gray-300'
 
 export function MedicalMonitor() {
     const { toast } = useToast()
@@ -170,7 +170,7 @@ export function MedicalMonitor() {
     }
 
     const columns: Column<MedicalAssignment>[] = [
-        { key: 'refNo', header: 'Ref No', sortable: true, cell: (row) => <span className="font-bold text-[#1f3b4d]">{row.refNo}</span> },
+        { key: 'refNo', header: 'Ref No', sortable: true, cell: (row) => <span className="font-bold text-[#294D61]">{row.refNo}</span> },
         {
             key: 'staff',
             header: 'Doctor / Nurse',
@@ -250,7 +250,7 @@ export function MedicalMonitor() {
                 ].map((metric) => (
                     <div key={metric.label} className="min-h-[104px] rounded-lg border border-gray-100 bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] dark:border-white/10 dark:bg-black">
                         <div className="text-xs font-bold uppercase text-gray-500">{metric.label}</div>
-                        <div className="mt-2 text-2xl font-black text-gray-900 dark:text-white">{metric.value}</div>
+                        <div className="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white">{metric.value}</div>
                     </div>
                 ))}
             </div>
@@ -320,7 +320,7 @@ export function MedicalMonitor() {
                         <textarea
                             value={formData.notes || ''}
                             onChange={(event) => setFormData((current) => ({ ...current, notes: event.target.value }))}
-                            className="min-h-[96px] w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 outline-none transition-all focus:border-[#3f5f6a] focus:bg-white focus:ring-2 focus:ring-[#3f5f6a]/20 dark:border-white/10 dark:bg-black dark:text-gray-100"
+                            className="min-h-[96px] w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 outline-none transition-all focus:border-[#0F969C] focus:bg-white focus:ring-2 focus:ring-[#0F969C]/20 dark:border-white/10 dark:bg-black dark:text-gray-100"
                             placeholder="Clinical notes, handoff details, or special instructions"
                         />
                     </div>
@@ -328,7 +328,7 @@ export function MedicalMonitor() {
                         <button type="button" onClick={() => setIsDrawerOpen(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 dark:border-white/10 dark:text-gray-300">
                             Cancel
                         </button>
-                        <button type="submit" disabled={createAssignment.isPending} className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
+                        <button type="submit" disabled={createAssignment.isPending} className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
                             {createAssignment.isPending ? 'Saving...' : 'Save Duty'}
                         </button>
                     </div>

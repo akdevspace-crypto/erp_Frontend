@@ -46,7 +46,7 @@ export function StockMovementHistory() {
             header: 'Product',
             cell: (movement) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-gray-900 dark:text-gray-100">{movement.product?.name || 'Unknown Product'}</span>
+                    <span className="font-extrabold text-gray-900 dark:text-gray-100">{movement.product?.name || 'Unknown Product'}</span>
                     <span className="text-xs font-semibold text-gray-500">{movement.product?.category || '-'}</span>
                 </div>
             )
@@ -61,7 +61,7 @@ export function StockMovementHistory() {
             header: 'Quantity',
             sortable: true,
             cell: (movement) => (
-                <span className={movement.signedQuantity < 0 ? 'font-black text-rose-600' : 'font-black text-emerald-700'}>
+                <span className={movement.signedQuantity < 0 ? 'font-extrabold text-rose-600' : 'font-extrabold text-emerald-700'}>
                     {movement.movementType === 'CURRENT_STOCK' ? '' : movement.signedQuantity < 0 ? '-' : '+'}{movement.quantity}
                 </span>
             )
