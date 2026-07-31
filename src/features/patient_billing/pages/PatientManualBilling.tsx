@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { FileText, Smartphone } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader';
-import { api } from '../../../lib/axios';
+// api import removed
 import html2pdf from 'html2pdf.js';
 
 const Field = ({ label, value, onChange, placeholder, type = 'text' }: any) => (

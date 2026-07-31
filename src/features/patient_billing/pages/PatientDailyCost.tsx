@@ -575,7 +575,7 @@ export function PatientDailyCost() {
     const downloadInvoicePdf = () => {
         if (!receiptInvoice) return
         const metadata = receiptInvoice.metadata || {}
-        const summary = Array.isArray(metadata.chargeSummary) ? metadata.chargeSummary : groupedCharges
+        // summary removed
         const patientName = metadata.patientName || receiptService?.patientName || '-'
         const clientName = metadata.clientName || receiptInvoice.clientName || receiptService?.clientName || '-'
         const serviceType = String(metadata.serviceType || receiptService?.serviceLabel || '-').replace(/_/g, ' ')
@@ -585,7 +585,7 @@ export function PatientDailyCost() {
         const generatedAt = new Date()
         const upi = metadata.upiId || upiId
         const accountHolder = 'Universal Elder Care'
-        const contactNumber = receiptService?.familyContact || '-'
+        // contactNumber removed
         const amount = Number(receiptInvoice.amount || 0)
         const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(receiptInvoice.refNo || 'Monthly Patient Invoice')}`
         const qrSrc = qrImageUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`

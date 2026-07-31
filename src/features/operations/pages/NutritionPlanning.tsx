@@ -30,9 +30,10 @@ export function NutritionPlanning() {
 
     const handleEditDiet = (plan: OperationsNutritionPlan) => {
         setSelectedPlan(plan)
-        setRestrictions(plan.metadata && typeof plan.metadata === 'object' && 'dietaryRestrictions' in plan.metadata ? String(plan.metadata.dietaryRestrictions) : '')
-        setTexture(plan.metadata && typeof plan.metadata === 'object' && 'textureModification' in plan.metadata ? String(plan.metadata.textureModification) : 'STANDARD')
-        setNotes(plan.metadata && typeof plan.metadata === 'object' && 'dietaryNotes' in plan.metadata ? String(plan.metadata.dietaryNotes) : '')
+        const planAny = plan as any;
+        setRestrictions(planAny.metadata && typeof planAny.metadata === 'object' && 'dietaryRestrictions' in planAny.metadata ? String(planAny.metadata.dietaryRestrictions) : '')
+        setTexture(planAny.metadata && typeof planAny.metadata === 'object' && 'textureModification' in planAny.metadata ? String(planAny.metadata.textureModification) : 'STANDARD')
+        setNotes(planAny.metadata && typeof planAny.metadata === 'object' && 'dietaryNotes' in planAny.metadata ? String(planAny.metadata.dietaryNotes) : '')
         setDrawerOpen(true)
     }
 
@@ -90,7 +91,8 @@ export function NutritionPlanning() {
             key: 'dietPlan',
             header: 'Diet Instructions',
             cell: (plan) => {
-                const metadata = typeof plan.metadata === 'object' && plan.metadata ? plan.metadata : {}
+                const planAny = plan as any;
+                const metadata = typeof planAny.metadata === 'object' && planAny.metadata ? planAny.metadata : {}
                 const r = 'dietaryRestrictions' in metadata ? String(metadata.dietaryRestrictions) : ''
                 const t = 'textureModification' in metadata ? String(metadata.textureModification) : 'STANDARD'
                 return (
@@ -183,7 +185,7 @@ export function NutritionPlanning() {
                 emptyStateMessage="No live nutrition plans found. Add diet plans from Healthcare → Nutrition & Diet."
             />
             
-            <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Specialized Diet Mapping" subtitle={`Map dietary restrictions for ${selectedPlan?.patient?.name || 'Resident'}`}>
+            <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title={`Specialized Diet Mapping for ${selectedPlan?.patient?.name || 'Resident'}`}>
                 <form onSubmit={handleSaveDiet} className="space-y-6">
                     <div>
                         <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-200">Dietary Restrictions & Allergies</label>

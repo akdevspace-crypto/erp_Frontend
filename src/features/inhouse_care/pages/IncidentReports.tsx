@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Plus, FileText, Activity } from 'lucide-react'
+import { AlertTriangle, Plus, Activity } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { api } from '../../../lib/axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'

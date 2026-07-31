@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Activity, Brain, Moon, Users, ListPlus, Send } from 'lucide-react'
+import { Activity, Brain, Moon, Users, ListPlus } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { api } from '../../../lib/axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'

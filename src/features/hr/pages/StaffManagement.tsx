@@ -617,9 +617,9 @@ export function StaffManagement() {
                         createStaffLogin.mutate({
                             staffId: editingStaffId,
                             data: {
-                                email: formData.loginEmail,
-                                password: formData.loginPassword,
-                                roleId: formData.loginRoleId
+                                email: formData.loginEmail || '',
+                                password: formData.loginPassword || '',
+                                roleId: formData.loginRoleId || ''
                             }
                         }, {
                             onSuccess: () => setIsDrawerOpen(false)

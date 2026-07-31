@@ -452,7 +452,7 @@ export function UserManagement() {
     })
 
     const filteredUsers = users.filter((user) => {
-        if (user.staff || user.staffId) return false;
+        if (user.staff || (user as any).staffId) return false;
         
         const roleName = String(user.role?.name || '').toLowerCase();
         if (roleName.includes('client') || roleName.includes('family member')) return false;

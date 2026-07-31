@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Calendar as CalendarIcon, Clock, MapPin, Tag, Plus, CheckCircle2 } from 'lucide-react'
+import { Calendar as CalendarIcon, Clock, MapPin, Plus } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { api } from '../../../lib/axios'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
