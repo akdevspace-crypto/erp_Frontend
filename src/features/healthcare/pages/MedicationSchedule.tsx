@@ -134,7 +134,7 @@ export function MedicationSchedule() {
                         <Pill className="h-4 w-4" />
                     </span>
                     <div className="flex flex-col">
-                        <span className="font-black text-gray-900 dark:text-gray-100">{schedule.medicineName}</span>
+                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{schedule.medicineName}</span>
                         <span className="text-xs font-semibold text-gray-500">{schedule.patientName}</span>
                     </div>
                 </div>
@@ -165,7 +165,7 @@ export function MedicationSchedule() {
                                 type="button"
                                 onClick={() => handleAdministerDose(schedule, slot)}
                                 disabled={done || administerDose.isPending}
-                                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black transition disabled:opacity-70 ${done ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
+                                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-extrabold transition disabled:opacity-70 ${done ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
                                 title={done ? `${slot} dose already administered` : `Mark ${slot} dose as given`}
                             >
                                 {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
@@ -187,7 +187,7 @@ export function MedicationSchedule() {
                     <div className="max-w-56 space-y-1">
                         {history.slice(-2).map((item, index) => (
                             <div key={`${item.slot}-${item.administeredAt || index}`} className="rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">
-                                <p className="font-black">{item.slot} given</p>
+                                <p className="font-extrabold">{item.slot} given</p>
                                 <p className="truncate">{item.administeredBy || 'Care staff'} - {formatDateTime(item.administeredAt)}</p>
                             </div>
                         ))}
@@ -226,8 +226,8 @@ export function MedicationSchedule() {
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 {summary.map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -237,10 +237,10 @@ export function MedicationSchedule() {
             <div className="mb-4 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-gray-900">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-sm font-black text-gray-900 dark:text-gray-100">Issued medicines waiting for schedule</p>
+                        <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Issued medicines waiting for schedule</p>
                         <p className="text-xs font-semibold text-gray-500">Approved medicine issues appear here before patient dose tracking starts.</p>
                     </div>
-                    <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">
+                    <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-extrabold text-sky-700">
                         {unscheduledMedicineIssues.length} Pending
                     </span>
                 </div>
@@ -249,13 +249,13 @@ export function MedicationSchedule() {
                         {unscheduledMedicineIssues.slice(0, 4).map((issue) => (
                             <div key={issue.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-black text-gray-900 dark:text-gray-100">{issue.productName}</p>
+                                    <p className="truncate text-sm font-extrabold text-gray-900 dark:text-gray-100">{issue.productName}</p>
                                     <p className="text-xs font-semibold text-gray-500">Qty {issue.quantity} issued to {issue.issuedTo || 'Patient'}</p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => openScheduleDrawer(issue)}
-                                    className="rounded-lg bg-[#3f5f6a] px-3 py-1.5 text-xs font-black text-white shadow-sm transition hover:bg-[#1f3b4d]"
+                                    className="rounded-lg bg-[#0F969C] px-3 py-1.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#294D61]"
                                 >
                                     Create Schedule
                                 </button>
@@ -316,7 +316,7 @@ export function MedicationSchedule() {
                                     key={slot}
                                     type="button"
                                     onClick={() => toggleSlot(slot)}
-                                    className={`rounded-full px-4 py-2 text-xs font-black transition ${selectedSlots.includes(slot) ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                    className={`rounded-full px-4 py-2 text-xs font-extrabold transition ${selectedSlots.includes(slot) ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
                                 >
                                     {slot}
                                 </button>
@@ -331,7 +331,7 @@ export function MedicationSchedule() {
 
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
-                        <button type="submit" disabled={createSchedule.isPending || issueOptions.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60">
+                        <button type="submit" disabled={createSchedule.isPending || issueOptions.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60">
                             <Plus className="h-4 w-4" />
                             {createSchedule.isPending ? 'Saving...' : 'Save Schedule'}
                         </button>

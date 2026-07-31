@@ -167,10 +167,10 @@ export function StaffMenuPrivilege() {
     }
 
     return (
-        <div className="flex h-full min-w-0 flex-col space-y-4 bg-transparent dark:bg-black sm:space-y-6">
+        <div className="flex min-h-full min-w-0 flex-col space-y-4 bg-transparent pb-4 dark:bg-black sm:space-y-6">
             <PageHeader title="Staff Menu Privilege" breadcrumbs={[{ label: 'Home' }, { label: 'Staff Login Privilege' }]} />
 
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
+            <div className="flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
                 <div className="sticky top-0 z-10 flex flex-col gap-3 border-b border-gray-100 bg-gray-50/50 px-4 py-4 dark:border-white/10 dark:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <h2 className="text-base font-bold text-gray-800 dark:text-gray-200">Edit - Staff Menu Privilege</h2>
                     <button onClick={() => navigate('/hr/staff-privilege')} className="px-3 py-1.5 bg-white dark:bg-black border border-gray-300 dark:border-white/10 text-gray-700 dark:text-gray-300 font-medium rounded-md text-xs hover:bg-gray-50 dark:hover:bg-white/5 transition shadow-sm">
@@ -178,7 +178,7 @@ export function StaffMenuPrivilege() {
                     </button>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+                <div className="p-4 sm:p-6">
                     <div className="mx-auto mb-8 w-full max-w-none overflow-hidden rounded-md border border-gray-200 dark:border-white/10">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10 text-gray-900 dark:text-gray-100">
                             <tbody className="divide-y divide-gray-200 dark:divide-white/10 text-sm">

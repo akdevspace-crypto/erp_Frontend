@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { enquiryService } from '../services/enquiry'
+import type { ClientPortalAccessPayload } from '../services/enquiry'
 import type { EnquiryFormValues } from '../schema'
 import { useToast } from '../../../components/Toast'
 import { useAuthStore } from '../../../store/authStore'
@@ -288,6 +289,40 @@ export const useCreateAdmissionClientPortalAccess = () => {
                 error?.response?.data?.message ||
                 error?.message ||
                 'Failed to create client portal access'
+            toast({ type: 'error', title: 'Access Failed', message })
+        }
+    })
+}
+
+export const useUpsertClientPortalAccess = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: ({
+            enquiryId,
+            data
+        }: {
+            enquiryId: string
+            data: ClientPortalAccessPayload
+        }) => enquiryService.upsertClientPortalAccess(enquiryId, data),
+        onSuccess: (result: any) => {
+            queryClient.invalidateQueries({ queryKey: ['enquiries'] })
+            queryClient.invalidateQueries({ queryKey: ['clients'] })
+            toast({
+                type: result?.created ? 'success' : 'info',
+                title: result?.created ? 'Access Created' : 'Access Updated',
+                message: result?.created
+                    ? 'Client portal login was created'
+                    : 'Client portal login was updated'
+            })
+        },
+        onError: (error: any) => {
+            const message =
+                error?.response?.data?.errors?.[0]?.message ||
+                error?.response?.data?.message ||
+                error?.message ||
+                'Failed to save client portal access'
             toast({ type: 'error', title: 'Access Failed', message })
         }
     })

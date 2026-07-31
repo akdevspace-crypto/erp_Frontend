@@ -8,6 +8,7 @@ import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
 import { useRoles, useStaff } from '../hooks/useHR'
 import { hrService } from '../services/hr'
+
 import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '../../../components/Toast'
 import { useForm } from 'react-hook-form'
@@ -36,7 +37,7 @@ type PrivilegeFormInput = z.input<typeof privilegeFormSchema>
 type PrivilegeFormValues = z.output<typeof privilegeFormSchema>
 
 export function StaffPrivilege() {
-    const { data: staffData = [] } = useStaff()
+    const { data: staffData = [] } = useStaff({ includeFormer: true })
     const { data: roleList = [] } = useRoles()
     const { data: units = [] } = useUnits()
     const queryClient = useQueryClient()
@@ -157,8 +158,9 @@ export function StaffPrivilege() {
             toast({ type: 'success', title: 'Success', message: 'Login privilege saved.' })
             setIsDrawerOpen(false)
             queryClient.invalidateQueries({ queryKey: ['staff'] })
-        } catch (e) {
-            toast({ type: 'error', title: 'Error', message: 'Failed to save privilege' })
+        } catch (e: any) {
+            const errorMsg = e?.response?.data?.errors?.[0]?.message || e?.response?.data?.message || e.message || 'Failed to save privilege'
+            toast({ type: 'error', title: 'Error', message: errorMsg })
         }
     }
 
@@ -224,7 +226,7 @@ export function StaffPrivilege() {
                 </div>
                 <div className="flex gap-3">
                     <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">Enable Live Monitoring</button>
-                    <button onClick={openAddDrawer} className="inline-flex items-center px-4 py-2 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3f5f6a] transition-all active:scale-95 border border-transparent">Add New Staff</button>
+                    <button onClick={openAddDrawer} className="inline-flex items-center px-4 py-2 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#0F969C] to-[#294D61] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(15,150,156,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F969C] transition-all active:scale-95 border border-transparent">Add New Staff</button>
                 </div>
             </div>
 

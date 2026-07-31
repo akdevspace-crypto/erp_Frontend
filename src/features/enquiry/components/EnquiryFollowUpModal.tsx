@@ -154,8 +154,8 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
 
                     <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm dark:border-white/5 dark:bg-black sm:flex-row sm:items-center sm:justify-between sm:p-6">
                         <div className="min-w-0">
-                            <p className="text-[11px] font-black text-gray-500 uppercase tracking-widest mb-1">Client Reference No.</p>
-                            <h3 className="truncate text-2xl font-black tracking-tight text-[#ffc107] sm:text-3xl">{enquiry.refNo || `ENQ-${enquiry.id?.substring(0, 6).toUpperCase()}`}</h3>
+                            <p className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mb-1">Client Reference No.</p>
+                            <h3 className="truncate text-2xl font-extrabold tracking-tight text-[#ffc107] sm:text-3xl">{enquiry.refNo || `ENQ-${enquiry.id?.substring(0, 6).toUpperCase()}`}</h3>
                         </div>
                         <div className="text-left sm:text-right">
                             <div className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 rounded-xl px-4 py-3 min-w-[140px] shadow-sm">
@@ -170,7 +170,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:gap-8">
                         {/* Enquiry Snapshot */}
                         <section>
-                            <h4 className="text-[12px] font-black text-[#ffc107] uppercase tracking-[0.2em] mb-4">ENQUIRY SNAPSHOT</h4>
+                            <h4 className="text-[12px] font-extrabold text-[#ffc107] uppercase tracking-[0.2em] mb-4">ENQUIRY SNAPSHOT</h4>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div className="bg-amber-50/30 dark:bg-black border border-amber-100 dark:border-[#ffc107]/10 rounded-xl p-4">
                                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">UNIT</p>
@@ -205,21 +205,21 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
 
                         {/* Client Details */}
                         <section>
-                            <h4 className="text-[12px] font-black text-[#3f5f6a] uppercase tracking-[0.2em] mb-4">CLIENT DETAILS</h4>
+                            <h4 className="text-[12px] font-extrabold text-[#0F969C] uppercase tracking-[0.2em] mb-4">CLIENT DETAILS</h4>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <div className="bg-primary-50/30 dark:bg-black border border-primary-100 dark:border-[#3f5f6a]/10 rounded-xl p-4">
+                                <div className="bg-primary-50/30 dark:bg-black border border-primary-100 dark:border-[#0F969C]/10 rounded-xl p-4">
                                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">CLIENT NAME</p>
                                     <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{enquiry.clientName}</p>
                                 </div>
-                                <div className="bg-primary-50/30 dark:bg-black border border-primary-100 dark:border-[#3f5f6a]/10 rounded-xl p-4">
+                                <div className="bg-primary-50/30 dark:bg-black border border-primary-100 dark:border-[#0F969C]/10 rounded-xl p-4">
                                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">MOBILE</p>
                                     <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{enquiry.mobile}</p>
                                 </div>
-                                <div className="bg-primary-50/30 dark:bg-[#010e0c] border border-primary-100 dark:border-[#3f5f6a]/10 rounded-xl p-4 col-span-2">
+                                <div className="bg-primary-50/30 dark:bg-[#010e0c] border border-primary-100 dark:border-[#0F969C]/10 rounded-xl p-4 col-span-2">
                                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">EMAIL</p>
                                     <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">{enquiry.email || '--'}</p>
                                 </div>
-                                <div className="bg-primary-50/30 dark:bg-[#010e0c] border border-primary-100 dark:border-[#3f5f6a]/10 rounded-xl p-4 col-span-2">
+                                <div className="bg-primary-50/30 dark:bg-[#010e0c] border border-primary-100 dark:border-[#0F969C]/10 rounded-xl p-4 col-span-2">
                                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">LAST COMMENTS</p>
                                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400 italic">"{enquiry.comments || 'No initial comments provided.'}"</p>
                                 </div>
@@ -229,11 +229,11 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
 
                     {/* Follow-up Form Section */}
                     <div className="bg-gray-50 dark:bg-black border border-gray-200 dark:border-white/5 rounded-[24px] p-6 shadow-sm">
-                        <h4 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Discussion Record</h4>
+                        <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-6">Discussion Record</h4>
 
                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-4 2xl:gap-6">
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Lead Filter</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Lead Filter</label>
                                 <select
                                     value={form.leadValidity}
                                     onChange={(e) => setForm(prev => ({ ...prev, leadValidity: e.target.value }))}
@@ -248,7 +248,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Followup Mode</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Followup Mode</label>
                                 <select
                                     value={form.followupMode}
                                     onChange={(e) => setForm(prev => ({ ...prev, followupMode: e.target.value }))}
@@ -263,7 +263,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Conversion Readiness</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Conversion Readiness</label>
                                 <select
                                     value={form.conversionReadiness}
                                     onChange={(e) => setForm(prev => ({ ...prev, conversionReadiness: e.target.value }))}
@@ -279,7 +279,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Urgency</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Urgency</label>
                                 <select
                                     value={form.urgency}
                                     onChange={(e) => setForm(prev => ({ ...prev, urgency: e.target.value }))}
@@ -294,7 +294,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Staff Followup *</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Staff Followup *</label>
                                 <select
                                     value={form.staffId}
                                     onChange={(e) => setForm(prev => ({ ...prev, staffId: e.target.value }))}
@@ -321,7 +321,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Outcome / Status</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Outcome / Status</label>
                                 <select
                                     value={form.followupStatus}
                                     onChange={(e) => setForm(prev => ({ ...prev, followupStatus: e.target.value }))}
@@ -339,7 +339,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Next Followup Date</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Next Followup Date</label>
                                 <input
                                     type="date"
                                     value={form.nextFollowupDate}
@@ -349,7 +349,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Client Interest</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Client Interest</label>
                                 <select
                                     value={form.clientInterest}
                                     onChange={(e) => setForm(prev => ({ ...prev, clientInterest: e.target.value }))}
@@ -365,7 +365,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Ready To Pay Amount</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Ready To Pay Amount</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -377,7 +377,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Payment Mode</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Payment Mode</label>
                                 <select
                                     value={form.paymentMode}
                                     onChange={(e) => setForm(prev => ({ ...prev, paymentMode: e.target.value }))}
@@ -393,7 +393,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Attachment / Proof Name</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Attachment / Proof Name</label>
                                 <input
                                     value={form.attachmentName}
                                     onChange={(e) => setForm(prev => ({ ...prev, attachmentName: e.target.value }))}
@@ -403,7 +403,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             </div>
 
                             <div className="space-y-2 md:col-span-2 2xl:col-span-4">
-                                <label className="text-[11px] font-black text-gray-500 uppercase tracking-widest ml-1">Discussion Timeline & Notes *</label>
+                                <label className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest ml-1">Discussion Timeline & Notes *</label>
                                 <textarea
                                     value={form.comments}
                                     onChange={(e) => setForm(prev => ({ ...prev, comments: e.target.value }))}
@@ -431,7 +431,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
                             <button
                                 type="submit"
                                 disabled={addFollowUp.isPending || missingComments || missingStaff}
-                                className="px-8 py-3 rounded-xl bg-[#3f5f6a] text-white font-black text-sm uppercase tracking-wider hover:bg-[#1f3b4d] shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-8 py-3 rounded-xl bg-[#0F969C] text-white font-extrabold text-sm uppercase tracking-wider hover:bg-[#294D61] shadow-lg shadow-primary-500/20 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 <Send className="w-4 h-4" />
                                 {addFollowUp.isPending ? 'Submitting...' : 'Submit Follow-up'}
@@ -441,7 +441,7 @@ export function EnquiryFollowUpModal({ isOpen, onClose, enquiry, staffOptions }:
 
                     {Array.isArray(enquiry.followUps) && enquiry.followUps.length > 0 && (
                         <section className="rounded-[24px] border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-black">
-                            <h4 className="mb-4 text-lg font-black text-gray-900 dark:text-white">Follow-up History</h4>
+                            <h4 className="mb-4 text-lg font-extrabold text-gray-900 dark:text-white">Follow-up History</h4>
                             <div className="space-y-3">
                                 {enquiry.followUps.slice(0, 5).map((followUp: any, index: number) => (
                                     <div key={followUp.id || index} className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm dark:border-white/10 dark:bg-white/5">

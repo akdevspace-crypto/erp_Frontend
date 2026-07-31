@@ -368,7 +368,7 @@ export function EnquiryFollowUp() {
             key: 'refNo', header: 'Client Ref. No.', sortable: true, cell: (e) => (
                 <div className="flex flex-col text-left">
                     <span className="text-[13px] font-bold text-gray-900 dark:text-gray-100 uppercase">{e.refNo}</span>
-                    <span className="mt-0.5 flex items-center text-[11px] font-medium text-[#3f5f6a]">
+                    <span className="mt-0.5 flex items-center text-[11px] font-medium text-[#0F969C]">
                         <span className="mr-1">-&gt;</span> Enq
                     </span>
                 </div>
@@ -399,8 +399,8 @@ export function EnquiryFollowUp() {
         {
             key: 'clientName', header: 'Client Details', sortable: true, cell: (e) => (
                 <div className="flex flex-col text-left">
-                    <span className="text-[13px] font-black text-gray-900 dark:text-gray-100">{e.clientName}</span>
-                    <span className="mt-1 text-[11px] font-bold tracking-wide text-[#3f5f6a] dark:text-primary-300">{e.mobile}</span>
+                    <span className="text-[13px] font-extrabold text-gray-900 dark:text-gray-100">{e.clientName}</span>
+                    <span className="mt-1 text-[11px] font-bold tracking-wide text-[#0F969C] dark:text-primary-300">{e.mobile}</span>
                 </div>
             )
         },
@@ -408,7 +408,7 @@ export function EnquiryFollowUp() {
             key: 'mode', header: 'Lead Score & Priority', cell: (e) => (
                 <div className="flex flex-col text-left">
                     <span className="w-fit border-b border-gray-100 dark:border-white/10 pb-1 text-[14px] font-bold text-gray-900 dark:text-gray-100">{e.automationScore ?? 0} / 100 PTS</span>
-                    <StatusHighlighter value={e.automationPriority || 'COLD'} className="mt-1.5 min-w-0 px-2 py-[3px] text-[10px] font-black" />
+                    <StatusHighlighter value={e.automationPriority || 'COLD'} className="mt-1.5 min-w-0 px-2 py-[3px] text-[10px] font-extrabold" />
                 </div>
             )
         },
@@ -440,15 +440,15 @@ export function EnquiryFollowUp() {
                     { label: 'Urgent Leads', value: accountabilityTotals.urgent }
                 ].map((item) => (
                     <div key={item.label} className="rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-black">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
-                        <p className="mt-1 text-2xl font-black text-gray-900 dark:text-gray-100">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-gray-100">{item.value}</p>
                     </div>
                 ))}
             </section>
 
             <section className="mb-3 h-[220px] shrink-0">
                 <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-sm font-black uppercase tracking-[0.18em] text-gray-500">Staff Follow-up Accountability</h3>
+                    <h3 className="text-sm font-extrabold uppercase tracking-[0.18em] text-gray-500">Staff Follow-up Accountability</h3>
                 </div>
                 <div className="h-[190px] rounded-xl border border-gray-100 bg-white p-2 shadow-sm dark:border-white/10 dark:bg-black">
                     <div className="h-full overflow-y-auto pr-1">
@@ -456,7 +456,7 @@ export function EnquiryFollowUp() {
                             <thead className="sticky top-0 z-10 bg-white dark:bg-black">
                                 <tr>
                                     {['Staff', 'Assigned', 'Pending', 'Ready', 'Urgent', 'Invalid', 'Latest Status'].map((header) => (
-                                        <th key={header} className="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-gray-500">
+                                        <th key={header} className="px-3 py-2 text-left text-[11px] font-extrabold uppercase tracking-[0.16em] text-gray-500">
                                             {header}
                                         </th>
                                     ))}
@@ -470,10 +470,10 @@ export function EnquiryFollowUp() {
                                         </td>
                                     </tr>
                                 ) : staffAccountability.map((row) => (
-                                    <tr key={row.staffName} className="hover:bg-[#3f5f6a]/5">
+                                    <tr key={row.staffName} className="hover:bg-[#0F969C]/5">
                                         <td className="px-3 py-2">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-black text-gray-900 dark:text-gray-100">{row.staffName}</span>
+                                                <span className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{row.staffName}</span>
                                                 <span className="text-xs font-medium text-gray-500">
                                                     Last: {row.lastFollowUp ? new Date(row.lastFollowUp).toLocaleDateString() : 'No date'}
                                                 </span>
@@ -523,7 +523,7 @@ export function EnquiryFollowUp() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => handleFollowUpOpen(e)}
-                                className="flex items-center rounded bg-[#3f5f6a] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-[#1f3b4d]"
+                                className="flex items-center rounded bg-[#0F969C] px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-[#294D61]"
                             >
                                 Followup
                             </button>
@@ -546,7 +546,7 @@ export function EnquiryFollowUp() {
                                 <button onClick={() => { setActiveTraceId(e.id); setTraceModalOpen(true) }} className="flex items-center justify-center rounded bg-indigo-500 p-1.5 text-white shadow-sm hover:bg-indigo-600" title="Intelligence Trace">
                                     <Zap className="h-3.5 w-3.5" />
                                 </button>
-                                <button onClick={() => handleEdit(e)} className="rounded bg-[#3f5f6a] p-1.5 text-white shadow-sm hover:bg-primary-600" title="Edit">
+                                <button onClick={() => handleEdit(e)} className="rounded bg-[#0F969C] p-1.5 text-white shadow-sm hover:bg-primary-600" title="Edit">
                                     <Edit2 className="h-3.5 w-3.5" />
                                 </button>
                                 <button onClick={() => { setEnquiryToDelete(e); setDeleteModalOpen(true) }} className="rounded border border-gray-300 dark:border-white/10 bg-white dark:bg-transparent px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-white/5" title="Delete">

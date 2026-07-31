@@ -130,7 +130,7 @@ export function FieldDuty() {
                 row.status === 'Completed' ? (
                     <button
                         onClick={() => createAllowanceClaim(row)}
-                        className="rounded-xl bg-[#3f5f6a] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1f3b4d] transition-colors"
+                        className="rounded-xl bg-[#0F969C] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#294D61] transition-colors"
                     >
                         Create Claim
                     </button>
@@ -223,7 +223,7 @@ export function FieldDuty() {
                         <button type="button" onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 dark:text-gray-300 dark:border-white/10">
                             Cancel
                         </button>
-                        <button type="submit" className="px-4 py-2 rounded-xl bg-[#3f5f6a] text-sm font-semibold text-white">
+                        <button type="submit" className="px-4 py-2 rounded-xl bg-[#0F969C] text-sm font-semibold text-white">
                             Save Duty
                         </button>
                     </div>

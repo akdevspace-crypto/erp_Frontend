@@ -178,7 +178,7 @@ export function Renewals() {
             key: 'paidAmount',
             header: 'Paid',
             sortable: true,
-            cell: (row) => <span className="font-black text-emerald-700">Rs {row.paidAmount.toFixed(2)}</span>
+            cell: (row) => <span className="font-extrabold text-emerald-700">Rs {row.paidAmount.toFixed(2)}</span>
         },
         { key: 'paymentDate', header: 'Closed On', cell: (row) => formatDate(row.paymentDate) },
         { key: 'renewalDate', header: 'Suggested Follow-up', cell: (row) => formatDate(row.renewalDate) },
@@ -213,7 +213,7 @@ export function Renewals() {
             {renewalCandidate && (
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="text-sm font-black text-emerald-900">Renewal follow-up created</p>
+                        <p className="text-sm font-extrabold text-emerald-900">Renewal follow-up created</p>
                         <p className="text-sm font-semibold text-emerald-700">
                             Continue to enquiry follow-up to record call later, not interested, or convert to repeat service.
                         </p>
@@ -223,7 +223,7 @@ export function Renewals() {
                             ...(routeUnitId ? { unitId: routeUnitId } : {}),
                             search: renewalCandidate.enquiryRef || renewalCandidate.clientName || renewalCandidate.allocationRef
                         }).toString()}`}
-                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-emerald-800"
+                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white hover:bg-emerald-800"
                     >
                         Record Renewal Outcome
                     </Link>
@@ -236,25 +236,25 @@ export function Renewals() {
                         <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Paid Services</p>
                         <CalendarClock className="h-5 w-5 text-primary-600" />
                     </div>
-                    <p className="mt-2 text-2xl font-black text-gray-900">{totals.total}</p>
+                    <p className="mt-2 text-2xl font-extrabold text-gray-900">{totals.total}</p>
                 </div>
                 <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Ready</p>
                         <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     </div>
-                    <p className="mt-2 text-2xl font-black text-emerald-900">{totals.ready}</p>
+                    <p className="mt-2 text-2xl font-extrabold text-emerald-900">{totals.ready}</p>
                 </div>
                 <div className="rounded-lg border border-amber-100 bg-amber-50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Follow-ups Created</p>
-                    <p className="mt-2 text-2xl font-black text-amber-900">{totals.created}</p>
+                    <p className="mt-2 text-2xl font-extrabold text-amber-900">{totals.created}</p>
                 </div>
                 <div className="rounded-lg border border-red-100 bg-red-50 p-4">
                     <div className="flex items-center justify-between gap-2">
                         <p className="text-xs font-semibold uppercase tracking-wider text-red-700">Complaint Pending</p>
                         <MessageCircleWarning className="h-5 w-5 text-red-600" />
                     </div>
-                    <p className="mt-2 text-2xl font-black text-red-900">{totals.complaint}</p>
+                    <p className="mt-2 text-2xl font-extrabold text-red-900">{totals.complaint}</p>
                 </div>
             </div>
 

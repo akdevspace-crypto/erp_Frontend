@@ -43,7 +43,7 @@ export function NutritionDiet() {
                         <Apple className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{plan.patient?.name || 'Patient'}</p>
+                        <p className="font-extrabold text-slate-950">{plan.patient?.name || 'Patient'}</p>
                         <p className="text-xs font-semibold text-slate-500">Nutrition plan</p>
                     </div>
                 </div>
@@ -83,16 +83,16 @@ export function NutritionDiet() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{nutritionPlans.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Diet Plans</p>
+                    <p className="text-2xl font-extrabold">{nutritionPlans.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Diet Plans</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{averageCalories}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Avg Calories</p>
+                    <p className="text-2xl font-extrabold">{averageCalories}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Avg Calories</p>
                 </div>
                 <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sky-700 shadow-sm">
-                    <p className="text-2xl font-black">{patients.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Patients Available</p>
+                    <p className="text-2xl font-extrabold">{patients.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Patients Available</p>
                 </div>
             </div>
 
@@ -134,7 +134,7 @@ export function NutritionDiet() {
                             value={formData.dietPlan}
                             onChange={(event) => setFormData((prev) => ({ ...prev, dietPlan: event.target.value }))}
                             placeholder="Breakfast, lunch, dinner, restrictions, hydration notes..."
-                            className="min-h-32 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#3f5f6a] focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20"
+                            className="min-h-32 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#0F969C] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20"
                         />
                     </label>
                     <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
@@ -142,7 +142,7 @@ export function NutritionDiet() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createNutrition.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createNutrition.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             <Plus className="h-4 w-4" />
                             {createNutrition.isPending ? 'Saving...' : 'Save Diet Plan'}
                         </button>

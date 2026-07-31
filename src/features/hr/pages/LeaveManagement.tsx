@@ -83,8 +83,8 @@ export function LeaveManagement() {
                     { label: 'Rejected', value: summary.rejected, tone: 'bg-red-50 text-red-700' }
                 ].map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 px-4 py-3 ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -108,7 +108,7 @@ export function LeaveManagement() {
                             <button
                                 disabled={!isPending || updateLeaveStatus.isPending}
                                 onClick={() => handleDecision(row, 'APPROVED')}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-black text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-extrabold text-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                                 Approve
@@ -116,7 +116,7 @@ export function LeaveManagement() {
                             <button
                                 disabled={!isPending || updateLeaveStatus.isPending}
                                 onClick={() => handleDecision(row, 'REJECTED')}
-                                className="inline-flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-black text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                className="inline-flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-extrabold text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 <XCircle className="h-3.5 w-3.5" />
                                 Reject

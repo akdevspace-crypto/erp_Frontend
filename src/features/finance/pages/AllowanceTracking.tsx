@@ -185,7 +185,7 @@ export function AllowanceTracking() {
                 {monthlySummary.map((item) => (
                     <div key={item.label} className="bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 rounded-3xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                         <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{item.label}</p>
-                        <p className="mt-2 text-2xl font-black text-gray-900 dark:text-gray-100">{item.value}</p>
+                        <p className="mt-2 text-2xl font-extrabold text-gray-900 dark:text-gray-100">{item.value}</p>
                     </div>
                 ))}
             </div>
@@ -296,7 +296,7 @@ export function AllowanceTracking() {
                         <textarea
                             value={formData.purpose}
                             onChange={(event) => setFormData((current) => ({ ...current, purpose: event.target.value }))}
-                            className="w-full h-24 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a]"
+                            className="w-full h-24 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 focus:border-[#0F969C]"
                             placeholder="Example: Doctor visit to patient home, hospital transfer, medicine pickup"
                             required
                         />
@@ -305,7 +305,7 @@ export function AllowanceTracking() {
                         <button type="button" onClick={() => setIsDrawerOpen(false)} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 dark:text-gray-300 dark:border-white/10">
                             Cancel
                         </button>
-                        <button type="submit" className="px-4 py-2 rounded-xl bg-[#3f5f6a] text-sm font-semibold text-white">
+                        <button type="submit" className="px-4 py-2 rounded-xl bg-[#0F969C] text-sm font-semibold text-white">
                             Save Claim
                         </button>
                     </div>

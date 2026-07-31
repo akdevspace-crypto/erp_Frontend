@@ -31,7 +31,18 @@ export interface Enquiry {
     admissionId?: string | null
     admittedAt?: string | null
     admittedPatientName?: string | null
+    clientPortalAccess?: ClientPortalAccess | null
     followUps?: EnquiryFollowUpRecord[]
+}
+
+export interface ClientPortalAccess {
+    id: string
+    email: string
+    mobile?: string | null
+    roleName?: string
+    isActive: boolean
+    createdAt?: string
+    updatedAt?: string
 }
 
 export interface EnquiryFollowUpRecord {

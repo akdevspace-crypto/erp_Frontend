@@ -39,6 +39,7 @@ export interface AdministerMedicationDosePayload {
 
 export interface HealthcareAdmission {
     id: string
+    enquiryId?: string | null
     status?: string | null
     service?: string | null
     admittedAt?: string | null
@@ -177,6 +178,9 @@ export interface CaregiverVitalChart {
 
 export interface SaveCaregiverVitalChartPayload {
     patientId: string
+    admissionId?: string
+    enquiryId?: string
+    allocationId?: string
     patientName?: string
     age?: string
     sex?: string
@@ -184,6 +188,7 @@ export interface SaveCaregiverVitalChartPayload {
     entries: CaregiverVitalEntry[]
     signatures?: CaregiverVitalChart['signatures']
     status?: string
+    unitId?: string | null
 }
 
 export interface CreateNutritionPayload {

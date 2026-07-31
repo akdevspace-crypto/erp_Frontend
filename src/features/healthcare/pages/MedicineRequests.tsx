@@ -100,7 +100,7 @@ export function MedicineRequests() {
                         <Pill className="h-4 w-4" />
                     </span>
                     <div className="flex flex-col">
-                        <span className="font-black text-gray-900 dark:text-gray-100">{request.productName}</span>
+                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{request.productName}</span>
                         <span className="text-xs font-semibold text-gray-500">{request.category || 'medical'}</span>
                     </div>
                 </div>
@@ -156,7 +156,7 @@ export function MedicineRequests() {
                             type="button"
                             onClick={() => handleApprove(request)}
                             disabled={!canApprove || approveIssueRequest.isPending || rejectIssueRequest.isPending}
-                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
                         >
                             Approve
                         </button>
@@ -164,7 +164,7 @@ export function MedicineRequests() {
                             type="button"
                             onClick={() => handleReject(request)}
                             disabled={approveIssueRequest.isPending || rejectIssueRequest.isPending}
-                            className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
+                            className="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
                         >
                             Reject
                         </button>
@@ -203,8 +203,8 @@ export function MedicineRequests() {
                         }}
                         className={`rounded-2xl border border-slate-100 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${item.tone}`}
                     >
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </button>
                 ))}
             </div>

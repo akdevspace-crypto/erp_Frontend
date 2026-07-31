@@ -39,7 +39,7 @@ export function CriticalPatients() {
             header: 'Patient',
             cell: (item) => (
                 <div className="flex flex-col">
-                    <span className="font-black text-slate-950">{item.patient.name}</span>
+                    <span className="font-extrabold text-slate-950">{item.patient.name}</span>
                     <span className="text-xs font-semibold text-slate-500">{patientServiceLabel(item.patient)}</span>
                 </div>
             )
@@ -69,16 +69,16 @@ export function CriticalPatients() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-rose-700 shadow-sm">
-                    <p className="text-2xl font-black">{criticalPatients.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Critical Now</p>
+                    <p className="text-2xl font-extrabold">{criticalPatients.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Critical Now</p>
                 </div>
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{patients.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Patients Tracked</p>
+                    <p className="text-2xl font-extrabold">{patients.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Patients Tracked</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{patientsWithoutVitals}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Needs Vitals</p>
+                    <p className="text-2xl font-extrabold">{patientsWithoutVitals}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Needs Vitals</p>
                 </div>
             </div>
 

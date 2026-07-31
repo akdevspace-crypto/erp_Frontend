@@ -165,7 +165,7 @@ export function HolidayMapping() {
     ]
 
     return (
-        <div className="flex h-full min-w-0 flex-col bg-transparent dark:bg-black">
+        <div className="flex min-h-full min-w-0 flex-col bg-transparent pb-4 dark:bg-black">
             <PageHeader
                 title="Holiday Mapping"
                 breadcrumbs={[
@@ -179,8 +179,8 @@ export function HolidayMapping() {
                 addLabel="Add New Holiday"
             />
 
-            <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
-                <div className="flex min-h-0 flex-1 flex-col p-4 2xl:p-5">
+            <div className="mt-4 flex flex-col rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-black">
+                <div className="flex flex-col p-4 2xl:p-5">
                     <FilterSection
                         searchQuery={searchQuery}
                         onSearchChange={(e) => setSearchQuery(e.target.value)}
@@ -192,7 +192,7 @@ export function HolidayMapping() {
                             <div className="h-8 bg-gray-200 rounded w-full"></div>
                         </div>
                     ) : (
-                        <div className="mt-4 min-h-0 flex-1">
+                        <div className="mt-4">
                             <DataTable
                                 data={filteredHolidays}
                                 columns={columns}

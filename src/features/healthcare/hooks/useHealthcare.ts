@@ -66,10 +66,10 @@ export const useCreateVitalSign = () => {
     })
 }
 
-export const useCaregiverVitalCharts = (month?: string, patientId?: string) => {
+export const useCaregiverVitalCharts = (month?: string, patientId?: string, unitId?: string | null) => {
     return useQuery({
-        queryKey: ['caregiver-vital-charts', month || 'all', patientId || 'all'],
-        queryFn: () => healthcareService.getCaregiverVitalCharts(month, patientId),
+        queryKey: ['caregiver-vital-charts', month || 'all', patientId || 'all', unitId || 'active-unit'],
+        queryFn: () => healthcareService.getCaregiverVitalCharts(month, patientId, unitId),
         staleTime: 30_000
     })
 }

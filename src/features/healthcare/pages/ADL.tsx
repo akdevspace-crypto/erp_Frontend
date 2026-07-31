@@ -47,7 +47,7 @@ export function ADLDailyLiving() {
                         <ClipboardCheck className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{record.patient?.name || 'Patient'}</p>
+                        <p className="font-extrabold text-slate-950">{record.patient?.name || 'Patient'}</p>
                         <p className="text-xs font-semibold text-slate-500">Daily living check</p>
                     </div>
                 </div>
@@ -68,7 +68,7 @@ export function ADLDailyLiving() {
                         <button
                             type="button"
                             onClick={() => updateStatus.mutate({ id: record.id, status: 'NEEDS_SUPPORT' })}
-                            className="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-700"
+                            className="rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-extrabold text-amber-700"
                         >
                             Needs Support
                         </button>
@@ -77,7 +77,7 @@ export function ADLDailyLiving() {
                         <button
                             type="button"
                             onClick={() => updateStatus.mutate({ id: record.id, status: 'COMPLETED' })}
-                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700"
+                            className="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700"
                         >
                             Complete
                         </button>
@@ -112,16 +112,16 @@ export function ADLDailyLiving() {
 
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4 text-primary-700 shadow-sm">
-                    <p className="text-2xl font-black">{adlRecords.length}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">ADL Records</p>
+                    <p className="text-2xl font-extrabold">{adlRecords.length}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">ADL Records</p>
                 </div>
                 <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-amber-700 shadow-sm">
-                    <p className="text-2xl font-black">{needsSupport}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Needs Support</p>
+                    <p className="text-2xl font-extrabold">{needsSupport}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Needs Support</p>
                 </div>
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 shadow-sm">
-                    <p className="text-2xl font-black">{completed}</p>
-                    <p className="text-xs font-black uppercase tracking-wide">Completed</p>
+                    <p className="text-2xl font-extrabold">{completed}</p>
+                    <p className="text-xs font-extrabold uppercase tracking-wide">Completed</p>
                 </div>
             </div>
 
@@ -163,7 +163,7 @@ export function ADLDailyLiving() {
                         <textarea
                             value={formData.notes}
                             onChange={(event) => setFormData((prev) => ({ ...prev, notes: event.target.value }))}
-                            className="min-h-24 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#3f5f6a] focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20"
+                            className="min-h-24 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#0F969C] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20"
                             placeholder="Observation, discomfort, assistance needed..."
                         />
                     </label>
@@ -172,7 +172,7 @@ export function ADLDailyLiving() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createAdl.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createAdl.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             <Plus className="h-4 w-4" />
                             {createAdl.isPending ? 'Saving...' : 'Save ADL'}
                         </button>

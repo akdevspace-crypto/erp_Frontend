@@ -19,6 +19,13 @@ export type ExistingPatientValues = {
     openingBalance?: number
 }
 
+export type ClientPortalAccessPayload = {
+    email: string
+    mobile?: string
+    password?: string
+    roleName: 'Family Member' | 'Client Family Member'
+}
+
 const mapBackendStatusToUi = (status: string, isConverted?: boolean): Enquiry['status'] => {
     if (status === 'IN_PROGRESS' || status === 'FOLLOW_UP') return 'In Progress'
     if (status === 'CLOSED') return isConverted ? 'Converted' : 'Lost'
@@ -91,7 +98,8 @@ const mapBackendEnquiry = (e: any): Enquiry => {
         automationPriority: e.automationPriority || 'COLD',
         admissionId: e.admission?.id || null,
         admittedAt: e.admission?.admittedAt || null,
-        admittedPatientName: e.admission?.patient?.name || null
+        admittedPatientName: e.admission?.patient?.name || null,
+        clientPortalAccess: e.clientPortalAccess || null
     }
 }
 
@@ -199,6 +207,14 @@ export const enquiryService = {
         data: { email: string; mobile?: string; password: string; roleName: 'Family Member' | 'Client Family Member' }
     ): Promise<any> => {
         const response = await api.post(`/enquiry/admissions/${admissionId}/client-portal-access`, data)
+        return response.data.data
+    },
+
+    upsertClientPortalAccess: async (
+        enquiryId: string,
+        data: ClientPortalAccessPayload
+    ): Promise<any> => {
+        const response = await api.post(`/enquiry/${enquiryId}/client-portal-access`, data)
         return response.data.data
     },
 

@@ -257,7 +257,7 @@ export function Invoice() {
             {paidInvoice && (
                 <div className="mb-4 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="text-sm font-black text-emerald-900">Payment captured</p>
+                        <p className="text-sm font-extrabold text-emerald-900">Payment captured</p>
                         <p className="text-sm font-semibold text-emerald-700">
                             Continue to customer care feedback for {paidInvoice.clientName || paidInvoice.receiptNo}.
                         </p>
@@ -267,7 +267,7 @@ export function Invoice() {
                             ...(routeUnitId ? { unitId: routeUnitId } : {}),
                             search: paidInvoice.allocationRef || paidInvoice.clientName || paidInvoice.receiptNo || ''
                         }).toString()}`}
-                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-emerald-800"
+                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white hover:bg-emerald-800"
                     >
                         Collect Feedback
                     </Link>
@@ -289,7 +289,7 @@ export function Invoice() {
             {isError ? (
                 <div className="flex min-h-[320px] flex-col items-center justify-center rounded-3xl border border-red-100 bg-red-50 px-6 py-10 text-center">
                     <AlertCircle className="h-10 w-10 text-red-600" />
-                    <h3 className="mt-4 text-lg font-black text-red-900">Invoice list could not load</h3>
+                    <h3 className="mt-4 text-lg font-extrabold text-red-900">Invoice list could not load</h3>
                     <p className="mt-2 max-w-xl text-sm font-semibold text-red-700">{errorMessage}</p>
                     <button
                         type="button"
@@ -328,7 +328,7 @@ export function Invoice() {
                 {paymentInvoice && (
                     <div className="mt-4 space-y-4 text-left">
                         <div className="rounded-xl border border-primary-100 bg-primary-50 p-3">
-                            <p className="text-sm font-black text-gray-900">{paymentInvoice.receiptNo}</p>
+                            <p className="text-sm font-extrabold text-gray-900">{paymentInvoice.receiptNo}</p>
                             <p className="text-xs font-semibold text-gray-600">{paymentInvoice.clientName || 'Client'} - {paymentInvoice.category || 'Service'}</p>
                             <p className="mt-2 text-xs font-bold text-gray-700">
                                 Balance: Rs {Number(paymentInvoice.balanceAmount || 0).toFixed(2)}

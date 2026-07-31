@@ -198,7 +198,7 @@ export function HRReports() {
         { key: 'absentDays', header: 'Absent' },
         { key: 'grossPay', header: 'Gross', cell: (row) => money(row.grossPay) },
         { key: 'deductions', header: 'Deductions', cell: (row) => money(row.deductions) },
-        { key: 'netPay', header: 'Net Pay', cell: (row) => <span className="font-black">{money(row.netPay)}</span> },
+        { key: 'netPay', header: 'Net Pay', cell: (row) => <span className="font-extrabold">{money(row.netPay)}</span> },
         { key: 'status', header: 'Status', cell: (row) => <StatusHighlighter value={row.status} /> }
     ]
 
@@ -213,7 +213,7 @@ export function HRReports() {
         { key: 'lastSalary', header: 'Last Salary', cell: (row) => money(row.lastSalary) },
         { key: 'allowance', header: 'Allowance', cell: (row) => money(row.allowance) },
         { key: 'deduction', header: 'Deduction', cell: (row) => money(row.deduction) },
-        { key: 'payable', header: 'Final Payable', cell: (row) => <span className="font-black">{money(row.payable)}</span> }
+        { key: 'payable', header: 'Final Payable', cell: (row) => <span className="font-extrabold">{money(row.payable)}</span> }
     ]
 
     return (
@@ -233,8 +233,8 @@ export function HRReports() {
                     { label: 'Settlement Pending', value: summary.pendingSettlement, tone: 'bg-orange-50 text-orange-700' }
                 ].map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 px-4 py-3 ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -282,7 +282,7 @@ export function HRReports() {
                         payrollQuery.refetch()
                         staffQuery.refetch()
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-[#1f3b4d]"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-extrabold text-white shadow-sm hover:bg-[#294D61]"
                 >
                     <RefreshCw className={`h-4 w-4 ${attendanceQuery.isFetching || leaveQuery.isFetching || payrollQuery.isFetching || staffQuery.isFetching ? 'animate-spin' : ''}`} />
                     Refresh Reports
@@ -297,7 +297,7 @@ export function HRReports() {
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-black text-slate-950">Attendance Report</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">Attendance Report</h2>
                     <button
                         type="button"
                         onClick={() => downloadCsv(
@@ -305,7 +305,7 @@ export function HRReports() {
                             ['Date', 'Emp ID', 'Staff Name', 'Check In', 'Check Out', 'Status'],
                             filteredAttendance.map((row) => [row.date, row.empId, row.name, row.checkIn, row.checkOut, row.status])
                         )}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-slate-50"
                     >
                         <Download className="h-4 w-4" />
                         CSV
@@ -316,7 +316,7 @@ export function HRReports() {
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-black text-slate-950">Leave Report</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">Leave Report</h2>
                     <button
                         type="button"
                         onClick={() => downloadCsv(
@@ -324,7 +324,7 @@ export function HRReports() {
                             ['Emp ID', 'Staff Name', 'Unit', 'Leave Type', 'From', 'To', 'Status'],
                             filteredLeave.map((row) => [row.empId, row.name, row.unitName || row.unitId || '-', row.leaveType, row.fromDate, row.toDate, row.status])
                         )}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-slate-50"
                     >
                         <Download className="h-4 w-4" />
                         CSV
@@ -335,7 +335,7 @@ export function HRReports() {
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-black text-slate-950">Payroll Report</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">Payroll Report</h2>
                     <button
                         type="button"
                         onClick={() => downloadCsv(
@@ -343,7 +343,7 @@ export function HRReports() {
                             ['Emp ID', 'Staff Name', 'Month', 'Present', 'Leave', 'Absent', 'Gross', 'Deductions', 'Net Pay', 'Status'],
                             filteredPayroll.map((row) => [row.empId, row.name, row.month, row.presentDays, row.approvedLeaveDays, row.absentDays, row.grossPay, row.deductions, row.netPay, row.status])
                         )}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-slate-50"
                     >
                         <Download className="h-4 w-4" />
                         CSV
@@ -354,7 +354,7 @@ export function HRReports() {
 
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-black text-slate-950">Final Settlement Report</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">Final Settlement Report</h2>
                     <button
                         type="button"
                         onClick={() => downloadCsv(
@@ -362,7 +362,7 @@ export function HRReports() {
                             ['Emp ID', 'Staff Name', 'Unit', 'Exit Date', 'Exit Reason', 'Staff Status', 'Settlement Status', 'Last Salary', 'Allowance', 'Deduction', 'Final Payable'],
                             filteredSettlement.map((row) => [row.empId, row.name, row.unitId, row.exitDate, row.exitReason, row.staffStatus, row.settlementStatus, row.lastSalary, row.allowance, row.deduction, row.payable])
                         )}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-slate-50"
                     >
                         <Download className="h-4 w-4" />
                         CSV

@@ -88,7 +88,7 @@ export function HRDashboard() {
                 {metrics.map((metric) => (
                     <div key={metric.label} className="bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 rounded-3xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                         <p className="text-sm font-bold text-gray-500 dark:text-gray-400">{metric.label}</p>
-                        <p className="mt-3 text-3xl font-black text-gray-900 dark:text-gray-100">{metric.value}</p>
+                        <p className="mt-3 text-3xl font-extrabold text-gray-900 dark:text-gray-100">{metric.value}</p>
                         <p className="mt-1 text-xs font-medium text-gray-400">{metric.note}</p>
                     </div>
                 ))}
@@ -104,7 +104,7 @@ export function HRDashboard() {
                         <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-50 text-primary-700 group-hover:bg-primary-600 group-hover:text-white">
                             <action.icon className="h-5 w-5" />
                         </div>
-                        <p className="text-sm font-black text-gray-900 dark:text-gray-100">{action.title}</p>
+                        <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{action.title}</p>
                         <p className="mt-1 text-xs font-semibold text-gray-500">{action.description}</p>
                     </Link>
                 ))}

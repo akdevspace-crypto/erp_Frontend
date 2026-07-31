@@ -141,7 +141,7 @@ export function MedicationManagement() {
                         <Pill className="h-4 w-4" />
                     </span>
                     <div className="flex flex-col">
-                        <span className="font-black text-gray-900 dark:text-gray-100">{product.name}</span>
+                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{product.name}</span>
                         <span className="text-xs font-semibold text-gray-500">Medical stock item</span>
                     </div>
                 </div>
@@ -175,7 +175,7 @@ export function MedicationManagement() {
                         setIssueDrawerOpen(true)
                     }}
                     disabled={getQuantity(stockByProductId, product.id) <= 0}
-                    className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 transition hover:bg-primary-100 disabled:opacity-50"
+                    className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 transition hover:bg-primary-100 disabled:opacity-50"
                 >
                     Request Issue
                 </button>
@@ -185,7 +185,7 @@ export function MedicationManagement() {
     ]
 
     const requestColumns: Column<InventoryStockIssueRequest>[] = [
-        { key: 'productName', header: 'Medicine', cell: (request) => <span className="font-black text-gray-900 dark:text-gray-100">{request.productName}</span> },
+        { key: 'productName', header: 'Medicine', cell: (request) => <span className="font-extrabold text-gray-900 dark:text-gray-100">{request.productName}</span> },
         { key: 'quantity', header: 'Qty', sortable: true },
         { key: 'issuedTo', header: 'Patient / Receiver', cell: (request) => request.issuedTo || '-' },
         { key: 'notes', header: 'Notes', cell: (request) => request.notes || '-' },
@@ -213,7 +213,7 @@ export function MedicationManagement() {
                             <button
                                 type="button"
                                 onClick={() => setIssueDrawerOpen(true)}
-                                className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-xs font-black text-primary-700 hover:bg-primary-100"
+                                className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                             >
                                 <Send className="h-4 w-4" />
                                 Request Medicine
@@ -226,8 +226,8 @@ export function MedicationManagement() {
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 {summary.map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -259,14 +259,14 @@ export function MedicationManagement() {
             <section className="mb-6 flex min-h-[300px] flex-col gap-3">
                 <div className="flex flex-wrap items-center justify-between gap-3 px-1">
                     <div>
-                        <h2 className="text-lg font-black text-slate-950">Medicine Request History</h2>
+                        <h2 className="text-lg font-extrabold text-slate-950">Medicine Request History</h2>
                         <p className="text-sm font-semibold text-slate-500">Live request status after medical inventory approval.</p>
                     </div>
                     <button
                         type="button"
                         onClick={() => setIssueDrawerOpen(true)}
                         disabled={!canRequestMedicine}
-                        className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-xs font-black text-primary-700 transition hover:bg-primary-100 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-2 text-xs font-extrabold text-primary-700 transition hover:bg-primary-100 disabled:opacity-50"
                     >
                         <Send className="h-4 w-4" />
                         New Request
@@ -297,7 +297,7 @@ export function MedicationManagement() {
 
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setMedicineDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
-                        <button type="submit" disabled={isSavingMedicine} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60">
+                        <button type="submit" disabled={isSavingMedicine} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60">
                             <PackagePlus className="h-4 w-4" />
                             {isSavingMedicine ? 'Saving...' : 'Save Medicine'}
                         </button>
@@ -325,7 +325,7 @@ export function MedicationManagement() {
 
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setIssueDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
-                        <button type="submit" disabled={!canRequestMedicine || createIssueRequest.isPending || availableMedicineOptions.length === 0} className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1f3b4d] disabled:opacity-60">
+                        <button type="submit" disabled={!canRequestMedicine || createIssueRequest.isPending || availableMedicineOptions.length === 0} className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60">
                             Save Request
                         </button>
                     </div>

@@ -60,7 +60,7 @@ export function PatientDashboard() {
                         <UserRound className="h-4 w-4" />
                     </span>
                     <div>
-                        <p className="font-black text-slate-950">{patient.name}</p>
+                        <p className="font-extrabold text-slate-950">{patient.name}</p>
                         <p className="text-xs font-semibold text-slate-500">{patientServiceLabel(patient)}</p>
                     </div>
                 </div>
@@ -133,7 +133,7 @@ export function PatientDashboard() {
                     <button
                         type="button"
                         onClick={() => setVitalDrawerOpen(true)}
-                        className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-xs font-black text-primary-700 hover:bg-primary-100"
+                        className="inline-flex items-center gap-2 rounded-full border border-primary-100 bg-primary-50 px-4 py-2 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                     >
                         <HeartPulse className="h-4 w-4" />
                         Record Vitals
@@ -144,7 +144,7 @@ export function PatientDashboard() {
             {vitalsRecordedFor && (
                 <div className="mb-4 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="text-sm font-black text-emerald-900">Healthcare monitoring updated</p>
+                        <p className="text-sm font-extrabold text-emerald-900">Healthcare monitoring updated</p>
                         <p className="text-sm font-semibold text-emerald-700">
                             Continue to billing for {vitalsRecordedFor}.
                         </p>
@@ -154,7 +154,7 @@ export function PatientDashboard() {
                             ...(routeUnitId ? { unitId: routeUnitId } : {}),
                             search: vitalsRecordedFor
                         }).toString()}`}
-                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-emerald-800"
+                        className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white hover:bg-emerald-800"
                     >
                         Open Billing
                     </Link>
@@ -164,8 +164,8 @@ export function PatientDashboard() {
             <div className="mb-5 grid gap-3 md:grid-cols-4">
                 {summary.map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -194,7 +194,7 @@ export function PatientDashboard() {
                     <Input label="Patient Name" required value={patientName} onChange={(event) => setPatientName(event.target.value)} placeholder="Enter patient name" />
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setPatientDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createPatient.isPending} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createPatient.isPending} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             <Plus className="h-4 w-4" />
                             {createPatient.isPending ? 'Saving...' : 'Save Patient'}
                         </button>
@@ -224,7 +224,7 @@ export function PatientDashboard() {
                     </div>
                     <div className="flex justify-end gap-3 pt-4">
                         <button type="button" onClick={() => setVitalDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm">Cancel</button>
-                        <button type="submit" disabled={createVital.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+                        <button type="submit" disabled={createVital.isPending || !patients.length} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
                             <HeartPulse className="h-4 w-4" />
                             {createVital.isPending ? 'Saving...' : 'Save Vitals'}
                         </button>

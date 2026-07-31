@@ -63,7 +63,7 @@ export function MedicineIssueLog() {
                         <Pill className="h-4 w-4" />
                     </span>
                     <div className="flex flex-col">
-                        <span className="font-black text-gray-900 dark:text-gray-100">{request.productName}</span>
+                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{request.productName}</span>
                         <span className="text-xs font-semibold text-gray-500">Qty issued: {request.quantity}</span>
                     </div>
                 </div>
@@ -142,8 +142,8 @@ export function MedicineIssueLog() {
             <div className="mb-5 grid gap-3 md:grid-cols-3">
                 {summary.map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>

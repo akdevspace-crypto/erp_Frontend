@@ -9,9 +9,10 @@ import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { Drawer } from '../../../components/Drawer'
 import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
+import { FormActions, FormGrid, FormSection } from '../../../components/FormLayout'
 import { staffSchema, type StaffFormInput, type StaffFormValues } from '../schema'
 import type { Staff } from '../types'
-import { useStaff, useAddStaff, useUpdateStaff, useDeleteStaff, useRoles } from '../hooks/useHR'
+import { useStaff, useAddStaff, useUpdateStaff, useDeleteStaff, useRoles, useCreateStaffLogin } from '../hooks/useHR'
 import { useUnits } from '../../master/hooks/useUnit'
 import { useAuthStore } from '../../../store/authStore'
 
@@ -80,6 +81,7 @@ export function StaffManagement() {
     const updateStaff = useUpdateStaff()
     const deleteStaff = useDeleteStaff()
     const { data: roleList = [] } = useRoles()
+    const createStaffLogin = useCreateStaffLogin()
     const unitOptions = useMemo(() => {
         const options = units.map((unit) => ({
             value: unit.id,
@@ -166,7 +168,7 @@ export function StaffManagement() {
         }
     })
 
-    const createLoginEnabled = watch('createLogin')
+    const createLoginEnabled = Boolean(watch('createLogin'))
 
     const suggestUniqueLoginEmail = () => {
         const rawName = String(watch('name') || 'staff')
@@ -609,7 +611,23 @@ export function StaffManagement() {
 
         if (editingStaffId) {
             updateStaff.mutate({ staffId: editingStaffId, data: payload }, {
-                onSuccess: () => setIsDrawerOpen(false),
+                onSuccess: () => {
+                    const s = staffData.find((st) => st.id === editingStaffId);
+                    if (formData.createLogin && !s?.user) {
+                        createStaffLogin.mutate({
+                            staffId: editingStaffId,
+                            data: {
+                                email: formData.loginEmail,
+                                password: formData.loginPassword,
+                                roleId: formData.loginRoleId
+                            }
+                        }, {
+                            onSuccess: () => setIsDrawerOpen(false)
+                        });
+                    } else {
+                        setIsDrawerOpen(false)
+                    }
+                },
                 onError: applyServerErrors
             })
         } else {
@@ -715,7 +733,7 @@ export function StaffManagement() {
     columns[0].cell = (item) => filteredData.findIndex((a: any) => a.id === item.id) + 1
 
     return (
-        <div className="flex h-full min-w-0 flex-col space-y-4 bg-transparent dark:bg-black sm:space-y-6">
+        <div className="flex h-full min-w-0 flex-1 min-h-0 flex-col space-y-4 overflow-y-auto bg-transparent dark:bg-black sm:space-y-6">
             <PageHeader title="Staff Management" breadcrumbs={[{ label: 'Home' }, { label: 'Staff Management' }]} />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-black p-4 rounded-lg border border-gray-200 dark:border-white/10 shadow-sm gap-4 2xl:p-5">
@@ -745,7 +763,7 @@ export function StaffManagement() {
                             Active Staff List
                         </button>
                     )}
-                    <button onClick={handleAdd} className="inline-flex items-center px-4 py-2.5 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3f5f6a] transition-all active:scale-95 border border-transparent">
+                    <button onClick={handleAdd} className="inline-flex items-center px-4 py-2.5 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#0F969C] to-[#294D61] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(15,150,156,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0F969C] transition-all active:scale-95 border border-transparent">
                         Add New Staff
                     </button>
                 </div>
@@ -759,8 +777,8 @@ export function StaffManagement() {
                     { label: 'Ex-Staff', value: exStaffCount, note: 'Archived or resigned staff records' }
                 ].map((item) => (
                     <div key={item.label} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-                        <p className="text-2xl font-black text-gray-950">{item.value}</p>
-                        <p className="mt-1 text-sm font-black text-gray-900">{item.label}</p>
+                        <p className="text-2xl font-extrabold text-gray-950">{item.value}</p>
+                        <p className="mt-1 text-sm font-extrabold text-gray-900">{item.label}</p>
                         <p className="mt-1 text-xs font-medium text-gray-500">{item.note}</p>
                     </div>
                 ))}
@@ -776,28 +794,30 @@ export function StaffManagement() {
                 data={filteredData}
                 columns={columns}
                 keyExtractor={(s) => s.id}
+                showScrollbars
+                minTableWidth="1400px"
+                spreadColumns
+                fullHeight={false}
             />
 
             <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editingStaffId ? "Edit - Staff" : "Add - New Staff"} size="xl">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
-                    <div className="mx-auto w-full max-w-none space-y-8">
+                    <div className="mx-auto w-full max-w-none space-y-5">
                         {(errors as any).root?.server?.message ? (
                             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                                 {(errors as any).root.server.message}
                             </div>
                         ) : null}
 
-                        {/* Profile Photo */}
-                        <div className="flex items-center justify-center flex-col gap-4">
-                            <label className="text-sm border-b border-gray-200 w-full text-center pb-2 font-bold text-gray-700">Profile Photo <span className="text-xs font-normal text-gray-500">(Images only. Max 2MB)</span></label>
+                        <FormSection title="Profile Photo" description="Images only. Max 2MB." contentClassName="flex flex-col items-center gap-4">
                             <input type="hidden" {...register('photoUrl')} />
 
-                            <div className="h-28 w-28 rounded-full border-2 border-dashed border-gray-300 dark:border-white/20 bg-gray-50 dark:bg-white/5 overflow-hidden flex items-center justify-center">
+                            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-[#6DA5C0]/45 bg-[#F7FAFC] dark:border-white/20 dark:bg-white/5">
                                 {profilePreview ? (
                                     <img src={profilePreview} alt="Profile preview" className="h-full w-full object-cover" />
                                 ) : (
-                                    <span className="text-xs font-semibold text-gray-400 text-center px-3">No photo selected</span>
+                                    <span className="px-3 text-center text-xs font-semibold text-[#6DA5C0]">No photo selected</span>
                                 )}
                             </div>
 
@@ -805,7 +825,7 @@ export function StaffManagement() {
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-black px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#6DA5C0]/30 bg-white px-4 text-sm font-semibold text-[#294D61] shadow-sm transition hover:border-[#0F969C]/50 hover:text-[#0F969C] dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5"
                                 >
                                     <Upload className="w-4 h-4" />
                                     Upload Photo
@@ -813,7 +833,7 @@ export function StaffManagement() {
                                 <button
                                     type="button"
                                     onClick={cameraOpen ? stopCamera : openCamera}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 transition-colors"
+                                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#0F969C] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#294D61]"
                                 >
                                     <Camera className="w-4 h-4" />
                                     {cameraOpen ? 'Close Camera' : 'Capture Live Photo'}
@@ -822,7 +842,7 @@ export function StaffManagement() {
                                     <button
                                         type="button"
                                         onClick={clearProfilePhoto}
-                                        className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
+                                        className="inline-flex h-10 items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-600 transition hover:bg-red-100"
                                     >
                                         <X className="w-4 h-4" />
                                         Clear
@@ -841,7 +861,7 @@ export function StaffManagement() {
                             {cameraError ? <p className="text-xs text-red-500">{cameraError}</p> : null}
 
                             {cameraOpen && (
-                                <div className="w-full max-w-md space-y-3 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4">
+                                <div className="w-full max-w-md space-y-3 rounded-2xl border border-[#6DA5C0]/20 bg-[#F7FAFC] p-4 dark:border-white/10 dark:bg-white/5">
                                     <div className="aspect-[4/3] overflow-hidden rounded-xl bg-black">
                                         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
                                     </div>
@@ -849,16 +869,17 @@ export function StaffManagement() {
                                         <button
                                             type="button"
                                             onClick={capturePhoto}
-                                            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                                            className="rounded-xl bg-[#0C7075] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#294D61]"
                                         >
                                             Take Snapshot
                                         </button>
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </FormSection>
 
-                        <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2 2xl:grid-cols-3">
+                        <FormSection title="Staff & Contact Details" description="Basic staff identity, unit, and communication details.">
+                            <FormGrid columns={3}>
                             <Select label="Unit Name" {...register('unitId')} error={errors.unitId?.message} options={unitOptions} />
                             <div className="hidden 2xl:block"></div>
 
@@ -870,20 +891,20 @@ export function StaffManagement() {
 
                             <Input label="Official Mobile No." placeholder="Enter Official Mobile No." {...register('officialPhone')} error={errors.officialPhone?.message} />
                             <Input label="Official Email" placeholder="Enter Official Email Address" type="email" {...register('officialEmail')} error={errors.officialEmail?.message} />
+                            </FormGrid>
+                        </FormSection>
 
-                            <div className="rounded-lg border border-emerald-100 bg-emerald-50/70 p-4 md:col-span-2 2xl:col-span-3">
-                                <p className="text-sm font-black text-gray-900">Payroll Setup</p>
-                                <p className="mt-1 text-xs font-medium text-gray-500">These values feed the live payroll preview. Leave blank if salary is not finalized.</p>
-                            </div>
+                        <FormSection title="Payroll Setup" description="These values feed the live payroll preview. Leave blank if salary is not finalized.">
+                            <FormGrid columns={3}>
                             <Select label="Salary Type" {...register('salaryType')} options={[{ value: 'Monthly', label: 'Monthly' }, { value: 'Daily', label: 'Daily' }, { value: 'Hourly', label: 'Hourly' }]} />
                             <Input label="Monthly Salary" type="number" min="0" step="1" placeholder="Enter gross salary" {...register('monthlySalary')} error={errors.monthlySalary?.message} />
                             <Input label="Fixed Allowance" type="number" min="0" step="1" placeholder="Enter fixed allowance" {...register('fixedAllowance')} error={errors.fixedAllowance?.message} />
                             <Input label="Fixed Deduction" type="number" min="0" step="1" placeholder="Enter fixed deduction" {...register('fixedDeduction')} error={errors.fixedDeduction?.message} />
+                            </FormGrid>
+                        </FormSection>
 
-                            <div className="rounded-lg border border-orange-100 bg-orange-50/80 p-4 md:col-span-2 2xl:col-span-3">
-                                <p className="text-sm font-black text-gray-900">Exit & Final Settlement</p>
-                                <p className="mt-1 text-xs font-medium text-gray-500">Use this only when staff resigns or is terminated. Former staff will stay in HR history and stay blocked from assignment, attendance, and payroll queues.</p>
-                            </div>
+                        <FormSection title="Exit & Final Settlement" description="Use this only when staff resigns or is terminated. Former staff will stay in HR history and stay blocked from assignment, attendance, and payroll queues.">
+                            <FormGrid columns={3}>
                             <Select label="Staff Status" {...register('status')} options={[
                                 { value: 'Working', label: 'Working' },
                                 { value: 'On Leave', label: 'On Leave' },
@@ -903,24 +924,27 @@ export function StaffManagement() {
                             <Input label="Settlement Allowance" type="number" min="0" step="1" placeholder="Pending allowance" {...register('settlementAllowance')} error={errors.settlementAllowance?.message} />
                             <Input label="Settlement Deduction" type="number" min="0" step="1" placeholder="Recoveries/deductions" {...register('settlementDeduction')} error={errors.settlementDeduction?.message} />
                             <Input label="Final Payable" type="number" min="0" step="1" placeholder="Net payable amount" {...register('settlementPayable')} error={errors.settlementPayable?.message} />
+                            </FormGrid>
+                        </FormSection>
 
-                            {!editingStaffId && (
-                                <>
-                                    <div className="md:col-span-2 rounded-lg border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 p-4">
-                                        <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                                            <input type="checkbox" {...register('createLogin')} />
-                                            Create Login (Optional)
-                                        </label>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Enable only if this staff member needs ERP access. Leave unchecked if they only need to be available for duty assignment.
-                                        </p>
-                                        {errors.createLogin?.message ? (
-                                            <p className="mt-2 text-sm text-red-500">{errors.createLogin.message}</p>
-                                        ) : null}
-                                    </div>
+                        {(!editingStaffId || (editingStaffId && !staffData.find(s => s.id === editingStaffId)?.user)) && (
+                            <FormSection title="ERP Login Access" description="Enable only if this staff member needs ERP access.">
+                                <div className="space-y-4">
+                                    <label className="flex items-start gap-3 rounded-2xl border border-[#6DA5C0]/20 bg-[#F7FAFC] p-4 text-sm font-semibold text-[#294D61] dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                                        <input type="checkbox" {...register('createLogin')} className="mt-1 h-4 w-4 rounded border-[#6DA5C0]/40 text-[#0F969C] focus:ring-[#0F969C]/30" />
+                                        <span>
+                                            <span className="block font-extrabold text-[#05161A] dark:text-gray-100">Create Login</span>
+                                            <span className="mt-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                Leave unchecked if this staff member only needs to be available for duty assignment.
+                                            </span>
+                                        </span>
+                                    </label>
+                                    {errors.createLogin?.message ? (
+                                        <p className="text-sm font-semibold text-red-500">{String(errors.createLogin.message)}</p>
+                                    ) : null}
 
                                     {createLoginEnabled && (
-                                        <>
+                                        <FormGrid columns={2}>
                                             <Input
                                                 label="Login Email *"
                                                 type="email"
@@ -933,7 +957,7 @@ export function StaffManagement() {
                                                 <button
                                                     type="button"
                                                     onClick={suggestUniqueLoginEmail}
-                                                    className="h-10 w-full rounded-xl border border-[#3f5f6a]/40 bg-[#f2f5ea] px-3 text-sm font-semibold text-[#1f3b4d] transition hover:bg-[#c0c7a0]"
+                                                    className="h-10 w-full rounded-xl border border-[#0F969C]/40 bg-[#F7FAFC] px-3 text-sm font-semibold text-[#294D61] shadow-sm transition hover:border-[#0F969C] hover:bg-white hover:text-[#0F969C]"
                                                 >
                                                     Use unique login email
                                                 </button>
@@ -952,12 +976,14 @@ export function StaffManagement() {
                                                 error={errors.loginRoleId?.message}
                                                 options={loginRoleOptions}
                                             />
-                                            <div className="hidden md:block"></div>
-                                        </>
+                                        </FormGrid>
                                     )}
-                                </>
-                            )}
+                                </div>
+                            </FormSection>
+                        )}
 
+                        <FormSection title="Employment & Personal Details" description="Role, department, identity, and contact background.">
+                            <FormGrid columns={3}>
                             <Select label="Department *" {...register('department')} error={errors.department?.message} options={departmentOptions} />
                             <Select label="Designation *" {...register('role')} error={errors.role?.message} options={designationOptions} />
 
@@ -971,57 +997,62 @@ export function StaffManagement() {
                             <Select label="Marital Status" {...register('maritalStatus')} error={errors.maritalStatus?.message} options={[{ value: '', label: '-- Select the Marital Status --' }, { value: 'Single', label: 'Single' }, { value: 'Married', label: 'Married' }]} />
 
                             <Input label="Aadhaar No" placeholder="Enter the Aadhaar No." {...register('aadhaarNo')} error={errors.aadhaarNo?.message} />
+                            </FormGrid>
+                        </FormSection>
 
+                        <FormSection title="Document Uploads" description="Upload the mandatory HR documents linked to this staff profile.">
+                            <FormGrid columns={2}>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Aadhaar Document <span className="text-xs font-normal text-gray-500">(PDF/JPG/PNG. Max 5MB)</span></label>
+                                <label className="mb-1.5 block text-[13px] font-bold text-[#294D61] dark:text-gray-300">Aadhaar Document <span className="text-xs font-medium text-gray-500">(PDF/JPG/PNG. Max 5MB)</span></label>
                                 <input
                                     name="aadhaarDocument"
                                     type="file"
                                     accept=".pdf,.png,.jpg,.jpeg"
                                     onChange={(e) => handleDocumentSelection(e, 'aadhaarDocument', setAadhaarDocumentName, ['application/pdf', 'image/png', 'image/jpeg'])}
-                                    className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 dark:file:border-white/10 file:rounded-md file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-black file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-white/5 border py-1 ${errors.aadhaarDocument?.message ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
+                                    className={`block h-10 w-full rounded-xl border bg-[#F7FAFC] text-sm font-medium text-gray-500 shadow-sm file:mr-4 file:h-full file:border-0 file:bg-[#D8EEF5] file:px-4 file:text-sm file:font-semibold file:text-[#294D61] hover:bg-white dark:bg-black dark:text-gray-300 dark:file:bg-white/10 dark:file:text-gray-300 ${errors.aadhaarDocument?.message ? 'border-red-400' : 'border-[#6DA5C0]/25 dark:border-white/10'}`}
                                 />
-                                {aadhaarDocumentName ? <span className="text-xs text-gray-500">Selected: {aadhaarDocumentName}</span> : null}
-                                {errors.aadhaarDocument?.message ? <p className="text-sm text-red-500">{String(errors.aadhaarDocument.message)}</p> : null}
+                                {aadhaarDocumentName ? <span className="text-xs font-medium text-gray-500">Selected: {aadhaarDocumentName}</span> : null}
+                                {errors.aadhaarDocument?.message ? <p className="text-xs font-semibold text-red-500">{String(errors.aadhaarDocument.message)}</p> : null}
                             </div>
 
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Resume <span className="text-xs font-normal text-gray-500">(PDF/DOCX. Max 5MB)</span></label>
+                                <label className="mb-1.5 block text-[13px] font-bold text-[#294D61] dark:text-gray-300">Resume <span className="text-xs font-medium text-gray-500">(PDF/DOCX. Max 5MB)</span></label>
                                 <input
                                     name="resumeDocument"
                                     type="file"
                                     accept=".pdf,.docx"
                                     onChange={(e) => handleDocumentSelection(e, 'resumeDocument', setResumeDocumentName, ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])}
-                                    className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 dark:file:border-white/10 file:rounded-md file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-black file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-white/5 border py-1 ${errors.resumeDocument?.message ? 'border-red-500' : 'border-gray-300 dark:border-white/10'}`}
+                                    className={`block h-10 w-full rounded-xl border bg-[#F7FAFC] text-sm font-medium text-gray-500 shadow-sm file:mr-4 file:h-full file:border-0 file:bg-[#D8EEF5] file:px-4 file:text-sm file:font-semibold file:text-[#294D61] hover:bg-white dark:bg-black dark:text-gray-300 dark:file:bg-white/10 dark:file:text-gray-300 ${errors.resumeDocument?.message ? 'border-red-400' : 'border-[#6DA5C0]/25 dark:border-white/10'}`}
                                 />
-                                {resumeDocumentName ? <span className="text-xs text-gray-500">Selected: {resumeDocumentName}</span> : null}
-                                {errors.resumeDocument?.message ? <p className="text-sm text-red-500">{String(errors.resumeDocument.message)}</p> : null}
+                                {resumeDocumentName ? <span className="text-xs font-medium text-gray-500">Selected: {resumeDocumentName}</span> : null}
+                                {errors.resumeDocument?.message ? <p className="text-xs font-semibold text-red-500">{String(errors.resumeDocument.message)}</p> : null}
                             </div>
 
-                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 md:col-span-2">
-                                <p className="font-black text-gray-800">Original Documents Submitted</p>
+                            <div className="rounded-2xl border border-[#6DA5C0]/20 bg-[#F7FAFC] p-4 text-sm text-gray-600 md:col-span-2">
+                                <p className="font-extrabold text-[#05161A]">Original Documents Submitted</p>
                                 <p className="mt-1 text-xs font-medium">
                                     Current live storage supports Aadhaar and resume uploads here. Other original document categories are maintained from Admin Files.
                                 </p>
                             </div>
-                        </div>
+                            </FormGrid>
+                        </FormSection>
 
-                        <div className="pt-6 flex justify-end gap-3 mt-auto border-t border-gray-200 dark:border-white/10">
+                        <FormActions>
                             <button
                                 type="button"
                                 onClick={() => setIsDrawerOpen(false)}
-                                className="px-4 py-2 border border-gray-300 dark:border-white/10 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-black hover:bg-gray-50 dark:hover:bg-white/5 font-medium shadow-sm transition-colors"
+                                className="h-10 rounded-xl border border-[#6DA5C0]/30 bg-white px-4 text-sm font-semibold text-[#294D61] shadow-sm transition hover:border-[#0F969C]/50 hover:text-[#0F969C] dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={addStaff.isPending || updateStaff.isPending}
-                                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 font-medium shadow-sm disabled:opacity-50 transition-colors"
+                                className="h-10 rounded-xl bg-[#0F969C] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#294D61] disabled:opacity-50"
                             >
                                 {addStaff.isPending || updateStaff.isPending ? 'Saving...' : 'Save'}
                             </button>
-                        </div>
+                        </FormActions>
                     </div>
                 </form>
             </Drawer>
@@ -1030,16 +1061,16 @@ export function StaffManagement() {
 
                 {selectedStaff && (
                     <div className="space-y-5">
-                        <div className="rounded-2xl border border-primary-100 bg-primary-50/70 p-4">
+                        <FormSection className="bg-[#F7FAFC] dark:bg-white/5">
                             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                                 {selectedStaff.photoUrl ? (
                                     <img src={selectedStaff.photoUrl} alt={selectedStaff.name} className="h-24 w-24 rounded-2xl border border-white object-cover shadow-sm" />
                                 ) : (
-                                    <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-primary-100 bg-white text-sm font-black text-primary-600">IMG</div>
+                                    <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-[#6DA5C0]/25 bg-white text-sm font-extrabold text-[#0F969C]">IMG</div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-2xl font-black text-gray-950">{selectedStaff.name}</p>
-                                    <p className="mt-1 text-sm font-bold text-gray-600">{selectedStaff.role} - {selectedStaff.department}</p>
+                                    <p className="text-2xl font-extrabold text-[#05161A] dark:text-gray-100">{selectedStaff.name}</p>
+                                    <p className="mt-1 text-sm font-bold text-[#294D61] dark:text-gray-300">{selectedStaff.role} - {selectedStaff.department}</p>
                                     <div className="mt-3 flex flex-wrap gap-2">
                                         <StatusHighlighter value={isExStaffRecord(selectedStaff) ? selectedStaff.status || 'Ex-Staff' : 'Working'} />
                                         <StatusHighlighter value={selectedStaff.user?.isActive ? 'Login Active' : selectedStaff.user ? 'Login Disabled' : 'No Login'} />
@@ -1047,10 +1078,11 @@ export function StaffManagement() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </FormSection>
 
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            {[
+                        <FormSection title="Staff Details">
+                            <FormGrid columns={2}>
+                                {[
                                 { label: 'Employee ID', value: selectedStaff.empId || 'N/A' },
                                 { label: 'Unit', value: unitLabelById.get(selectedStaff.unitId)?.replace('\n', ' - ') || 'Unknown Unit' },
                                 { label: 'Joining Date', value: selectedStaff.joiningDate || '-' },
@@ -1079,34 +1111,34 @@ export function StaffManagement() {
                                 { label: 'Aadhaar No.', value: getStaffMetadata(selectedStaff).aadhaarNo || '-' },
                                 { label: 'Aadhaar Verification', value: getStaffMetadata(selectedStaff).aadhaarVerification?.status || 'Not verified' }
                             ].map((item) => (
-                                <div key={item.label} className="rounded-lg border border-gray-100 bg-white p-3">
-                                    <p className="text-xs font-black uppercase tracking-wide text-gray-400">{item.label}</p>
-                                    <p className="mt-1 break-words text-sm font-bold text-gray-900">{item.value}</p>
+                                <div key={item.label} className="rounded-xl border border-[#6DA5C0]/15 bg-[#F7FAFC] p-3 dark:border-white/10 dark:bg-white/5">
+                                    <p className="text-xs font-extrabold uppercase tracking-wide text-[#6DA5C0]">{item.label}</p>
+                                    <p className="mt-1 break-words text-sm font-bold text-[#05161A] dark:text-gray-100">{item.value}</p>
                                 </div>
                             ))}
-                        </div>
+                            </FormGrid>
+                        </FormSection>
 
-                        <div className="rounded-lg border border-gray-100 bg-white p-4">
-                            <p className="text-sm font-black text-gray-900">Address</p>
-                            <p className="mt-1 text-sm font-medium text-gray-600">{getStaffMetadata(selectedStaff).address || '-'}</p>
-                        </div>
+                        <FormSection title="Address">
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{getStaffMetadata(selectedStaff).address || '-'}</p>
+                        </FormSection>
 
                         {isExStaffRecord(selectedStaff) && (
-                            <div className="rounded-lg border border-orange-100 bg-orange-50/80 p-4">
-                                <p className="text-sm font-black text-gray-900">Exit Remarks</p>
-                                <p className="mt-1 text-sm font-medium text-gray-600">{getStaffMetadata(selectedStaff).exit?.remarks || '-'}</p>
-                            </div>
+                            <FormSection title="Exit Remarks" className="border-[#0C7075]/20 bg-[#0C7075]/5">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{getStaffMetadata(selectedStaff).exit?.remarks || '-'}</p>
+                            </FormSection>
                         )}
 
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            {[
+                        <FormSection title="Documents">
+                            <FormGrid columns={2}>
+                                {[
                                 { label: 'Aadhaar Document', document: getStaffDocument(selectedStaff, 'aadhaarDocument') },
                                 { label: 'Resume', document: getStaffDocument(selectedStaff, 'resumeDocument') }
                             ].map((item) => (
-                                <div key={item.label} className="rounded-lg border border-gray-100 bg-white p-4">
-                                    <p className="text-sm font-black text-gray-900">{item.label}</p>
+                                <div key={item.label} className="rounded-xl border border-[#6DA5C0]/15 bg-[#F7FAFC] p-4 dark:border-white/10 dark:bg-white/5">
+                                    <p className="text-sm font-extrabold text-[#05161A] dark:text-gray-100">{item.label}</p>
                                     {item.document?.fileUrl ? (
-                                        <a href={item.document.fileUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex rounded-full bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 hover:bg-primary-100">
+                                        <a href={item.document.fileUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex rounded-full bg-[#D8EEF5] px-3 py-1.5 text-xs font-extrabold text-[#294D61] hover:bg-[#6DA5C0]/30">
                                             View Uploaded File
                                         </a>
                                     ) : (
@@ -1114,7 +1146,8 @@ export function StaffManagement() {
                                     )}
                                 </div>
                             ))}
-                        </div>
+                            </FormGrid>
+                        </FormSection>
                     </div>
                 )}
             </Drawer>

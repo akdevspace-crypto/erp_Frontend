@@ -55,13 +55,20 @@ export const healthcareService = {
         return response.data?.data
     },
 
-    getCaregiverVitalCharts: async (month?: string, patientId?: string): Promise<CaregiverVitalChart[]> => {
-        const response = await api.get('/caregiver-vital-charts', { params: { month, patientId } })
+    getCaregiverVitalCharts: async (month?: string, patientId?: string, unitId?: string | null): Promise<CaregiverVitalChart[]> => {
+        const response = await api.get('/caregiver-vital-charts', {
+            params: { month, patientId },
+            ...(unitId ? { headers: { 'x-unit-id': unitId } } : {})
+        })
         return response.data?.data || []
     },
 
     saveCaregiverVitalChart: async (payload: SaveCaregiverVitalChartPayload): Promise<CaregiverVitalChart> => {
-        const response = await api.post('/caregiver-vital-charts', payload)
+        const { unitId, ...requestBody } = payload
+        if (import.meta.env.DEV) {
+            console.debug('[INHOUSE_VITALS][save-chart] request body', requestBody)
+        }
+        const response = await api.post('/caregiver-vital-charts', requestBody, unitId ? { headers: { 'x-unit-id': unitId } } : undefined)
         return response.data?.data
     },
 

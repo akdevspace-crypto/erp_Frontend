@@ -81,7 +81,7 @@ export function PendingPayments() {
                         </span>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-wide text-orange-700">Pending Due</p>
-                            <p className="text-lg font-black text-gray-900">
+                            <p className="text-lg font-extrabold text-gray-900">
                                 Rs {pendingInvoices.reduce((total, invoice) => total + Number(invoice.balanceAmount || 0), 0).toFixed(2)}
                             </p>
                         </div>

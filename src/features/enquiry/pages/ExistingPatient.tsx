@@ -96,11 +96,11 @@ export function ExistingPatient() {
             />
 
             {created ? (
-                <div className="rounded-[8px] border border-[#c0c7a0] bg-[#f2f5ea] p-5 shadow-sm">
+                <div className="rounded-[8px] border border-[#6DA5C0] bg-[#F7FAFC] p-5 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                            <p className="text-xs font-black uppercase tracking-[0.14em] text-[#7b8f5d]">Existing Patient Added</p>
-                            <h2 className="mt-2 text-2xl font-black text-[#1f3b4d]">{created.patient?.name}</h2>
+                            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#6DA5C0]">Existing Patient Added</p>
+                            <h2 className="mt-2 text-2xl font-extrabold text-[#294D61]">{created.patient?.name}</h2>
                             <p className="mt-1 text-sm font-semibold text-slate-600">
                                 {created.enquiry?.refNo} &gt; {created.allocation?.refNo} &gt; {created.admission?.status}
                             </p>
@@ -111,7 +111,7 @@ export function ExistingPatient() {
                                 setForm(initialForm)
                                 setCreated(null)
                             }}
-                            className="inline-flex h-11 items-center gap-2 rounded-[8px] bg-[#1f3b4d] px-4 text-sm font-black text-white"
+                            className="inline-flex h-11 items-center gap-2 rounded-[8px] bg-[#294D61] px-4 text-sm font-extrabold text-white"
                         >
                             <UserPlus size={16} />
                             Add Another
@@ -125,10 +125,10 @@ export function ExistingPatient() {
                                 <Link
                                     key={item.href}
                                     to={item.href}
-                                    className="rounded-[8px] border border-[#d9dec5] bg-white p-4 text-sm shadow-sm transition hover:border-[#7b8f5d]"
+                                    className="rounded-[8px] border border-[#d9dec5] bg-white p-4 text-sm shadow-sm transition hover:border-[#6DA5C0]"
                                 >
-                                    <Icon className="mb-3 text-[#1f3b4d]" size={20} />
-                                    <p className="font-black text-slate-950">{item.label}</p>
+                                    <Icon className="mb-3 text-[#294D61]" size={20} />
+                                    <p className="font-extrabold text-slate-950">{item.label}</p>
                                     <p className="mt-1 text-xs font-semibold text-slate-500">{item.helper}</p>
                                 </Link>
                             )
@@ -206,39 +206,39 @@ export function ExistingPatient() {
 
                     <div className="mt-4 grid gap-4 md:grid-cols-2">
                         <label className="space-y-2">
-                            <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Health Condition</span>
+                            <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Health Condition</span>
                             <textarea
                                 value={form.healthCondition || ''}
                                 onChange={(event) => updateField('healthCondition', event.target.value)}
-                                className="min-h-[112px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#1f3b4d]"
+                                className="min-h-[112px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#294D61]"
                                 placeholder="Known health condition, vitals concern, special care notes..."
                             />
                         </label>
                         <label className="space-y-2">
-                            <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Current Medicines</span>
+                            <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Current Medicines</span>
                             <textarea
                                 value={form.currentMedicines || ''}
                                 onChange={(event) => updateField('currentMedicines', event.target.value)}
-                                className="min-h-[112px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#1f3b4d]"
+                                className="min-h-[112px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#294D61]"
                                 placeholder="Existing medicines, timing, dose..."
                             />
                         </label>
                     </div>
 
                     <label className="mt-4 block space-y-2">
-                        <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Routine Notes</span>
+                        <span className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Routine Notes</span>
                         <textarea
                             value={form.routineNotes || ''}
                             onChange={(event) => updateField('routineNotes', event.target.value)}
-                            className="min-h-[96px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#1f3b4d]"
+                            className="min-h-[96px] w-full rounded-[8px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#294D61]"
                             placeholder="Food, care routine, family instructions, doctor follow-up..."
                         />
                     </label>
                 </div>
 
-                <aside className="h-fit rounded-[8px] border border-[#c0c7a0] bg-[#f2f5ea] p-5 shadow-sm">
-                    <CalendarPlus className="text-[#1f3b4d]" size={24} />
-                    <h3 className="mt-3 text-lg font-black text-slate-950">Recommended Flow</h3>
+                <aside className="h-fit rounded-[8px] border border-[#6DA5C0] bg-[#F7FAFC] p-5 shadow-sm">
+                    <CalendarPlus className="text-[#294D61]" size={24} />
+                    <h3 className="mt-3 text-lg font-extrabold text-slate-950">Recommended Flow</h3>
                     <div className="mt-4 space-y-3 text-sm font-semibold text-slate-700">
                         <p>1. Add existing patient here.</p>
                         <p>2. ERP creates admission and allocation records.</p>
@@ -246,14 +246,14 @@ export function ExistingPatient() {
                         <p>4. Use Patient Ledger for daily expenses and month-end invoices.</p>
                         <p>5. Create family login from Admission Forms when needed.</p>
                     </div>
-                    <div className="mt-5 rounded-[8px] border border-[#c0c7a0] bg-white p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Opening Value</p>
-                        <p className="mt-2 text-2xl font-black text-[#1f3b4d]">Rs {amountPreview.toFixed(2)}</p>
+                    <div className="mt-5 rounded-[8px] border border-[#6DA5C0] bg-white p-4">
+                        <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Opening Value</p>
+                        <p className="mt-2 text-2xl font-extrabold text-[#294D61]">Rs {amountPreview.toFixed(2)}</p>
                     </div>
                     <button
                         type="submit"
                         disabled={!canSubmit || createExistingPatient.isPending}
-                        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-[8px] bg-[#1f3b4d] px-4 text-sm font-black text-white shadow-sm disabled:cursor-not-allowed disabled:bg-slate-300"
+                        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-[8px] bg-[#294D61] px-4 text-sm font-extrabold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
                         <UserPlus size={17} />
                         {createExistingPatient.isPending ? 'Creating...' : 'Create Admission + Allocation'}

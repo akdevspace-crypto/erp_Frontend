@@ -208,10 +208,10 @@ export function NewEnquiry() {
     const isSubmitting = addEnquiry.isPending || addFollowUp.isPending
 
     return (
-        <div className="flex h-full w-full min-w-0 flex-col overflow-hidden pb-1 bg-transparent dark:bg-black">
+        <div className="flex min-h-full w-full min-w-0 flex-col bg-transparent pb-4 dark:bg-black">
             <PageHeader title="New Enquiry" breadcrumbs={[{ label: 'Enquiry Desk' }, { label: 'Guided New Enquiry' }]} />
 
-            <div className="flex min-h-0 flex-1 flex-col rounded-[24px] border border-white/50 bg-white/70 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] backdrop-blur-xl dark:border-white/10 dark:bg-black sm:p-5 2xl:p-6">
+            <div className="flex flex-col rounded-[24px] border border-white/50 bg-white/70 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] backdrop-blur-xl dark:border-white/10 dark:bg-black sm:p-5 2xl:p-6">
                 <div className="mb-5 grid gap-3 md:grid-cols-4">
                     {steps.map((item, index) => (
                         <button
@@ -220,19 +220,19 @@ export function NewEnquiry() {
                             onClick={() => setStep(index)}
                             className={cn(
                                 'rounded-xl border p-3 text-left transition',
-                                step === index ? 'border-[#3f5f6a] bg-[#3f5f6a] text-white shadow-sm' : index < step ? 'border-emerald-100 bg-emerald-50 text-emerald-800' : 'border-slate-100 bg-white text-slate-600'
+                                step === index ? 'border-[#0F969C] bg-[#0F969C] text-white shadow-sm' : index < step ? 'border-emerald-100 bg-emerald-50 text-emerald-800' : 'border-slate-100 bg-white text-slate-600'
                             )}
                         >
-                            <span className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em]">
+                            <span className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em]">
                                 {index < step ? <Check className="h-4 w-4" /> : `Step ${index + 1}`}
                             </span>
-                            <p className="mt-2 text-sm font-black">{item.title}</p>
+                            <p className="mt-2 text-sm font-extrabold">{item.title}</p>
                             <p className="mt-1 text-xs font-semibold opacity-80">{item.helper}</p>
                         </button>
                     ))}
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6 overflow-y-auto pb-8 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-black/10 dark:[&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-8">
                     {step === 0 && (
                         <WorkflowSection title="Step 1: Enquiry Intake">
                             <Select label="Unit Name (Branch) *" {...register('unitId')} error={errors.unitId?.message} options={unitOptions} placeholder="-- Select Unit --" disabled={unitOptions.length <= 1} />
@@ -293,11 +293,11 @@ export function NewEnquiry() {
                                 <ChevronLeft className="h-4 w-4" /> Back
                             </button>
                             {step < steps.length - 1 ? (
-                                <button type="button" onClick={goNext} className="inline-flex items-center justify-center gap-2 rounded bg-[#3f5f6a] px-6 py-2.5 text-sm font-bold text-white shadow-sm">
+                                <button type="button" onClick={goNext} className="inline-flex items-center justify-center gap-2 rounded bg-[#0F969C] px-6 py-2.5 text-sm font-bold text-white shadow-sm">
                                     Next <ChevronRight className="h-4 w-4" />
                                 </button>
                             ) : (
-                                <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 rounded bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] px-6 py-2.5 text-[13.5px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] disabled:opacity-50">
+                                <button type="submit" disabled={isSubmitting} className="inline-flex items-center justify-center gap-2 rounded bg-gradient-to-r from-[#0F969C] to-[#294D61] px-6 py-2.5 text-[13.5px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(15,150,156,0.22)] disabled:opacity-50">
                                     <Save className="h-4 w-4" />
                                     {isSubmitting ? 'Saving Workflow...' : 'Save Enquiry Workflow'}
                                 </button>
