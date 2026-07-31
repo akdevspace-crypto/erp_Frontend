@@ -19,42 +19,36 @@ export function ActionBar({
     className
 }: ActionBarProps) {
     return (
-        <div className={cn("flex flex-wrap items-center gap-3 mb-4", className)}>
+        <div className={cn("mb-4 flex flex-wrap items-center gap-3", className)}>
             {onFilter && (
                 <button
+                    type="button"
                     onClick={onFilter}
-                    className="inline-flex items-center px-4 py-2.5 border border-gray-200 shadow-sm text-[13.5px] font-medium rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-black dark:border-white/10 dark:hover:bg-white/5"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#6DA5C0]/30 bg-white px-4 text-[13.5px] font-semibold text-[#294D61] shadow-sm transition-all hover:border-[#0F969C]/50 hover:bg-[#F7FAFC] hover:text-[#0F969C] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 dark:border-[#6DA5C0]/25 dark:bg-[#072E33] dark:text-[#B8D9E8] dark:hover:bg-[#0A2429] dark:hover:text-white"
                 >
-                    <Filter className="h-4 w-4 mr-2 text-gray-400" />
+                    <Filter className="h-4 w-4 text-[#6DA5C0]" />
                     Filter
                 </button>
             )}
             <div className="flex-1" />
             {onExport && (
                 <button
+                    type="button"
                     onClick={onExport}
-                    className="inline-flex items-center px-4 py-2.5 border border-gray-200 shadow-sm text-[13.5px] font-medium rounded-xl text-gray-700 dark:text-gray-300 bg-white dark:bg-black dark:border-white/10 dark:hover:bg-white/5"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-[#6DA5C0]/30 bg-white px-4 text-[13.5px] font-semibold text-[#294D61] shadow-sm transition-all hover:border-[#0F969C]/50 hover:bg-[#F7FAFC] hover:text-[#0F969C] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 dark:border-[#6DA5C0]/25 dark:bg-[#072E33] dark:text-[#B8D9E8] dark:hover:bg-[#0A2429] dark:hover:text-white"
                 >
-                    <Download className="h-4 w-4 mr-2 text-gray-400" />
-                    Export
+                    <Download className="h-4 w-4 text-[#6DA5C0]" />
+                    {exportLabel}
                 </button>
             )}
             {onAdd && (
                 <button
+                    type="button"
                     onClick={onAdd}
-                    className="inline-flex items-center px-4 py-2.5 shadow-sm text-[13.5px] font-medium rounded-xl text-white bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(63,95,106,0.22)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3f5f6a] transition-all active:scale-95 border border-transparent"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-[#0F969C] to-[#294D61] px-4 text-[13.5px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,150,156,0.24)] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/30 focus:ring-offset-2 active:scale-95"
                 >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4" />
                     {addLabel}
-                </button>
-            )}
-            {onExport && (
-                <button
-                    onClick={onExport}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm text-[13.5px] font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-black dark:border-white/10 dark:hover:bg-white/5"
-                >
-                    <Download className="h-4 w-4" />
-                    {exportLabel}
                 </button>
             )}
         </div>

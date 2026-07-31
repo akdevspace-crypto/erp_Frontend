@@ -183,7 +183,7 @@ export function CallNotificationCenter() {
                             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">
                                 {direction === 'INBOUND' ? 'Incoming Call' : 'Outgoing Call'}
                             </p>
-                            <p className="mt-1 text-base font-black text-slate-900 dark:text-white">
+                            <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">
                                 {otherParty || 'Unknown number'}
                             </p>
                         </div>
@@ -208,7 +208,7 @@ export function CallNotificationCenter() {
                         </span>
 
                         {liveCall.acceptedAt ? (
-                            <span className="text-sm font-black text-slate-900 dark:text-white">
+                            <span className="text-sm font-extrabold text-slate-900 dark:text-white">
                                 {formatCallDuration(elapsedSeconds)}
                             </span>
                         ) : null}
@@ -231,7 +231,7 @@ export function CallNotificationCenter() {
                                 }
                             }}
                             disabled={!liveCall.conversationId}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                            className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-extrabold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
                         >
                             <PhoneCall className="h-4 w-4" />
                             Open Thread
@@ -254,7 +254,7 @@ export function CallNotificationCenter() {
                                             }))
                                         }
                                     }}
-                                    className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200"
+                                    className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-extrabold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200"
                                 >
                                     <PhoneIncoming className="h-4 w-4" />
                                     Accept
@@ -262,7 +262,7 @@ export function CallNotificationCenter() {
                                 <button
                                     type="button"
                                     onClick={() => setLiveCall(null)}
-                                    className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-black text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200"
+                                    className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-extrabold text-red-700 transition hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200"
                                 >
                                     <PhoneOff className="h-4 w-4" />
                                     Reject
@@ -283,7 +283,7 @@ export function CallNotificationCenter() {
                                         endedAt: Date.now()
                                     } : current)
                                 }}
-                                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                             >
                                 <PhoneOff className="h-4 w-4" />
                                 {isTerminalCallStatus(liveCall.status) ? 'Dismiss' : 'End'}

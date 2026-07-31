@@ -40,11 +40,11 @@ export function Drawer({ isOpen, onClose, title, children, size = 'md' }: Drawer
                 <div className="flex flex-col bg-white dark:bg-black dark:border-white/10 overflow-hidden rounded-[24px] h-full relative shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-gray-50">
                     <div className="px-5 py-5 sm:px-6 border-b border-gray-100/80 flex-shrink-0">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-[18px] font-black tracking-tight text-gray-900 dark:text-gray-100">{title}</h2>
+                            <h2 className="text-[18px] font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{title}</h2>
                             <div className="ml-3 flex h-7 items-center">
                                 <button
                                     type="button"
-                                    className="rounded-md bg-white dark:bg-transparent text-gray-400 hover:text-[#3f5f6a] focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/30 transition-colors"
+                                    className="rounded-md bg-white dark:bg-transparent text-gray-400 hover:text-[#0F969C] focus:outline-none focus:ring-2 focus:ring-[#0F969C]/30 transition-colors"
                                     onClick={onClose}
                                 >
                                     <span className="sr-only">Close panel</span>

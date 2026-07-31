@@ -26,6 +26,9 @@ export interface DataTableProps<T> {
     actionsTitle?: string
     minTableWidth?: string
     showScrollbars?: boolean
+    spreadColumns?: boolean
+    fullHeight?: boolean
+    className?: string
 }
 
 export function DataTable<T>({
@@ -39,12 +42,13 @@ export function DataTable<T>({
     isLoading = false,
     actionsTitle = 'Actions',
     minTableWidth,
-    showScrollbars = false
+    showScrollbars = false,
+    spreadColumns = false,
+    fullHeight = true,
+    className
 }: DataTableProps<T>) {
-    const [sortKey, setSortKey] = useState<string | null>(null)
+    const [sortKey, setSortKey] = useState<string | null>(null)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
-
-    // Internal pagination state
     const [internalPage, setInternalPage] = useState(1)
     const [entriesPerPage, setEntriesPerPage] = useState(10)
 
@@ -109,14 +113,24 @@ export function DataTable<T>({
     }
 
     return (
-        <div className="bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden flex flex-col h-full flex-1 min-h-0 p-2 2xl:p-3">
+        <div className={cn(
+            "bg-white dark:bg-black border border-gray-100/80 dark:border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden flex flex-col p-2 2xl:p-3",
+            fullHeight ? "h-full flex-1 min-h-0" : "w-full shrink-0",
+            className
+        )}>
             <div className={cn(
-                "flex-1",
+                fullHeight ? "flex-1" : "w-full",
                 showScrollbars
-                    ? "overflow-auto"
+                    ? "app-scrollbar overflow-auto"
                     : "overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             )}>
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-white/10" style={minTableWidth ? { minWidth: minTableWidth } : undefined}>
+                <table
+                    className={cn(
+                        "w-full min-w-full divide-y divide-gray-200 dark:divide-white/10",
+                        spreadColumns && "table-fixed"
+                    )}
+                    style={minTableWidth ? { minWidth: minTableWidth } : undefined}
+                >
                     <thead className="bg-gray-50/80 dark:bg-white/5 backdrop-blur-sm sticky top-0 z-10 rounded-2xl">
                         <tr>
                             {columns.map(col => (
@@ -171,7 +185,7 @@ export function DataTable<T>({
                                 <tr
                                     key={keyExtractor(item)}
                                     className={cn(
-                                        "hover:bg-[#3f5f6a]/5 transition-colors group border-b border-gray-50 dark:border-white/5",
+                                        "hover:bg-[#0F969C]/5 transition-colors group border-b border-gray-50 dark:border-white/5",
                                         index % 2 === 0 ? "bg-white dark:bg-black" : "bg-gray-50/30 dark:bg-white/2"
                                     )}
                                 >

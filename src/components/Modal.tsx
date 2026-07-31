@@ -80,14 +80,14 @@ export function Modal({
             />
 
             {/* Modal panel */}
-            <div className={cn("relative z-10 transform overflow-hidden rounded-[32px] border border-white/20 bg-white p-2 text-left shadow-2xl transition-all dark:border-white/5 dark:bg-black sm:my-8 sm:w-full", sizeClasses[size])}>
-                <div className="bg-white dark:bg-black dark:border-white/10 border border-gray-50 shadow-[0_2px_12px_rgba(0,0,0,0.02)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-[24px]">
+            <div className={cn("relative z-10 flex max-h-[calc(100dvh-2rem)] transform flex-col overflow-hidden rounded-[32px] border border-white/20 bg-white p-2 text-left shadow-2xl transition-all dark:border-white/5 dark:bg-black sm:my-8 sm:w-full sm:max-h-[calc(100dvh-4rem)]", sizeClasses[size])}>
+                <div className="min-h-0 flex-1 overflow-y-auto bg-white dark:bg-black dark:border-white/10 border border-gray-50 shadow-[0_2px_12px_rgba(0,0,0,0.02)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4 rounded-t-[24px]">
                     <div className="sm:flex sm:items-start">
                         <div className={cn("mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10", bgClasses[type])}>
                             {icons[type]}
                         </div>
                         <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 className="text-[18px] leading-6 font-black tracking-tight text-gray-900 dark:text-gray-100" id="modal-title">
+                            <h3 className="text-[18px] leading-6 font-extrabold tracking-tight text-gray-900 dark:text-gray-100" id="modal-title">
                                 {title}
                             </h3>
                             <div className="mt-2 text-sm text-gray-500">
@@ -97,7 +97,7 @@ export function Modal({
                         </div>
                     </div>
                 </div>
-                <div className="bg-gray-50/50 dark:bg-black/20 border-x border-b border-gray-50 dark:border-white/10 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 rounded-b-[24px]">
+                <div className="shrink-0 bg-gray-50/50 dark:bg-black/20 border-x border-b border-gray-50 dark:border-white/10 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 rounded-b-[24px]">
                     {onConfirm && (
                         <button
                             type="button"
@@ -116,7 +116,7 @@ export function Modal({
                     )}
                     <button
                         type="button"
-                        className="mt-3 inline-flex w-full justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-transparent px-4 py-2.5 text-[13.5px] font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] sm:mt-0 sm:ml-3 sm:w-auto transition-all active:scale-95"
+                        className="mt-3 inline-flex w-full justify-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-transparent px-4 py-2.5 text-[13.5px] font-bold text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 focus:border-[#0F969C] sm:mt-0 sm:ml-3 sm:w-auto transition-all active:scale-95"
                         onClick={onClose}
                     >
                         {cancelLabel}

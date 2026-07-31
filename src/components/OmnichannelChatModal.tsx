@@ -249,7 +249,7 @@ const getBubbleClassName = (channel?: string, outbound?: boolean) => {
     const meta = getChannelMeta(channel)
 
     if (outbound) {
-        return 'border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(63,95,106,0.25)]'
+        return 'border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(15,150,156,0.25)]'
     }
 
     return cn('border bg-white text-slate-900 dark:bg-[#171717] dark:text-slate-100', meta.surfaceClassName)
@@ -849,13 +849,13 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
     return (
         <div className="fixed inset-0 z-50 bg-slate-950/55 p-2 backdrop-blur-md sm:p-4">
             <div className="absolute inset-0" onClick={onClose} />
-            <div className="relative z-10 mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-none flex-col overflow-hidden rounded-[24px] border border-white/15 bg-[#f5f7f2] shadow-[0_40px_120px_rgba(15,23,42,0.28)] dark:bg-[#0d1117] sm:h-[calc(100dvh-2rem)] lg:flex-row lg:rounded-[30px]">
+            <div className="relative z-10 mx-auto flex h-[calc(100dvh-1rem)] w-full max-w-none flex-col overflow-hidden rounded-[24px] border border-white/15 bg-[#F7FAFC] shadow-[0_40px_120px_rgba(15,23,42,0.28)] dark:bg-[#0d1117] sm:h-[calc(100dvh-2rem)] lg:flex-row lg:rounded-[30px]">
                 <aside className="flex max-h-[42dvh] w-full shrink-0 flex-col border-b border-slate-200/80 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 lg:max-h-none lg:w-[clamp(280px,22vw,360px)] lg:border-b-0 lg:border-r">
                     <div className="border-b border-slate-200/80 px-4 py-4 dark:border-white/10">
                         <div className="mb-4 flex items-center justify-between">
                             <div>
                                 <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">Inbox</p>
-                                <h2 className="mt-1 text-lg font-black text-slate-900 dark:text-white">Omnichannel</h2>
+                                <h2 className="mt-1 text-lg font-extrabold text-slate-900 dark:text-white">Omnichannel</h2>
                             </div>
                             <button
                                 type="button"
@@ -928,13 +928,13 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         )}
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-black text-white dark:bg-white/10">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-extrabold text-white dark:bg-white/10">
                                                 {getConversationName(conversation).charAt(0)}
                                             </div>
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="min-w-0">
-                                                        <p className="truncate text-sm font-black text-slate-900 dark:text-white">{getConversationName(conversation)}</p>
+                                                        <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{getConversationName(conversation)}</p>
                                                         <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{getConversationPreview(conversation)}</p>
                                                     </div>
                                                     <span className="shrink-0 text-[11px] font-semibold text-slate-400">
@@ -964,11 +964,11 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     )}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-black text-white shadow-md dark:from-primary-600 dark:to-primary-800">
+                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-extrabold text-white shadow-md dark:from-primary-600 dark:to-primary-800">
                                             {(person.firstName || 'S').charAt(0)}{(person.lastName || '').charAt(0)}
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="truncate text-sm font-black text-slate-900 dark:text-white">{person.firstName} {person.lastName}</p>
+                                            <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">{person.firstName} {person.lastName}</p>
                                             <p className="truncate text-xs text-slate-500 dark:text-slate-400">{person.designation || 'Staff member'}</p>
                                         </div>
                                     </div>
@@ -984,12 +984,12 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                 <>
                                     <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4 backdrop-blur-xl dark:border-white/10">
                                         <div className="flex min-w-0 items-center gap-3">
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-black text-white dark:bg-white/10">
+                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-sm font-extrabold text-white dark:bg-white/10">
                                                 {getConversationName(activeConversation).charAt(0)}
                                             </div>
                                             <div className="min-w-0">
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                     <h3 className="truncate text-base font-black text-slate-900 dark:text-white">{getConversationName(activeConversation)}</h3>
+                                                     <h3 className="truncate text-base font-extrabold text-slate-900 dark:text-white">{getConversationName(activeConversation)}</h3>
                                                      <ChannelBadge channel={visibleChannel} />
                                                      {liveCall ? <StatusHighlighter value={liveCall.status} className="min-w-0" /> : null}
                                                  </div>
@@ -1004,7 +1004,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                             <button
                                                 type="button"
                                                 onClick={() => setCallModalOpen(true)}
-                                                className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
+                                                className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
                                             >
                                                 <PhoneCall className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" />
                                                 Call
@@ -1025,7 +1025,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 <div className="flex h-20 w-20 items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-white/70 text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
                                                     <MessageSquare className="h-8 w-8" />
                                                 </div>
-                                                <h4 className="mt-4 text-lg font-black text-slate-900 dark:text-white">Start the first reply</h4>
+                                                <h4 className="mt-4 text-lg font-extrabold text-slate-900 dark:text-white">Start the first reply</h4>
                                                 <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Messages and call events from WhatsApp, email, and Exotel voice will appear together here with live status updates.</p>
                                             </div>
                                         ) : (
@@ -1149,7 +1149,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     <div className="flex h-24 w-24 items-center justify-center rounded-[30px] border border-dashed border-slate-300 bg-white/80 text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
                                         <MessageSquare className="h-10 w-10" />
                                     </div>
-                                    <h3 className="mt-5 text-xl font-black text-slate-900 dark:text-white">Select a conversation</h3>
+                                    <h3 className="mt-5 text-xl font-extrabold text-slate-900 dark:text-white">Select a conversation</h3>
                                     <p className="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">Pick a customer thread to reply through the most recent inbound channel, switch channels when needed, and watch delivery status update in real time.</p>
                                 </div>
                             )
@@ -1157,12 +1157,12 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                             <>
                                 <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4 backdrop-blur-xl dark:border-white/10">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-black text-white shadow-md dark:from-primary-600 dark:to-primary-800">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 text-sm font-extrabold text-white shadow-md dark:from-primary-600 dark:to-primary-800">
                                             {(selectedStaff?.firstName || 'S').charAt(0)}{(selectedStaff?.lastName || '').charAt(0)}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-base font-black text-slate-900 dark:text-white">{selectedStaff?.firstName} {selectedStaff?.lastName}</h3>
+                                                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{selectedStaff?.firstName} {selectedStaff?.lastName}</h3>
                                                 {internalCallState !== 'idle' ? (
                                                     <span className="animate-pulse rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:bg-primary-500/10 dark:text-primary-300">
                                                         {internalCallState}
@@ -1177,7 +1177,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                             type="button"
                                             onClick={() => handleStartInternalCall(selectedStaff)}
                                             disabled={internalCallState !== 'idle'}
-                                            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
+                                            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 lg:inline-flex"
                                         >
                                             <PhoneCall className="h-3.5 w-3.5 text-primary-600 dark:text-primary-300" />
                                             Call
@@ -1206,7 +1206,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                         <div className={cn(
                                                             'max-w-[88%] rounded-[26px] border px-4 py-3 sm:max-w-[78%]',
                                                             isOutbound
-                                                                ? 'rounded-br-md border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(63,95,106,0.25)] dark:border-primary-500/30 dark:bg-primary-600/90'
+                                                                ? 'rounded-br-md border-primary-500 bg-primary-600 text-white shadow-[0_18px_40px_rgba(15,150,156,0.25)] dark:border-primary-500/30 dark:bg-primary-600/90'
                                                                 : 'rounded-bl-md border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-[#171717] dark:text-slate-100'
                                                         )}>
                                                             <p className="whitespace-pre-wrap text-[14px] leading-6">{message.body}</p>
@@ -1238,7 +1238,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                 <div className="flex h-24 w-24 items-center justify-center rounded-[30px] border border-dashed border-slate-300 bg-white/80 text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
                                     <User className="h-10 w-10" />
                                 </div>
-                                <h3 className="mt-5 text-xl font-black text-slate-900 dark:text-white">Internal staff chat</h3>
+                                <h3 className="mt-5 text-xl font-extrabold text-slate-900 dark:text-white">Internal staff chat</h3>
                                 <p className="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">Select a staff member from the left to start or continue an internal handoff conversation.</p>
                             </div>
                         )}
@@ -1312,7 +1312,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         type="submit"
                                         disabled={!draft.trim() || sending || sendInternal.isPending || (chatType === 'client' && !hasSelectedReplyRecipient)}
                                         className={cn(
-                                            'inline-flex h-[54px] items-center gap-2 rounded-[22px] px-5 text-sm font-black text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50',
+                                            'inline-flex h-[54px] items-center gap-2 rounded-[22px] px-5 text-sm font-extrabold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50',
                                             'bg-primary-600 hover:bg-primary-700'
                                         )}
                                     >
@@ -1327,7 +1327,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                         <aside className="hidden w-[clamp(260px,20vw,340px)] shrink-0 border-l border-slate-200/80 bg-white/85 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-[#11161f]/95 xl:flex xl:flex-col">
                             <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(135deg,_rgba(255,255,255,0.95),_rgba(226,232,240,0.9))] p-4 dark:border-white/10 dark:bg-[linear-gradient(135deg,_rgba(15,23,42,0.95),_rgba(30,41,59,0.75))]">
                                 <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400">Customer Context</p>
-                                <h4 className="mt-2 text-lg font-black text-slate-900 dark:text-white">{getConversationName(activeConversation)}</h4>
+                                <h4 className="mt-2 text-lg font-extrabold text-slate-900 dark:text-white">{getConversationName(activeConversation)}</h4>
                                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Channel-aware inbox with live delivery feedback.</p>
                             </div>
 
@@ -1380,7 +1380,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Loading score...</p>
                                     ) : leadScore ? (
                                         <>
-                                            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{leadScore.score ?? leadScore.value ?? 0}</p>
+                                            <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-white">{leadScore.score ?? leadScore.value ?? 0}</p>
                                             <p className="mt-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-300">
                                                 {leadScore.label || leadScore.priority || 'Scored lead'}
                                             </p>
@@ -1402,7 +1402,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                             <div className="min-w-0">
                                 <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary-600 dark:text-primary-300">Enterprise Call Center</p>
                                 <div className="mt-2 flex flex-wrap items-center gap-3">
-                                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                                    <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
                                         {isGlobalMode ? 'Enterprise Operations' : getConversationName(activeConversation)}
                                     </h3>
                                     {liveCall ? <StatusHighlighter value={liveCall.status} className="min-w-0" /> : null}
@@ -1418,7 +1418,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     type="button"
                                     onClick={handleStartCall}
                                     disabled={!canStartCall}
-                                    className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-primary-700 transition hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-primary-400/30 dark:bg-primary-400/10 dark:text-primary-200 dark:hover:bg-primary-400/20"
+                                    className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-primary-700 transition hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-primary-400/30 dark:bg-primary-400/10 dark:text-primary-200 dark:hover:bg-primary-400/20"
                                 >
                                     <PhoneCall className="h-3.5 w-3.5" />
                                     {startingCall ? 'Calling...' : 'Start Call'}
@@ -1440,7 +1440,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
                                                 <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">Current Active Calls</p>
-                                                <h4 className="mt-1 text-base font-black text-slate-900 dark:text-white">Live Call Panel</h4>
+                                                <h4 className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">Live Call Panel</h4>
                                             </div>
                                             {loadingCalls ? <span className="text-xs font-bold text-slate-400">Syncing...</span> : null}
                                         </div>
@@ -1451,14 +1451,14 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 <div key={call.id || call.callSid || call.startedAt} className="rounded-2xl border border-primary-100 bg-primary-50/70 p-4 dark:border-primary-400/20 dark:bg-primary-400/10">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="min-w-0">
-                                                            <p className="truncate text-sm font-black text-slate-900 dark:text-white">
+                                                            <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">
                                                                 {call.customerName || (isGlobalMode ? (call.to || call.from || 'Customer') : getConversationName(activeConversation))}
                                                             </p>
                                                             <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-300">
                                                                 {call.customerPhone || call.to || call.from || (isGlobalMode ? 'No Number' : customerPhone)}
                                                             </p>
                                                         </div>
-                                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200">
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-200">
                                                             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
                                                             Ongoing
                                                         </span>
@@ -1494,7 +1494,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                             ].map((action) => {
                                                 const Icon = action.icon
                                                 const disabled = action.disabled || (!action.action && !action.href)
-                                                const className = "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+                                                const className = "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                                                 return action.href ? (
                                                     <a key={action.label} href={action.href} download={action.download} target={action.download ? undefined : '_blank'} rel={action.download ? undefined : 'noreferrer'} className={className}>
                                                         <Icon className="h-3.5 w-3.5" />
@@ -1516,7 +1516,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                             {callMetrics.map((metric) => (
                                                 <div key={metric.label} className="rounded-2xl border border-slate-100 bg-slate-50 p-3 dark:border-white/10 dark:bg-black/20">
                                                     <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">{metric.label}</p>
-                                                    <p className="mt-1 text-base font-black text-slate-900 dark:text-white">{metric.value}</p>
+                                                    <p className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">{metric.value}</p>
                                                 </div>
                                             ))}
                                         </div>
@@ -1527,7 +1527,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                                         <div>
                                             <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">Call History</p>
-                                            <h4 className="mt-1 text-base font-black text-slate-900 dark:text-white">Timeline</h4>
+                                            <h4 className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">Timeline</h4>
                                         </div>
                                         <div className="relative w-full xl:w-72">
                                             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -1555,7 +1555,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                 type="button"
                                                 onClick={() => setCallFilter(value)}
                                                 className={cn(
-                                                    'rounded-full border px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] transition',
+                                                    'rounded-full border px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] transition',
                                                     callFilter === value
                                                         ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-400/30 dark:bg-primary-400/10 dark:text-primary-200'
                                                         : 'border-slate-200 bg-white text-slate-500 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white'
@@ -1581,7 +1581,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                                                                 <DirectionIcon className="h-4 w-4" />
                                                             </div>
                                                             <div className="min-w-0">
-                                                                <p className="truncate text-sm font-black text-slate-900 dark:text-white">
+                                                                <p className="truncate text-sm font-extrabold text-slate-900 dark:text-white">
                                                                     {call.customerName || (isGlobalMode ? (call.to || call.from || 'Customer') : getConversationName(activeConversation))}
                                                                 </p>
                                                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -1615,14 +1615,14 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
             {incomingCallPayload || internalCallState === 'calling' || internalCallState === 'connected' ? (
                 <div className="absolute top-4 right-4 z-50 flex w-[min(20rem,calc(100vw-2rem))] animate-in fade-in slide-in-from-top-4 flex-col gap-3 rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl backdrop-blur-2xl">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 font-black shadow-md">
+                        <div className="flex h-12 w-12 shrink-0 animate-bounce items-center justify-center rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 font-extrabold shadow-md">
                             📞
                         </div>
                         <div className="min-w-0 flex-1">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400">
                                 {internalCallState === 'incoming' ? 'Incoming Voice Call' : internalCallState === 'calling' ? 'Calling...' : 'Live Call'}
                             </p>
-                            <p className="truncate text-sm font-black">
+                            <p className="truncate text-sm font-extrabold">
                                 {incomingCallPayload ? `Agent #${incomingCallPayload.callerUserId || 'Staff'}` : internalCallTargetStaff ? `${internalCallTargetStaff.firstName} ${internalCallTargetStaff.lastName}` : 'Internal Voice'}
                             </p>
                             <p className="text-xs text-slate-400">WebRTC Secure P2P</p>
@@ -1633,7 +1633,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                             <button
                                 type="button"
                                 onClick={handleAcceptInternalCall}
-                                className="flex-1 rounded-full bg-emerald-600 py-2 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-emerald-500"
+                                className="flex-1 rounded-full bg-emerald-600 py-2 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg transition hover:bg-emerald-500"
                             >
                                 Accept
                             </button>
@@ -1641,7 +1641,7 @@ export function ChatModal({ isOpen, onClose, entityType, entityId, focusConversa
                         <button
                             type="button"
                             onClick={handleDeclineOrEndInternalCall}
-                            className="flex-1 rounded-full bg-red-600 py-2 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:bg-red-500"
+                            className="flex-1 rounded-full bg-red-600 py-2 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg transition hover:bg-red-500"
                         >
                             {internalCallState === 'incoming' ? 'Decline' : 'End Call'}
                         </button>

@@ -27,9 +27,9 @@ export function CommandPalette() {
                 onClick={() => setOpen(false)}
             ></div>
             <Command
-                className="w-full max-w-2xl bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden relative z-50 flex flex-col scale-100 animate-in zoom-in-95 duration-200"
+                className="w-full max-w-2xl max-h-[calc(100dvh-2rem)] bg-white/95 backdrop-blur-xl rounded-[24px] shadow-[0_32px_64px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden relative z-50 flex flex-col scale-100 animate-in zoom-in-95 duration-200"
             >
-                <div className="flex items-center border-b border-gray-100 px-5">
+                <div className="flex shrink-0 items-center border-b border-gray-100 px-5">
                     <Search className="w-5 h-5 text-gray-400 shrink-0" />
                     <Command.Input
                         placeholder="What do you need to do? (e.g. Add Enquiry, Create Client)"
@@ -41,7 +41,7 @@ export function CommandPalette() {
                     </div>
                 </div>
 
-                <Command.List className="max-h-[350px] overflow-y-auto p-3 custom-scrollbar">
+                <Command.List className="min-h-0 flex-1 overflow-y-auto p-3 custom-scrollbar">
                     <Command.Empty className="py-8 text-center text-[13px] font-medium text-gray-500">No workflows found. Try "Add Enquiry".</Command.Empty>
 
                     <Command.Group heading="CORE WORKFLOWS" className="px-2 py-3 text-[10px] font-bold text-gray-400 tracking-wider">
@@ -51,14 +51,14 @@ export function CommandPalette() {
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Record a new lead</span>
                         </Command.Item>
 
-                        <Command.Item onSelect={() => { navigate('/tasks/assign'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#3f5f6a]/10 aria-selected:bg-[#3f5f6a]/10 text-gray-700 dark:text-gray-300 hover:text-[#3f5f6a] aria-selected:text-[#3f5f6a] transition-colors group">
-                            <div className="w-8 h-8 rounded-full bg-[#3f5f6a]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#3f5f6a]/20 shadow-sm transition-all"><CheckCircle className="w-4 h-4" /></div>
+                        <Command.Item onSelect={() => { navigate('/tasks/assign'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#0F969C]/10 aria-selected:bg-[#0F969C]/10 text-gray-700 dark:text-gray-300 hover:text-[#0F969C] aria-selected:text-[#0F969C] transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-[#0F969C]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#0F969C]/20 shadow-sm transition-all"><CheckCircle className="w-4 h-4" /></div>
                             <span className="text-[14px] font-bold text-gray-900 dark:text-gray-100">Assign Task</span>
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Delegate to team</span>
                         </Command.Item>
 
-                        <Command.Item onSelect={() => { navigate('/clients/new'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#3f5f6a]/10 aria-selected:bg-[#3f5f6a]/10 text-gray-700 dark:text-gray-300 hover:text-[#3f5f6a] aria-selected:text-[#3f5f6a] transition-colors group">
-                            <div className="w-8 h-8 rounded-full bg-[#3f5f6a]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#3f5f6a]/20 shadow-sm transition-all"><Users className="w-4 h-4" /></div>
+                        <Command.Item onSelect={() => { navigate('/clients/new'); setOpen(false) }} className="flex items-center gap-3 px-4 py-3.5 rounded-[16px] cursor-pointer hover:bg-[#0F969C]/10 aria-selected:bg-[#0F969C]/10 text-gray-700 dark:text-gray-300 hover:text-[#0F969C] aria-selected:text-[#0F969C] transition-colors group">
+                            <div className="w-8 h-8 rounded-full bg-[#0F969C]/10 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-[#0F969C]/20 shadow-sm transition-all"><Users className="w-4 h-4" /></div>
                             <span className="text-[14px] font-bold text-gray-900 dark:text-gray-100">Create Client Profile</span>
                             <span className="text-[12px] font-medium text-gray-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">Onboard new patient</span>
                         </Command.Item>
@@ -79,7 +79,7 @@ export function CommandPalette() {
                     </Command.Group>
                 </Command.List>
 
-                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between mt-auto">
+                <div className="shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                     <span className="text-[11px] font-medium text-gray-500">Pro tip: Press <kbd className="font-mono font-bold bg-white px-1.5 py-0.5 rounded shadow-sm border border-gray-200 ml-1">⌘</kbd> <kbd className="font-mono font-bold bg-white px-1.5 py-0.5 rounded shadow-sm border border-gray-200">K</kbd> to access anywhere</span>
                 </div>
             </Command>

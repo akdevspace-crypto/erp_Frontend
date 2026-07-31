@@ -132,7 +132,7 @@ export function NotificationModal({ isOpen, onClose }: { isOpen: boolean, onClos
                                         <span className="text-[13px] font-bold text-gray-900 dark:text-white leading-tight">{notification.title}</span>
                                         <span className="text-[12px] text-gray-500 dark:text-gray-400 mt-0.5">{notification.message}</span>
                                         <span className="text-[10px] font-bold text-gray-400 mt-1">{formatTime(notification.createdAt)}</span>
-                                        {notification.targetUrl && <span className="mt-1 text-[10px] font-black uppercase text-primary-500">Open step</span>}
+                                        {notification.targetUrl && <span className="mt-1 text-[10px] font-extrabold uppercase text-primary-500">Open step</span>}
                                     </div>
                                 </button>
                             )

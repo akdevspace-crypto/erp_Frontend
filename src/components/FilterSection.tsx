@@ -27,15 +27,15 @@ export function FilterSection({
     searchPlaceholder = 'Search...'
 }: FilterSectionProps) {
     return (
-        <div className="bg-white dark:bg-black p-4 rounded-3xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/80 dark:border-white/10 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-[#6DA5C0]/20 bg-white p-4 shadow-sm sm:flex-row sm:items-center dark:border-[#6DA5C0]/20 dark:bg-[#072E33]">
             {onSearchChange && (
                 <div className="relative flex-1 max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Search className="h-4 w-4 text-gray-400" />
+                        <Search className="h-4 w-4 text-[#6DA5C0]" />
                     </div>
                     <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-white/10 rounded-xl leading-5 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] sm:text-sm text-gray-900 dark:text-gray-100 transition-all"
+                        className="block h-10 w-full rounded-xl border border-[#6DA5C0]/25 bg-[#F7FAFC] py-2 pl-10 pr-3 text-sm font-medium leading-5 text-[#05161A] shadow-sm transition-all placeholder:text-[#6DA5C0] hover:border-[#0F969C]/45 hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 dark:border-[#6DA5C0]/25 dark:bg-[#0B2A30] dark:text-[#F7FAFC] dark:placeholder:text-[#8FB7C8] dark:hover:bg-[#0A2429] dark:focus:bg-[#0B2A30]"
                         placeholder={searchPlaceholder}
                         value={searchQuery}
                         onChange={onSearchChange}
@@ -49,7 +49,7 @@ export function FilterSection({
                         name={filter.name}
                         value={filter.value}
                         onChange={filter.onChange}
-                        className="block w-full sm:w-auto pl-3 pr-10 py-2 border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 focus:outline-none focus:bg-white dark:focus:bg-black focus:ring-2 focus:ring-[#3f5f6a]/20 focus:border-[#3f5f6a] sm:text-sm rounded-xl border text-gray-900 dark:text-gray-100 transition-all"
+                        className="block h-10 w-full rounded-xl border border-[#6DA5C0]/25 bg-[#F7FAFC] py-2 pl-3 pr-10 text-sm font-medium text-[#05161A] shadow-sm transition-all hover:border-[#0F969C]/45 hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 sm:w-auto dark:border-[#6DA5C0]/25 dark:bg-[#0B2A30] dark:text-[#F7FAFC] dark:hover:bg-[#0A2429] dark:focus:bg-[#0B2A30]"
                     >
                         {filter.placeholder && (
                             <option value="" disabled className="text-gray-400">
@@ -57,7 +57,7 @@ export function FilterSection({
                             </option>
                         )}
                         {filter.options.map(opt => (
-                            <option key={opt.value} value={opt.value} className="bg-white dark:bg-black text-gray-900 dark:text-gray-100">{opt.label}</option>
+                            <option key={opt.value} value={opt.value} className="bg-white text-gray-900 dark:bg-[#0B2A30] dark:text-[#F7FAFC]">{opt.label}</option>
                         ))}
                     </select>
                 ))}

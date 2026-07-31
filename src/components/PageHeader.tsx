@@ -18,7 +18,7 @@ export function PageHeader({ title, subtitle, breadcrumbs = [], action }: PageHe
     return (
         <div className="mb-4 flex flex-col gap-2 px-2 sm:mb-6 sm:flex-row sm:items-start sm:justify-between sm:px-4 2xl:px-6">
             <div>
-                <h1 className="text-xl font-black tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl 2xl:text-[28px]">{title}</h1>
+                <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-2xl 2xl:text-[28px]">{title}</h1>
                 {subtitle && <p className="text-gray-500 dark:text-gray-400 font-medium text-sm mt-0.5">{subtitle}</p>}
                 {breadcrumbs.length > 0 && (
                     <nav className="mt-2 flex overflow-x-auto text-sm text-gray-500 scrollbar-hide" aria-label="Breadcrumb">
@@ -29,7 +29,7 @@ export function PageHeader({ title, subtitle, breadcrumbs = [], action }: PageHe
                                     {item.href ? (
                                         <Link
                                             to={item.href}
-                                            className="inline-flex items-center hover:text-[#3f5f6a] font-medium transition-colors"
+                                            className="inline-flex items-center hover:text-[#0F969C] font-medium transition-colors"
                                         >
                                             {item.label}
                                         </Link>
