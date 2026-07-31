@@ -1,4 +1,4 @@
-import { Activity, Briefcase, Calendar, ClipboardCheck, ClipboardList, Database, DoorOpen, FileText, HeartPulse, IndianRupee, Key, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserCog, UserPlus, Users } from 'lucide-react'
+import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, DoorOpen, FileText, HeartPulse, IndianRupee, Key, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserCog, UserPlus, Users } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 
@@ -25,7 +25,9 @@ const hubs: Record<string, HubConfig> = {
         items: [
             { title: 'Revenue', description: 'In-house resident revenue and billing records.', href: '/inhouse-care/revenue', icon: IndianRupee },
             { title: 'Vitals', description: 'Resident vitals and health monitoring form.', href: '/inhouse-care/vitals', icon: HeartPulse },
-            { title: 'ADL Daily Living', description: 'Activities of daily living monitoring.', href: '/healthcare/adl', icon: ClipboardCheck }
+            { title: 'ADL Daily Living', description: 'Activities of daily living monitoring.', href: '/inhouse-care/adl', icon: ClipboardCheck },
+            { title: 'Event Calendar', description: 'Resident activities and recreation schedule.', href: '/inhouse-care/events', icon: CalendarDays },
+            { title: 'Incident Reports', description: 'Log falls and behavioral incidents.', href: '/inhouse-care/incidents', icon: AlertTriangle }
         ]
     },
     'uec-operations': {
@@ -47,6 +49,7 @@ const hubs: Record<string, HubConfig> = {
         items: [
             { title: 'Finance Dashboard', description: 'Elder finance overview and live accounting status.', href: '/finance/elder-dashboard', icon: IndianRupee },
             { title: 'In-House Expense', description: 'Resident and facility expense entry.', href: '/finance/inhouse-expense', icon: Receipt },
+            { title: 'Elder Billing', description: 'Monthly packages and security deposits.', href: '/finance/elder-billing', icon: FileText },
             { title: 'Cashbox', description: 'Cashbox and payment movement visibility.', href: '/finance/cashbox', icon: Database }
         ]
     },
@@ -179,9 +182,9 @@ export function ModuleCommandCenter() {
                         <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
                             <Icon className="h-5 w-5" />
                         </span>
-                        <h2 className="mt-4 text-lg font-black text-slate-950">{title}</h2>
+                        <h2 className="mt-4 text-lg font-extrabold text-slate-950">{title}</h2>
                         <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{description}</p>
-                        <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-primary-700">{status || 'Open workflow'}</p>
+                        <p className="mt-3 text-xs font-extrabold uppercase tracking-[0.14em] text-primary-700">{status || 'Open workflow'}</p>
                     </button>
                 ))}
             </section>

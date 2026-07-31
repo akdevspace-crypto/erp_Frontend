@@ -18,6 +18,8 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
     const [openMenuGroup, setOpenMenuGroup] = useState<string | null>(null)
     const [showUserManagementMenu, setShowUserManagementMenu] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
     const { data: units = [] } = useUnits()
     const user = useAuthStore((state) => state.user)
     const activeUnitId = useAuthStore((state) => state.activeUnitId)
@@ -193,9 +195,9 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
         ? resolvedActiveUnitId
         : (accessibleUnits[0]?.id || '')
     const userManagementLinks = [
-        { name: 'User Management', href: '/super-admin/users' },
-        { name: 'Staff Management', href: '/hr/staff' },
-        { name: 'Client Management', href: '/crm/clients' }
+        { name: 'Employee Management', href: '/super-admin/users', menu: 'Super Admin' },
+        { name: 'Staff Management', href: '/hr/staff', menu: 'Human Resource' },
+        { name: 'Client Management', href: '/crm/clients', menu: 'Enquiry Desk' }
     ].filter((link) => canAccessPath(user, link.href))
 
     useEffect(() => {
@@ -235,24 +237,24 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
 
     return (
         <>
-            <header className="flex items-center justify-between w-full h-[56px] shrink-0 overflow-visible relative gap-2">
-                <div className="flex items-center gap-2 md:gap-3 shrink-0 w-auto min-w-0 lg:min-w-[180px] 2xl:min-w-[220px]">
+            <header className="flex h-[60px] w-full shrink-0 items-center justify-between gap-3 overflow-visible relative min-w-0 lg:grid lg:grid-cols-[minmax(190px,1fr)_auto_minmax(260px,1fr)]">
+                <div className="flex min-w-0 shrink-0 items-center gap-2 md:gap-3 lg:w-auto lg:justify-self-start 2xl:min-w-[220px]">
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                        className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-[#072E33] text-white hover:bg-[#0F969C] transition-colors"
                     >
                         {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </button>
 
                     <img src="/logo.png" alt="UNI Senth" className="h-8 md:h-12 w-auto object-contain" />
-                    <span className="font-black text-lg md:text-[22px] tracking-tight text-gray-900 dark:text-gray-100 hidden md:block">
+                    <span className="font-extrabold text-lg md:text-[22px] tracking-tight text-gray-900 dark:text-gray-100 hidden md:block">
                         UNI <span className="text-primary-500">Senth</span>
                     </span>
                 </div>
 
                 {/* Center: Five grouped menu tabs with hover dropdowns */}
-                <div className="hidden lg:flex flex-none w-fit max-w-[min(56vw,860px)] items-center justify-center gap-1 bg-white dark:bg-black dark:border-white/10 rounded-full p-1.5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-gray-100 ml-auto mr-2 xl:mr-4 overflow-visible whitespace-nowrap pointer-events-auto relative z-30">
+                <div className="hidden lg:flex flex-none w-fit max-w-[min(56vw,860px)] items-center justify-center gap-1 bg-[#072E33] rounded-full p-1.5 shadow-[0_18px_42px_rgba(5,22,26,0.14)] border border-[#6DA5C0]/15 overflow-visible whitespace-nowrap pointer-events-auto relative z-30 lg:justify-self-center">
                     {visibleMenuGroups.map((group) => (
                         <div
                             key={group.name}
@@ -263,10 +265,10 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                             <button
                                 onClick={() => activateMenu(getGroupTarget(group.items))}
                                 className={cn(
-                                    "px-3 xl:px-5 py-2 rounded-full text-[12px] font-bold transition-all shrink-0 flex items-center gap-2",
+                                    "h-11 px-3 xl:px-5 rounded-full text-[12px] font-bold transition-all shrink-0 flex items-center gap-2",
                                     getGroupActive(group.items)
-                                        ? "bg-primary-500 text-white shadow-sm"
-                                        : "text-gray-500 dark:text-gray-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-white/5"
+                                        ? "bg-[#0F969C] text-white shadow-[0_10px_24px_rgba(15,150,156,0.28)]"
+                                        : "text-[#D8EEF5] hover:text-white hover:bg-white/10"
                                 )}
                             >
                                 <span>{group.name}</span>
@@ -274,7 +276,7 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                             </button>
 
                             {getDropdownItems(group).length > 0 && openMenuGroup === group.name ? (
-                                <div className="absolute left-1/2 top-[calc(100%-1px)] z-50 flex min-w-[190px] -translate-x-1/2 flex-col gap-1 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-black p-2 shadow-xl transition-all">
+                                <div className="absolute left-1/2 top-[calc(100%+8px)] z-50 flex min-w-[190px] -translate-x-1/2 flex-col gap-1 rounded-2xl border border-[#6DA5C0]/15 bg-[#072E33] p-2 shadow-[0_22px_54px_rgba(5,22,26,0.24)] transition-all">
                                     {getDropdownItems(group).map((item) => (
                                         <button
                                             key={item}
@@ -282,8 +284,8 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                             className={cn(
                                                 "w-full rounded-xl px-3 py-2 text-left text-[12px] font-bold transition-colors",
                                                 activeMenu === item
-                                                    ? "bg-primary-500 text-white"
-                                                    : "text-gray-600 dark:text-gray-300 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-white/5"
+                                                    ? "bg-[#0F969C] text-white"
+                                                    : "text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                             )}
                                         >
                                             {item}
@@ -296,26 +298,31 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                 </div>
 
                 {/* Right: User tools */}
-                <div className="flex items-center gap-2 xl:gap-3 shrink-0 relative z-20">
+                <div className="flex shrink-0 items-center justify-end gap-2 xl:gap-3 relative z-20 lg:justify-self-end">
                     {userManagementLinks.length > 0 && !isStaffSelfService && !isClientPortal ? (
-                        <div className="relative">
+                        <div 
+                            className="relative"
+                            onMouseEnter={() => setShowUserManagementMenu(true)}
+                            onMouseLeave={() => setShowUserManagementMenu(false)}
+                        >
                             <button
                                 onClick={() => setShowUserManagementMenu((value) => !value)}
-                                className="flex h-10 items-center gap-2 rounded-full border border-gray-100 bg-white px-4 text-[12px] font-black text-gray-700 shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-colors hover:bg-primary-50 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-200 dark:hover:bg-white/5"
+                                className="flex h-11 items-center gap-2 rounded-full border border-[#6DA5C0]/15 bg-[#072E33] px-5 text-[12px] font-bold text-[#D8EEF5] shadow-[0_14px_34px_rgba(5,22,26,0.12)] transition-colors hover:bg-[#0F969C] hover:text-white"
                             >
-                                User Management
+                                Management
                                 <ChevronDown className="h-3.5 w-3.5" />
                             </button>
                             {showUserManagementMenu ? (
-                                <div className="absolute right-0 top-[46px] z-50 w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-[0_16px_40px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-black">
+                                <div className="absolute right-0 top-[46px] z-50 w-56 rounded-2xl border border-[#6DA5C0]/15 bg-[#072E33] p-2 shadow-[0_22px_54px_rgba(5,22,26,0.24)]">
                                     {userManagementLinks.map((link) => (
                                         <button
                                             key={link.href}
                                             onClick={() => {
                                                 setShowUserManagementMenu(false)
+                                                setActiveMenu(link.menu)
                                                 navigate(link.href)
                                             }}
-                                            className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm font-bold text-gray-700 hover:bg-primary-50 hover:text-primary-600 dark:text-gray-200 dark:hover:bg-white/5"
+                                            className="flex w-full items-center rounded-xl px-3 py-2 text-left text-sm font-bold text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                         >
                                             {link.name}
                                         </button>
@@ -325,11 +332,46 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                         </div>
                     ) : null}
 
-                    <div className="flex items-center bg-white dark:bg-black dark:border-white/10 rounded-full p-1 shadow-[0_2px_12px_rgba(0,0,0,0.02)] border border-gray-100 gap-1 px-2 xl:px-3 py-1 xl:mr-2">
-                        <button onClick={() => {
-                            const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: true })
-                            document.dispatchEvent(event)
-                        }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-50 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 transition-colors"><Search className="w-[16px] h-[16px]" /></button>
+                    <div className={cn(
+                        "flex h-11 items-center rounded-full border border-[#6DA5C0]/15 bg-[#072E33] shadow-[0_14px_34px_rgba(5,22,26,0.12)] transition-all overflow-hidden",
+                        isSearchExpanded ? "w-48 xl:w-64 px-2" : "w-11 justify-center"
+                    )}>
+                        <button 
+                            onClick={() => {
+                                if (!isSearchExpanded) {
+                                    setIsSearchExpanded(true)
+                                } else if (searchQuery.trim()) {
+                                    const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: true })
+                                    document.dispatchEvent(event)
+                                }
+                            }} 
+                            className={cn(
+                                "flex h-full items-center justify-center text-[#D8EEF5] transition-colors hover:text-white shrink-0",
+                                isSearchExpanded ? "w-8" : "w-full rounded-full hover:bg-[#0F969C]"
+                            )}
+                        >
+                            <Search className="h-4 w-4" />
+                        </button>
+                        {isSearchExpanded && (
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onBlur={() => {
+                                    if (!searchQuery) setIsSearchExpanded(false)
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Escape') setIsSearchExpanded(false)
+                                    if (e.key === 'Enter' && searchQuery.trim()) {
+                                        const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: true })
+                                        document.dispatchEvent(event)
+                                    }
+                                }}
+                                className="h-full w-full bg-transparent outline-none text-white placeholder:text-[#D8EEF5]/70 text-[13px] font-medium px-1"
+                            />
+                        )}
                     </div>
                 </div>
             </header>
@@ -351,19 +393,19 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 z-50 md:hidden">
                     <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
-                    <div className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-black shadow-xl">
+                    <div className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-[#072E33] text-[#D8EEF5] shadow-xl">
                         <div className="flex flex-col h-full">
                             {/* Mobile Menu Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+                            <div className="flex items-center justify-between p-4 border-b border-white/10">
                                 <div className="flex items-center gap-3">
                                     <img src="/logo.png" alt="UNI Senth" className="h-8 w-auto object-contain" />
-                                    <span className="font-black text-lg text-gray-900 dark:text-gray-100">
-                                        UNI <span className="text-primary-500">Senth</span>
+                                    <span className="font-extrabold text-lg text-white">
+                                        UNI <span className="text-[#6DA5C0]">Senth</span>
                                     </span>
                                 </div>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-white/10"
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -379,8 +421,8 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                                 className={cn(
                                                     "w-full text-left px-4 py-3 rounded-xl font-bold transition-colors",
                                                     getGroupActive(group.items)
-                                                        ? "bg-primary-500 text-white"
-                                                        : "text-gray-700 dark:text-gray-300 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-white/5"
+                                                        ? "bg-[#0F969C] text-white"
+                                                        : "text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                                 )}
                                             >
                                                 {group.name}
@@ -394,8 +436,8 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                                             className={cn(
                                                                 "w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors",
                                                                 activeMenu === item
-                                                                    ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
-                                                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-white/5"
+                                                                    ? "bg-[#0F969C] text-white"
+                                                                    : "text-[#B8D9E8] hover:bg-white/10 hover:text-white"
                                                             )}
                                                         >
                                                             {item}
@@ -408,7 +450,7 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                 </div>
 
                                 {(canAccessSuperAdmin || canAccessClientPortal) && (
-                                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+                                    <div className="mt-6 pt-4 border-t border-white/10">
                                         <div className="space-y-2">
                                             {canAccessSuperAdmin ? (
                                                 <button
@@ -416,11 +458,11 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                                     className={cn(
                                                         "w-full text-left px-4 py-3 rounded-xl font-bold transition-colors",
                                                         activeMenu === 'Super Admin'
-                                                            ? "bg-primary-500 text-white"
-                                                            : "text-gray-700 dark:text-gray-300 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-white/5"
+                                                            ? "bg-[#0F969C] text-white"
+                                                            : "text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                                     )}
                                                 >
-                                                    User Management
+                                                    Employee Management
                                                 </button>
                                             ) : null}
                                             {canAccessClientPortal ? (
@@ -429,8 +471,8 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
                                                     className={cn(
                                                         "w-full text-left px-4 py-3 rounded-xl font-bold transition-colors",
                                                         activeMenu === 'Client Portal'
-                                                            ? "bg-primary-500 text-white"
-                                                            : "text-gray-700 dark:text-gray-300 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-white/5"
+                                                            ? "bg-[#0F969C] text-white"
+                                                            : "text-[#D8EEF5] hover:bg-white/10 hover:text-white"
                                                     )}
                                                 >
                                                     Client Portal
@@ -442,13 +484,13 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
 
                                 {/* Mobile Unit Selector */}
                                 {canAccessAdminFiles && (
-                                    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-white/10">
+                                    <div className="mt-6 pt-4 border-t border-white/10">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Unit</label>
+                                            <label className="text-sm font-bold text-[#D8EEF5]">Unit</label>
                                             <select
                                                 value={safeActiveUnitId}
                                                 onChange={(e) => setActiveUnitId(e.target.value)}
-                                                className="w-full px-3 py-2 bg-white dark:bg-black border border-gray-200 dark:border-white/10 rounded-lg text-sm"
+                                                className="w-full px-3 py-2 bg-white/10 border border-white/10 rounded-lg text-sm text-white"
                                             >
                                                 {accessibleUnits.map((unit) => (
                                                     <option key={unit.id} value={unit.id}>

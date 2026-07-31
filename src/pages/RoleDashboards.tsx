@@ -34,6 +34,7 @@ import { useAttendanceLogs, useLeaveRequests, usePayrollPreview, useStaff } from
 import { useLaundryRecords, useMaintenanceRecords, useMealPreps, useOperationsNutritionPlans, useWasteRecords } from '../features/operations/hooks/useOperations'
 import { useAuthStore } from '../store/authStore'
 import { api } from '../lib/axios'
+import { useUecAdminDashboard, useUecFinanceDashboard } from '../hooks/useDashboard'
 
 type Metric = {
     label: string
@@ -67,7 +68,7 @@ type AdminFileDashboardRecord = {
     uploadedFileUrl?: string
 }
 
-const colors = ['#3f5f6a', '#1f3b4d', '#7b8f5d', '#9da96b', '#7b8f5d', '#1f3b4d']
+const colors = ['#0F969C', '#294D61', '#6DA5C0', '#0C7075', '#072E33', '#8BC7DC']
 
 const formatShortMoney = (amount: number) => {
     if (amount >= 100000) return `Rs ${(amount / 100000).toFixed(amount % 100000 === 0 ? 0 : 1)}L`
@@ -145,8 +146,8 @@ function MetricCard({ metric }: { metric: Metric }) {
                 </div>
                 <span className="h-2.5 w-2.5 rounded-full bg-primary-500" />
             </div>
-            <p className="mt-4 text-2xl font-black leading-none text-gray-950 dark:text-gray-100">{metric.value}</p>
-            <p className="mt-2 text-sm font-black text-gray-700 dark:text-gray-200">{metric.label}</p>
+            <p className="mt-4 text-2xl font-extrabold leading-none text-gray-950 dark:text-gray-100">{metric.value}</p>
+            <p className="mt-2 text-sm font-extrabold text-gray-700 dark:text-gray-200">{metric.label}</p>
             <p className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{metric.helper}</p>
         </div>
     )
@@ -159,7 +160,7 @@ function QuickLinks({ links }: { links: Array<{ label: string; href: string }> }
                 <Link
                     key={link.href}
                     to={link.href}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-extrabold text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
                 >
                     {link.label}
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -174,7 +175,7 @@ function TrendChart({ title, subtitle, data, keys }: { title: string; subtitle: 
         <div className="min-h-[340px] rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">{title}</h2>
+                    <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">{title}</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{subtitle}</p>
                 </div>
                 <TrendingUp className="h-5 w-5 text-primary-500" />
@@ -202,7 +203,7 @@ function SplitChart({ title, subtitle, data }: { title: string; subtitle: string
 
     return (
         <div className="min-h-[340px] rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
-            <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">{title}</h2>
+            <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">{title}</h2>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{subtitle}</p>
             <div className="mt-4 h-[260px] w-full min-w-[1px]">
                 {total > 0 ? (
@@ -228,12 +229,12 @@ function SplitChart({ title, subtitle, data }: { title: string; subtitle: string
 function WorkTable({ title, subtitle, rows }: { title: string; subtitle: string; rows: WorkItem[] }) {
     return (
         <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
-            <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">{title}</h2>
+            <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">{title}</h2>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{subtitle}</p>
             <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[620px] text-left text-sm">
                     <thead>
-                        <tr className="border-b border-gray-100 text-xs font-black uppercase tracking-wide text-gray-400 dark:border-white/10">
+                        <tr className="border-b border-gray-100 text-xs font-extrabold uppercase tracking-wide text-gray-400 dark:border-white/10">
                             <th className="py-3">ID</th>
                             <th className="py-3">Name</th>
                             <th className="py-3">Detail</th>
@@ -245,12 +246,12 @@ function WorkTable({ title, subtitle, rows }: { title: string; subtitle: string;
                     <tbody>
                         {rows.map((row) => (
                             <tr key={row.id} className="border-b border-gray-50 last:border-0 dark:border-white/5">
-                                <td className="py-3 font-black text-gray-900 dark:text-gray-100">{row.id}</td>
+                                <td className="py-3 font-extrabold text-gray-900 dark:text-gray-100">{row.id}</td>
                                 <td className="py-3 font-semibold text-gray-700 dark:text-gray-200">{row.name}</td>
                                 <td className="py-3 text-gray-600 dark:text-gray-300">{row.detail}</td>
                                 <td className="py-3 text-gray-600 dark:text-gray-300">{row.owner}</td>
                                 <td className="py-3">
-                                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-black text-primary-700">{row.status}</span>
+                                    <span className="rounded-full bg-primary-50 px-3 py-1 text-xs font-extrabold text-primary-700">{row.status}</span>
                                 </td>
                                 <td className="py-3 text-gray-600 dark:text-gray-300">{row.due}</td>
                             </tr>
@@ -283,15 +284,15 @@ function WorkflowPulse() {
         <section className="rounded-lg border border-primary-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-primary-600">Operational Workflow</p>
-                    <h2 className="mt-1 text-lg font-black text-gray-950 dark:text-gray-100">Live workflow reflection</h2>
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-primary-600">Operational Workflow</p>
+                    <h2 className="mt-1 text-lg font-extrabold text-gray-950 dark:text-gray-100">Live workflow reflection</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Enquiry to payment movement visible from the workflow timeline.
                     </p>
                 </div>
                 <Link
                     to="/workflow/timeline"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary-600 px-4 text-xs font-black text-white shadow-sm transition hover:bg-primary-700"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary-600 px-4 text-xs font-extrabold text-white shadow-sm transition hover:bg-primary-700"
                 >
                     Open Timeline
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -300,19 +301,19 @@ function WorkflowPulse() {
 
             <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <div className="rounded-lg bg-gray-50 px-3 py-3">
-                    <p className="text-xl font-black text-gray-950">{isLoading ? '-' : timelines.length}</p>
+                    <p className="text-xl font-extrabold text-gray-950">{isLoading ? '-' : timelines.length}</p>
                     <p className="text-xs font-bold text-gray-500">Total Workflows</p>
                 </div>
                 <div className="rounded-lg bg-emerald-50 px-3 py-3">
-                    <p className="text-xl font-black text-emerald-800">{isLoading ? '-' : metrics.completed}</p>
+                    <p className="text-xl font-extrabold text-emerald-800">{isLoading ? '-' : metrics.completed}</p>
                     <p className="text-xs font-bold text-emerald-700">Closed</p>
                 </div>
                 <div className="rounded-lg bg-amber-50 px-3 py-3">
-                    <p className="text-xl font-black text-amber-800">{isLoading ? '-' : metrics.paymentPending + metrics.approvalPending}</p>
+                    <p className="text-xl font-extrabold text-amber-800">{isLoading ? '-' : metrics.paymentPending + metrics.approvalPending}</p>
                     <p className="text-xs font-bold text-amber-700">Needs Action</p>
                 </div>
                 <div className="rounded-lg bg-primary-50 px-3 py-3">
-                    <p className="text-xl font-black text-primary-800">Rs {isLoading ? '-' : metrics.paidAmount.toFixed(2)}</p>
+                    <p className="text-xl font-extrabold text-primary-800">Rs {isLoading ? '-' : metrics.paidAmount.toFixed(2)}</p>
                     <p className="text-xs font-bold text-primary-700">Collected</p>
                 </div>
             </div>
@@ -329,15 +330,15 @@ function RoleActionQueue() {
         <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-primary-600">My Action Queue</p>
-                    <h2 className="mt-1 text-lg font-black text-gray-950 dark:text-gray-100">Role-based workflow actions</h2>
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-primary-600">My Action Queue</p>
+                    <h2 className="mt-1 text-lg font-extrabold text-gray-950 dark:text-gray-100">Role-based workflow actions</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Only workflow items that match this user role are shown here.
                     </p>
                 </div>
                 <Link
                     to="/workflow/timeline"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-extrabold text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
                 >
                     Review All
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -361,10 +362,10 @@ function RoleActionQueue() {
                     >
                         <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                                <p className="text-sm font-black text-gray-900">{action.title}</p>
+                                <p className="text-sm font-extrabold text-gray-900">{action.title}</p>
                                 <p className="mt-1 text-xs font-medium text-gray-600">{action.description}</p>
                             </div>
-                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase ${
+                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase ${
                                 action.severity === 'high'
                                     ? 'bg-red-100 text-red-700'
                                     : action.severity === 'medium'
@@ -401,15 +402,15 @@ function InventoryWorkflowPulse({
         <section className="rounded-lg border border-primary-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-primary-600">Inventory Operational Flow</p>
-                    <h2 className="mt-1 text-lg font-black text-gray-950 dark:text-gray-100">Live stock movement reflection</h2>
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-primary-600">Inventory Operational Flow</p>
+                    <h2 className="mt-1 text-lg font-extrabold text-gray-950 dark:text-gray-100">Live stock movement reflection</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Product creation, stock update, low-stock alert, purchase, and movement audit in one view.
                     </p>
                 </div>
                 <Link
                     to="/inventory/stock-movements"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary-600 px-4 text-xs font-black text-white shadow-sm transition hover:bg-primary-700"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary-600 px-4 text-xs font-extrabold text-white shadow-sm transition hover:bg-primary-700"
                 >
                     Open Movements
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -418,23 +419,23 @@ function InventoryWorkflowPulse({
 
             <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
                 <div className="rounded-lg bg-gray-50 px-3 py-3">
-                    <p className="text-xl font-black text-gray-950">{products}</p>
+                    <p className="text-xl font-extrabold text-gray-950">{products}</p>
                     <p className="text-xs font-bold text-gray-500">Products</p>
                 </div>
                 <div className="rounded-lg bg-primary-50 px-3 py-3">
-                    <p className="text-xl font-black text-primary-800">{stockItems}</p>
+                    <p className="text-xl font-extrabold text-primary-800">{stockItems}</p>
                     <p className="text-xs font-bold text-primary-700">Stock Records</p>
                 </div>
                 <div className="rounded-lg bg-amber-50 px-3 py-3">
-                    <p className="text-xl font-black text-amber-800">{lowStock}</p>
+                    <p className="text-xl font-extrabold text-amber-800">{lowStock}</p>
                     <p className="text-xs font-bold text-amber-700">Low Stock</p>
                 </div>
                 <div className="rounded-lg bg-emerald-50 px-3 py-3">
-                    <p className="text-xl font-black text-emerald-800">{purchases}</p>
+                    <p className="text-xl font-extrabold text-emerald-800">{purchases}</p>
                     <p className="text-xs font-bold text-emerald-700">Purchases</p>
                 </div>
                 <div className="rounded-lg bg-slate-50 px-3 py-3">
-                    <p className="text-xl font-black text-slate-800">{movements}</p>
+                    <p className="text-xl font-extrabold text-slate-800">{movements}</p>
                     <p className="text-xs font-bold text-slate-600">Audit Logs</p>
                 </div>
             </div>
@@ -449,15 +450,15 @@ function InventoryActionQueue({ lowStockRows, purchaseRows }: { lowStockRows: Wo
         <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-primary-600">Inventory Action Queue</p>
-                    <h2 className="mt-1 text-lg font-black text-gray-950 dark:text-gray-100">Stock actions needing attention</h2>
+                    <p className="text-xs font-extrabold uppercase tracking-widest text-primary-600">Inventory Action Queue</p>
+                    <h2 className="mt-1 text-lg font-extrabold text-gray-950 dark:text-gray-100">Stock actions needing attention</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Low-stock items and recent purchases from live inventory records are shown here.
                     </p>
                 </div>
                 <Link
                     to="/inventory/low-stock-alerts"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 text-xs font-extrabold text-gray-700 shadow-sm transition hover:border-primary-300 hover:text-primary-600 dark:border-white/10 dark:bg-black dark:text-gray-100"
                 >
                     Review Stock
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -477,10 +478,10 @@ function InventoryActionQueue({ lowStockRows, purchaseRows }: { lowStockRows: Wo
                     >
                         <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
-                                <p className="text-sm font-black text-gray-900">{action.name}</p>
+                                <p className="text-sm font-extrabold text-gray-900">{action.name}</p>
                                 <p className="mt-1 text-xs font-medium text-gray-600">{action.detail}</p>
                             </div>
-                            <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-black uppercase text-primary-700">
+                            <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-extrabold uppercase text-primary-700">
                                 {action.status}
                             </span>
                         </div>
@@ -698,9 +699,22 @@ export function ElderCareAdminDashboard() {
     const { data: inHouseAllocations = [], isLoading: isInHouseLoading } = useInHouseAllocations()
     const { data: stock = [], isLoading: isStockLoading } = useInventoryStock()
     const { data: approvalTasks = [], isLoading: isTaskLoading } = useApprovalTasks()
+    const { data: uecAdminData, isLoading: isUecAdminLoading } = useUecAdminDashboard()
+    
     const lowStockRows = stock.filter((item: any) => Number(item.quantity || 0) <= inventoryLowStockThreshold)
     const pendingTasks = approvalTasks.filter((task: any) => ['PENDING', 'COMPLETED', 'ASSIGNED'].includes(String(task.status || '').toUpperCase()))
-    const isLoading = isInHouseLoading || isStockLoading || isTaskLoading
+    const isLoading = isInHouseLoading || isStockLoading || isTaskLoading || isUecAdminLoading
+    
+    const summary = uecAdminData?.summary || { totalResidents: 0, pendingTasks: 0, vitalsToday: 0 }
+    const trendData = uecAdminData?.trend?.datasets || []
+    
+    const activeTrend = trendData.length > 0 ? buildEmptyMonthlyTrend(['residents', 'tasks', 'vitals']).map((bucket, index) => {
+        bucket.residents = trendData[0]?.data?.[index] || 0;
+        bucket.tasks = trendData[1]?.data?.[index] || 0;
+        bucket.vitals = trendData[2]?.data?.[index] || 0;
+        return bucket;
+    }) : buildEmptyMonthlyTrend(['residents', 'tasks', 'vitals'])
+
     const rows: WorkItem[] = [
         ...pendingTasks.slice(0, 3).map((task: any) => ({
             id: String(task.refNo || task.id),
@@ -732,18 +746,18 @@ export function ElderCareAdminDashboard() {
                 { label: 'Low Stock', href: '/inventory/low-stock-alerts' }
             ]}
             metrics={[
-                { label: 'Active Residents', value: isLoading ? '-' : inHouseAllocations.length, helper: 'Live in-house allocations under monitoring', icon: Users },
-                { label: 'Vitals Logged', value: 0, helper: 'Live vitals integration pending', icon: HeartPulse },
-                { label: 'Pending Tasks', value: isLoading ? '-' : pendingTasks.length, helper: 'Daily and scheduled approvals', icon: ClipboardList },
+                { label: 'Active Residents', value: isLoading ? '-' : summary.totalResidents, helper: 'Live in-house allocations under monitoring', icon: Users },
+                { label: 'Vitals Logged', value: isLoading ? '-' : summary.vitalsToday, helper: 'Live vitals recorded across residents', icon: HeartPulse },
+                { label: 'Pending Tasks', value: isLoading ? '-' : summary.pendingTasks, helper: 'Daily and scheduled approvals waiting', icon: ClipboardList },
                 { label: 'Low Stock Alerts', value: isLoading ? '-' : lowStockRows.length, helper: 'Inventory items need review', icon: AlertTriangle }
             ]}
-            trend={{ title: 'Elder Care Movement', subtitle: 'Residents, tasks, and vitals across the last six months', data: buildEmptyMonthlyTrend(['residents', 'tasks', 'vitals']) }}
+            trend={{ title: 'Elder Care Movement', subtitle: 'Residents, tasks, and vitals across the last six months', data: activeTrend }}
             trendKeys={['residents', 'tasks', 'vitals']}
             split={[
-                { name: 'In-House Care', value: inHouseAllocations.length },
+                { name: 'Residents', value: summary.totalResidents },
                 { name: 'Inventory', value: lowStockRows.length },
-                { name: 'Task Log', value: pendingTasks.length },
-                { name: 'Vitals', value: 0 }
+                { name: 'Task Log', value: summary.pendingTasks },
+                { name: 'Vitals', value: summary.vitalsToday }
             ]}
             splitTitle="Admin Workload"
             splitSubtitle="UEC work areas currently under monitoring"
@@ -1686,7 +1700,7 @@ export function HRManagerDashboard() {
                     { label: 'Payroll', href: '/hr/payroll' },
                     { label: 'Reports', href: '/hr/reports' }
                 ].map((link) => (
-                    <Link key={link.href} to={link.href} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-primary-200 hover:bg-primary-50">
+                    <Link key={link.href} to={link.href} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-800 shadow-sm hover:border-primary-200 hover:bg-primary-50">
                         {link.label}
                         <ArrowRight className="h-4 w-4" />
                     </Link>
@@ -1704,8 +1718,8 @@ export function HRManagerDashboard() {
                         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-50 text-primary-700">
                             <metric.icon className="h-5 w-5" />
                         </div>
-                        <p className="mt-4 text-2xl font-black text-slate-950">{isLoading ? '-' : metric.value}</p>
-                        <p className="text-sm font-black text-slate-950">{metric.label}</p>
+                        <p className="mt-4 text-2xl font-extrabold text-slate-950">{isLoading ? '-' : metric.value}</p>
+                        <p className="text-sm font-extrabold text-slate-950">{metric.label}</p>
                         <p className="mt-1 text-xs font-semibold text-slate-500">{metric.helper}</p>
                     </div>
                 ))}
@@ -1714,7 +1728,7 @@ export function HRManagerDashboard() {
             <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
                 <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                     <div className="mb-4">
-                        <h2 className="text-lg font-black text-slate-950">HR Movement</h2>
+                        <h2 className="text-lg font-extrabold text-slate-950">HR Movement</h2>
                         <p className="text-sm font-semibold text-slate-500">Live staff volume, pending actions, and completed logs</p>
                     </div>
                     <div className="h-72">
@@ -1725,9 +1739,9 @@ export function HRManagerDashboard() {
                                 <YAxis allowDecimals={false} />
                                 <Tooltip />
                                 <Legend />
-                                <Bar dataKey="volume" fill="#3f5f6a" radius={[8, 8, 0, 0]} />
-                                <Bar dataKey="pending" fill="#F59E0B" radius={[8, 8, 0, 0]} />
-                                <Bar dataKey="completed" fill="#1f3b4d" radius={[8, 8, 0, 0]} />
+                                <Bar dataKey="volume" fill="#0F969C" radius={[8, 8, 0, 0]} />
+                                <Bar dataKey="pending" fill="#0C7075" radius={[8, 8, 0, 0]} />
+                                <Bar dataKey="completed" fill="#294D61" radius={[8, 8, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -1735,7 +1749,7 @@ export function HRManagerDashboard() {
 
                 <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                     <div className="mb-4">
-                        <h2 className="text-lg font-black text-slate-950">HR Workload Split</h2>
+                        <h2 className="text-lg font-extrabold text-slate-950">HR Workload Split</h2>
                         <p className="text-sm font-semibold text-slate-500">Current HR operational distribution</p>
                     </div>
                     <div className="h-72">
@@ -1759,17 +1773,17 @@ export function HRManagerDashboard() {
             <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
-                        <h2 className="text-lg font-black text-slate-950">HR Action Queue</h2>
+                        <h2 className="text-lg font-extrabold text-slate-950">HR Action Queue</h2>
                         <p className="text-sm font-semibold text-slate-500">Live leave, payroll, and attendance items needing review</p>
                     </div>
-                    <Link to="/hr/reports" className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-4 py-2 text-sm font-black text-white hover:bg-primary-700">
+                    <Link to="/hr/reports" className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-4 py-2 text-sm font-extrabold text-white hover:bg-primary-700">
                         Reports
                         <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>
                 <div className="overflow-hidden rounded-xl border border-slate-100">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-xs font-black uppercase text-slate-500">
+                        <thead className="bg-slate-50 text-xs font-extrabold uppercase text-slate-500">
                             <tr>
                                 <th className="px-4 py-3">Task</th>
                                 <th className="px-4 py-3">Detail</th>
@@ -1781,10 +1795,10 @@ export function HRManagerDashboard() {
                         <tbody>
                             {actionRows.length > 0 ? actionRows.map((row) => (
                                 <tr key={row.id} className="border-t border-slate-100">
-                                    <td className="px-4 py-3 font-black text-slate-950">{row.name}</td>
+                                    <td className="px-4 py-3 font-extrabold text-slate-950">{row.name}</td>
                                     <td className="px-4 py-3 font-semibold text-slate-600">{row.detail}</td>
                                     <td className="px-4 py-3 text-slate-600">{row.owner}</td>
-                                    <td className="px-4 py-3"><span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-black text-primary-700">{row.status}</span></td>
+                                    <td className="px-4 py-3"><span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-extrabold text-primary-700">{row.status}</span></td>
                                     <td className="px-4 py-3 text-slate-600">{row.due}</td>
                                 </tr>
                             )) : (
@@ -2476,7 +2490,52 @@ export function TaskLogCoordinatorDashboard() {
         />
     )
 }
-export const ElderFinanceManagerDashboard = () => <RoleDashboard config={roleDashboards.elderFinance} />
+export function ElderFinanceManagerDashboard() {
+    const { data: uecFinanceData, isLoading } = useUecFinanceDashboard()
+    const trendData = uecFinanceData?.trend?.datasets || []
+
+    const activeTrend = trendData.length > 0 ? buildEmptyMonthlyTrend(['volume', 'pending', 'completed']).map((bucket, index) => {
+        bucket.volume = trendData[0]?.data?.[index] || 0;
+        bucket.pending = trendData[1]?.data?.[index] || 0;
+        bucket.completed = trendData[2]?.data?.[index] || 0;
+        return bucket;
+    }) : buildEmptyMonthlyTrend(['volume', 'pending', 'completed'])
+
+    const volumeCurrent = trendData[0]?.data?.[5] || 0;
+    const pendingCurrent = trendData[1]?.data?.[5] || 0;
+    const completedCurrent = trendData[2]?.data?.[5] || 0;
+
+    return (
+        <DashboardFrame
+            title="Elder Finance Dashboard"
+            subtitle="UEC in-house expense, care spending, approvals, and elder finance monitoring."
+            breadcrumbs={[{ label: 'UEC' }, { label: 'Elder Finance' }, { label: 'Dashboard' }]}
+            links={[
+                { label: 'In-House Expense', href: '/finance/inhouse-expense' }
+            ]}
+            metrics={[
+                { label: 'Monthly Expense', value: isLoading ? '-' : formatShortMoney(volumeCurrent), helper: 'UEC current period spend', icon: IndianRupee },
+                { label: 'Pending Bills', value: isLoading ? '-' : pendingCurrent, helper: 'Bills waiting for review', icon: CalendarClock },
+                { label: 'Approved Items', value: isLoading ? '-' : completedCurrent, helper: 'Expense records approved', icon: ShieldCheck },
+                { label: 'Variance', value: '0%', helper: 'Expense variance from plan', icon: TrendingUp }
+            ]}
+            trend={{ title: 'Elder Finance Movement', subtitle: 'Expense volume, pending records, and approved transactions', data: activeTrend }}
+            trendKeys={['volume', 'pending', 'completed']}
+            split={[
+                { name: 'Monthly Expense', value: volumeCurrent },
+                { name: 'Pending Bills', value: pendingCurrent },
+                { name: 'Approved Items', value: completedCurrent }
+            ]}
+            splitTitle="Finance Split"
+            splitSubtitle="Current period finance distribution"
+            table={{
+                title: 'Elder Finance Watchlist',
+                subtitle: 'Bills and expenses that need finance follow-up',
+                rows: []
+            }}
+        />
+    )
+}
 export const PatientCareManagerDashboard = () => <RoleDashboard config={roleDashboards.patientCare} />
 export function CareAllocationManagerDashboard() {
     const { data: timelines = [], isLoading: isWorkflowLoading } = useWorkflowTimelines('')

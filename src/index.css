@@ -2,42 +2,56 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Deep blue, blue-gray, olive, sage, and soft ivory brand scale */
-  --color-primary-50: #f2f5ea;
-  --color-primary-100: #c0c7a0;
-  --color-primary-200: #c0c7a0;
-  --color-primary-300: #7b8f5d;
-  --color-primary-400: #7b8f5d;
-  --color-primary-500: #3f5f6a;
-  --color-primary-600: #1f3b4d;
-  --color-primary-700: #1f3b4d;
-  --color-primary-800: #1f3b4d;
-  --color-primary-900: #1f3b4d;
+  /* Teal, deep cyan, and cool blue brand scale */
+  --color-primary-50: #F7FAFC;
+  --color-primary-100: #6DA5C0;
+  --color-primary-200: #6DA5C0;
+  --color-primary-300: #6DA5C0;
+  --color-primary-400: #6DA5C0;
+  --color-primary-500: #0F969C;
+  --color-primary-600: #294D61;
+  --color-primary-700: #294D61;
+  --color-primary-800: #294D61;
+  --color-primary-900: #294D61;
 
-  --color-accent: #7b8f5d;
-  --color-success: #a0d6b4;
+  --color-accent: #6DA5C0;
+  --color-success: #0C7075;
   --color-surface: #ffffff;
   --color-border: #d9d9d9;
 
-  --color-surface-dark: #000000;
-  --color-border-dark: #1e1e1e;
+  --color-surface-dark: #05161A;
+  --color-surface-dark-raised: #072E33;
+  --color-surface-dark-soft: #0A2429;
+  --color-surface-dark-input: #0B2A30;
+  --color-border-dark: rgba(109, 165, 192, 0.22);
+  --color-text-dark: #F7FAFC;
+  --color-text-dark-muted: #B8D9E8;
+  --color-text-dark-subtle: #8FB7C8;
 
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    min-height: 100%;
+  }
+
   body {
-    background-color: #f2f5ea;
+    background-color: #F7FAFC;
     color: black;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
     font-size: 14px;
     line-height: 1.5;
   }
 
   .dark body {
-    background-color: black;
+    background-color: #05161A;
     color: #f3f4f6;
   }
 
@@ -56,6 +70,31 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .app-scrollbar {
+    scrollbar-color: rgba(148, 163, 184, 0.75) transparent;
+    scrollbar-width: thin;
+  }
+
+  .app-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.75);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+
+  .app-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 116, 139, 0.9);
   }
 
   /* Mobile optimizations */

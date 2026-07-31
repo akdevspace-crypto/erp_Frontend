@@ -95,8 +95,8 @@ function StatCard({ label, value, detail, icon: Icon, tone = 'teal', onClick, ac
             <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-full border ${tones[tone]}`}>
                 <Icon className="h-5 w-5" />
             </div>
-            <p className="text-2xl font-black text-gray-950">{value}</p>
-            <p className="mt-1 text-sm font-black text-gray-950">{label}</p>
+            <p className="text-2xl font-extrabold text-gray-950">{value}</p>
+            <p className="mt-1 text-sm font-extrabold text-gray-950">{label}</p>
             <p className="mt-1 text-xs font-medium text-gray-500">{detail}</p>
         </button>
     )
@@ -108,7 +108,7 @@ function ReportPanel({ title, subtitle, rows }: { title: string; subtitle: strin
     return (
         <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
             <div className="mb-4">
-                <h2 className="text-lg font-black text-gray-950">{title}</h2>
+                <h2 className="text-lg font-extrabold text-gray-950">{title}</h2>
                 <p className="text-sm font-medium text-gray-500">{subtitle}</p>
             </div>
             <div className="space-y-3">
@@ -119,7 +119,7 @@ function ReportPanel({ title, subtitle, rows }: { title: string; subtitle: strin
                         <div key={row.label}>
                             <div className="mb-1 flex items-center justify-between gap-3 text-sm">
                                 <span className="font-bold text-gray-700">{row.label}</span>
-                                <span className="font-black text-gray-950">{row.value}</span>
+                                <span className="font-extrabold text-gray-950">{row.value}</span>
                             </div>
                             <div className="h-2 rounded-full bg-gray-100">
                                 <div className={`h-full rounded-full ${row.tone || 'bg-primary-500'}`} style={{ width }} />
@@ -228,7 +228,7 @@ export function ReportsDashboard() {
 
             <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
                 <div className="grid gap-3 md:grid-cols-4">
-                    <label className="text-xs font-black uppercase tracking-wide text-gray-500">
+                    <label className="text-xs font-extrabold uppercase tracking-wide text-gray-500">
                         Module
                         <select value={moduleFilter} onChange={(event) => setModuleFilter(event.target.value as ReportModule)} className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-gray-800 outline-none focus:border-primary-400">
                             <option value="all">All Modules</option>
@@ -239,7 +239,7 @@ export function ReportsDashboard() {
                             <option value="tasks">Staff Tasks</option>
                         </select>
                     </label>
-                    <label className="text-xs font-black uppercase tracking-wide text-gray-500">
+                    <label className="text-xs font-extrabold uppercase tracking-wide text-gray-500">
                         Status
                         <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as ReportStatus)} className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-gray-800 outline-none focus:border-primary-400">
                             <option value="all">All Status</option>
@@ -248,7 +248,7 @@ export function ReportsDashboard() {
                             <option value="attention">Needs Attention</option>
                         </select>
                     </label>
-                    <label className="text-xs font-black uppercase tracking-wide text-gray-500">
+                    <label className="text-xs font-extrabold uppercase tracking-wide text-gray-500">
                         Date
                         <select value={dateFilter} onChange={(event) => setDateFilter(event.target.value as ReportDate)} className="mt-2 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-gray-800 outline-none focus:border-primary-400">
                             <option value="all">All Dates</option>
@@ -261,7 +261,7 @@ export function ReportsDashboard() {
                         <button
                             type="button"
                             onClick={() => { setModuleFilter('all'); setStatusFilter('all'); setDateFilter('all') }}
-                            className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 text-sm font-black text-gray-700 hover:bg-white"
+                            className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-4 text-sm font-extrabold text-gray-700 hover:bg-white"
                         >
                             Reset Filters
                         </button>
@@ -297,16 +297,16 @@ export function ReportsDashboard() {
                 <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm xl:col-span-2">
                     <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                            <h2 className="text-lg font-black text-gray-950">Recent Report Signals</h2>
+                            <h2 className="text-lg font-extrabold text-gray-950">Recent Report Signals</h2>
                             <p className="text-sm font-medium text-gray-500">Filtered live references from the selected module, status, and date.</p>
                         </div>
-                        <Link to="/workflow/timeline" className="rounded-full bg-primary-500 px-4 py-2 text-xs font-black text-white shadow-sm">
+                        <Link to="/workflow/timeline" className="rounded-full bg-primary-500 px-4 py-2 text-xs font-extrabold text-white shadow-sm">
                             Open Timeline
                         </Link>
                     </div>
                     <div className="overflow-hidden rounded-lg border border-gray-100">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 text-xs font-black uppercase tracking-wide text-gray-500">
+                            <thead className="bg-gray-50 text-xs font-extrabold uppercase tracking-wide text-gray-500">
                                 <tr>
                                     <th className="px-4 py-3">Reference</th>
                                     <th className="px-4 py-3">Record</th>
@@ -317,7 +317,7 @@ export function ReportsDashboard() {
                             <tbody>
                                 {filteredSignals.length > 0 ? filteredSignals.map((item) => (
                                     <tr key={`${item.ref}-${item.title}-${item.date}`} className="border-t border-gray-100">
-                                        <td className="px-4 py-3 font-black text-primary-700">{item.ref}</td>
+                                        <td className="px-4 py-3 font-extrabold text-primary-700">{item.ref}</td>
                                         <td className="px-4 py-3 font-bold text-gray-950">{item.title}</td>
                                         <td className="px-4 py-3 text-gray-600">{item.detail}</td>
                                         <td className="px-4 py-3 text-gray-500">{item.date === '-' ? '-' : new Date(item.date).toLocaleDateString('en-IN')}</td>
@@ -335,7 +335,7 @@ export function ReportsDashboard() {
                 </section>
 
                 <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
-                    <h2 className="text-lg font-black text-gray-950">Action Summary</h2>
+                    <h2 className="text-lg font-extrabold text-gray-950">Action Summary</h2>
                     <p className="text-sm font-medium text-gray-500">Live queues that still need review.</p>
                     <div className="mt-4 space-y-3">
                         {[
@@ -353,7 +353,7 @@ export function ReportsDashboard() {
                                     </span>
                                     <span className="text-sm font-bold text-gray-700">{item.label}</span>
                                 </div>
-                                <span className="text-sm font-black text-gray-950">{item.value}</span>
+                                <span className="text-sm font-extrabold text-gray-950">{item.value}</span>
                             </div>
                         ))}
                     </div>

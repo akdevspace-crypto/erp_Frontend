@@ -78,6 +78,7 @@ const financeMenus: MenuLink[] = [
     { name: 'Pending Payments', icon: IndianRupee, href: '/finance/pending-payments' },
     { name: 'Allowance Tracking', icon: Landmark, href: '/finance/allowance-tracking' },
     { name: 'Patient Daily Cost', icon: Receipt, href: '/finance/patient-daily-cost' },
+    { name: 'Manual Patient Billing', icon: Receipt, href: '/finance/manual-billing' },
     { name: 'Invoice', icon: Receipt, href: '/finance/invoice' },
     { name: 'Renewals', icon: Calendar, href: '/finance/renewals' }
 ]
@@ -85,6 +86,7 @@ const financeMenus: MenuLink[] = [
 const hrMenus: MenuLink[] = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/hr/manager-dashboard' },
     { name: 'HR Dashboard', icon: Activity, href: '/hr/dashboard' },
+    { name: 'Staff Management', icon: Users, href: '/hr/staff' },
     { name: 'Staff Privileges', icon: UserCog, href: '/hr/staff-privilege' },
     { name: 'Leave Management', icon: FilePenLine, href: '/hr/leave' },
     { name: 'Shift Roster', icon: Clock, href: '/hr/roster' },
@@ -121,13 +123,14 @@ const clientPortalMenus: MenuLink[] = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/client-portal/dashboard' },
     { name: 'My Profile', icon: User, href: '/client-portal/profile' },
     { name: 'My Services', icon: HandHelping, href: '/client-portal/services' },
+    { name: 'Health Records', icon: Activity, href: '/client-portal/health-records' },
     { name: 'My Medicines', icon: Pill, href: '/client-portal/medicines' },
     { name: 'My Complaints', icon: MessageSquare, href: '/client-portal/complaints' },
     { name: 'Notifications', icon: Bell, href: '/client-portal/notifications' }
 ]
 
 const superAdminMenus: MenuLink[] = [
-    { name: 'User Management', icon: User, href: '/super-admin/users' }
+    { name: 'Employee Management', icon: User, href: '/super-admin/users' }
 ]
 
 const inHouseCareMenus: MenuLink[] = [
@@ -180,7 +183,8 @@ const ambulanceSupportMenus: MenuLink[] = [
 ]
 
 const enquiryMenus: MenuLink[] = [
-    { name: 'Enquiry Desk', icon: Headset, href: '/module/ueo-enquiry' }
+    { name: 'Enquiry Desk', icon: Headset, href: '/module/ueo-enquiry' },
+    { name: 'Client Management', icon: Users, href: '/crm/clients' }
 ]
 
 const customerCareMenus: MenuLink[] = [
@@ -200,6 +204,7 @@ export const subMenus: Record<string, MenuLink[]> = {
         { name: 'Home', icon: LayoutDashboard, href: '/dashboard' },
         { name: 'Finance', icon: Wallet, href: '/finance/cashbox' },
         { name: 'Patient Daily Cost', icon: Receipt, href: '/finance/patient-daily-cost' },
+        { name: 'Manual Patient Billing', icon: Receipt, href: '/finance/manual-billing' },
         { name: 'Daily Operations', icon: ClipboardCheck, href: '/daily-operations' },
         { name: 'Human Resource', icon: Users, href: '/hr/dashboard' },
         { name: 'Workflow Timeline', icon: Activity, href: '/workflow/timeline' },
@@ -292,45 +297,47 @@ export function Sidebar({ activeMenu }: { activeMenu: string }) {
     const canAccessProfile = canAccessPath(user, profileRoute)
 
     return (
-        <aside className="w-[56px] hover:w-[236px] transition-[width] duration-300 ease-in-out shrink-0 h-full relative z-40 group md:block hidden">
-            <div className="w-full h-full flex flex-col items-start gap-4 pointer-events-none">
+        <aside className="hidden md:flex md:w-[68px] md:hover:w-[220px] transition-[width] duration-300 ease-in-out shrink-0 h-full relative z-40 group">
+            <div className="w-full h-full flex flex-col items-start gap-3 pointer-events-none">
 
                 {/* Split 1: Theme Toggle Container (RIGID) */}
-                <div className="bg-white dark:bg-black dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 rounded-full w-[56px] flex flex-col items-center py-2 shrink-0 pointer-events-auto transition-all">
+                <div className="bg-[#072E33] border border-[#6DA5C0]/15 shadow-[0_18px_40px_rgba(5,22,26,0.14)] rounded-full w-full flex flex-col items-center py-2 shrink-0 pointer-events-auto transition-all">
                     <button
                         onClick={() => document.documentElement.classList.remove('dark')}
-                        className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-[#1E1E1E] text-white shadow-sm mb-1 transition-all dark:bg-transparent dark:text-gray-500 dark:hover:text-gray-300 dark:shadow-none"
+                        className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-[#0F969C] text-white shadow-sm mb-1 transition-all dark:bg-[#0F969C] dark:text-white"
                         title="Light Theme"
                     >
-                        <Sun className="w-4 h-4 shrink-0" />
+                        <Sun className="w-3.5 h-3.5 shrink-0" />
                     </button>
                     <button
                         onClick={() => document.documentElement.classList.add('dark')}
-                        className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-800 dark:text-gray-200 transition-all dark:bg-primary-500 dark:text-white dark:shadow-sm"
+                        className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full text-[#B8D9E8] hover:bg-white/10 hover:text-white transition-all dark:bg-[#294D61] dark:text-white dark:shadow-sm"
                         title="Dark Theme"
                     >
-                        <Moon className="w-4 h-4 shrink-0" />
+                        <Moon className="w-3.5 h-3.5 shrink-0" />
                     </button>
                 </div>
 
                 {/* Split 2: Menu Icons Container (EXPANDS) */}
-                <div className="bg-white dark:bg-black dark:border-white/10 shadow-lg sm:shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 rounded-[28px] w-full flex-1 flex flex-col items-center py-3 px-1.5 overflow-y-auto [&::-webkit-scrollbar]:w-0 pointer-events-auto transition-all duration-300">
+                <div className="bg-[#072E33] border border-[#6DA5C0]/15 shadow-[0_22px_54px_rgba(5,22,26,0.16)] rounded-[28px] w-full flex-1 flex flex-col items-center py-3 px-1.5 overflow-y-auto [&::-webkit-scrollbar]:w-0 pointer-events-auto transition-all duration-300">
                     <div className="flex flex-col gap-2 w-full">
                         {visibleLinks.map((link) => {
-                            const isActive = location.pathname === link.href || (link.href === '/dashboard' && location.pathname === '/')
+                            const isActive = location.pathname === link.href ||
+                                (link.href !== '/' && location.pathname.startsWith(`${link.href}/`)) ||
+                                (link.href === '/dashboard' && location.pathname === '/')
                             return (
                                 <Link
                                     key={link.href}
                                     to={link.href}
                                     title={link.name}
                                     className={cn(
-                                        "h-11 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all shrink-0",
-                                        isActive ? "bg-primary-500 text-white shadow-md relative" : "text-gray-400 hover:bg-primary-50 hover:text-primary-500 relative border border-transparent hover:border-primary-100"
+                                        "h-10 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-3.5 transition-all shrink-0",
+                                        isActive ? "bg-[#0F969C] text-white shadow-[0_10px_24px_rgba(15,150,156,0.28)] relative" : "text-[#B8D9E8] hover:bg-white/10 hover:text-white relative border border-transparent hover:border-white/10"
                                     )}
                                 >
-                                    <link.icon className="w-[18px] h-[18px] shrink-0" />
+                                    <link.icon className="w-[16px] h-[16px] shrink-0" />
                                     {/* Auto-expand text snippet */}
-                                    <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[13px] font-bold ml-0 group-hover:ml-3">
+                                    <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[12px] font-bold ml-0 group-hover:ml-2.5">
                                         {link.name}
                                     </span>
                                 </Link>
@@ -340,30 +347,30 @@ export function Sidebar({ activeMenu }: { activeMenu: string }) {
                 </div>
 
                 {/* Split 3: Bottom Actions Container (RIGID) */}
-                <div className="bg-white dark:bg-black dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 rounded-[28px] w-full flex flex-col items-center py-2 px-1.5 shrink-0 pointer-events-auto transition-all gap-1">
+                <div className="bg-[#072E33] border border-[#6DA5C0]/15 shadow-[0_18px_40px_rgba(5,22,26,0.14)] rounded-[28px] w-full flex flex-col items-center py-2 px-1.5 shrink-0 pointer-events-auto transition-all gap-1">
                     {canAccessProfile ? (
                         <Link
                             to={profileRoute}
-                            className="h-11 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all shrink-0 text-gray-500 hover:bg-primary-50 hover:text-primary-600 border border-transparent hover:border-primary-100"
+                            className="h-10 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-3.5 transition-all shrink-0 text-[#B8D9E8] hover:bg-white/10 hover:text-white border border-transparent hover:border-white/10"
                             title="Profile"
                         >
-                            <User className="w-[18px] h-[18px] shrink-0" />
-                            <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[13px] font-bold ml-0 group-hover:ml-3">
+                            <User className="w-[16px] h-[16px] shrink-0" />
+                            <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[12px] font-bold ml-0 group-hover:ml-2.5">
                                 Profile
                             </span>
                         </Link>
                     ) : null}
                     {canAccessSettings ? (
-                        <button onClick={() => navigate('/settings')} className="h-11 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all shrink-0 text-gray-400 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-100" title="Settings">
-                            <Settings className="w-[18px] h-[18px] shrink-0" />
-                            <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[13px] font-bold ml-0 group-hover:ml-3">
+                        <button onClick={() => navigate('/settings')} className="h-10 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-3.5 transition-all shrink-0 text-[#B8D9E8] hover:bg-white/10 hover:text-white" title="Settings">
+                            <Settings className="w-[16px] h-[16px] shrink-0" />
+                            <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[12px] font-bold ml-0 group-hover:ml-2.5">
                                 Settings
                             </span>
                         </button>
                     ) : null}
-                    <button onClick={() => { logout(); navigate('/auth/login', { replace: true }); }} className="h-11 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-4 transition-all shrink-0 text-gray-400 hover:bg-red-50 hover:text-red-500" title="Logout">
-                        <LogOut className="w-[18px] h-[18px] shrink-0" />
-                        <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[13px] font-bold ml-0 group-hover:ml-3">
+                    <button onClick={() => { logout(); navigate('/auth/login', { replace: true }); }} className="h-10 w-full rounded-full flex items-center justify-center group-hover:justify-start group-hover:px-3.5 transition-all shrink-0 text-[#B8D9E8] hover:bg-white/10 hover:text-white" title="Logout">
+                        <LogOut className="w-[16px] h-[16px] shrink-0" />
+                        <span className="opacity-0 group-hover:opacity-100 max-w-0 group-hover:max-w-[160px] transition-all overflow-hidden whitespace-nowrap text-[12px] font-bold ml-0 group-hover:ml-2.5">
                             Logout
                         </span>
                     </button>

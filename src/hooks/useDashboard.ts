@@ -22,3 +22,17 @@ export const useRecentActivities = () => {
         enabled: Boolean(activeUnitId)
     })
 }
+
+export const useUecAdminDashboard = () => {
+    return useQuery({
+        queryKey: ['uec-admin-dashboard'],
+        queryFn: dashboardService.getUecAdminDashboard
+    })
+}
+
+export const useUecFinanceDashboard = () => {
+    return useQuery({
+        queryKey: ['uec-finance-dashboard'],
+        queryFn: dashboardService.getUecFinanceDashboard
+    })
+}

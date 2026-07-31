@@ -32,7 +32,8 @@ const parentMenuByChild: Record<string, string> = {
 }
 
 const concreteMenuOverrides: Array<{ prefix: string, menu: string }> = [
-    { prefix: "/admin-files", menu: "Admin Files" }
+    { prefix: "/hr/staff", menu: "Human Resource" },
+    { prefix: "/crm/clients", menu: "Enquiry Desk" }
 ]
 
 const getRoleName = (role: unknown, fallback = "Employee") => {
@@ -55,6 +56,7 @@ export default function DashboardLayout() {
     const setUser = useAuthStore((state) => state.setUser)
     const { toast } = useToast()
     const authDebug = import.meta.env.VITE_AUTH_DEBUG === 'true'
+    const isFixedViewportRoute = location.pathname === "/" || location.pathname === "/dashboard"
 
     useEffect(() => {
         const path = location.pathname
@@ -186,16 +188,16 @@ export default function DashboardLayout() {
     }, [activeUnitId, token, toast, user?.id])
 
     return (
-        <div className="h-dvh min-h-dvh w-full bg-[#f4f6f8] dark:bg-black font-sans text-gray-900 dark:text-gray-100 overflow-hidden relative flex flex-col p-2 md:p-4">
+        <div className="mx-auto h-dvh min-h-dvh w-full max-w-[2560px] bg-[#F7FAFC] dark:bg-[#05161A] font-sans text-gray-900 dark:text-gray-100 overflow-x-hidden overflow-y-auto relative flex flex-col p-1 sm:p-1.5 md:p-2 box-border">
             {/* Top Navbar spans full width initially to house the logo, pills, and right icons */}
             <Navbar activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
 
-            <div className="flex flex-1 min-h-0 overflow-hidden mt-2 gap-2 md:mt-4 md:gap-4 2xl:mt-6 2xl:gap-6">
+            <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden mt-1 sm:mt-1.5 md:mt-2 gap-1 sm:gap-1.5 md:gap-2">
                 {/* Slim Floating Sidebar */}
                 <Sidebar activeMenu={activeMenu} />
 
                 {/* Main Dashboard Area */}
-                <main className="flex-1 min-w-0 min-h-0 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:w-0 rounded-2xl md:rounded-[32px]">
+                <main className={`app-scrollbar flex-1 min-w-0 min-h-0 w-full overscroll-contain rounded-none sm:rounded-2xl md:rounded-[28px] ${isFixedViewportRoute ? 'overflow-hidden' : 'overflow-x-hidden overflow-y-auto'}`}>
                     <Outlet />
                 </main>
             </div>

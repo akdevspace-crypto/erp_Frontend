@@ -17,7 +17,7 @@ const orgFallbacks = {
 const fallbackDashboards: Record<string, OrganizationDashboardData> = {
     UNCF: {
         ...orgFallbacks.uncf,
-        accent: '#3f5f6a',
+        accent: '#0F969C',
         kpis: [
             { label: 'Active Enquiries', value: 0, tone: 'teal' },
             { label: 'Critical Patients', value: 0, tone: 'rose' },
@@ -34,7 +34,7 @@ const fallbackDashboards: Record<string, OrganizationDashboardData> = {
     },
     UEC: {
         ...orgFallbacks.uec,
-        accent: '#3f5f6a',
+        accent: '#0F969C',
         kpis: [
             { label: 'Active Residents', value: 0, tone: 'teal' },
             { label: 'In-House Care', value: 0, tone: 'blue' },
@@ -51,7 +51,7 @@ const fallbackDashboards: Record<string, OrganizationDashboardData> = {
     },
     UHC: {
         ...orgFallbacks.uhc,
-        accent: '#1f3b4d',
+        accent: '#294D61',
         kpis: [
             { label: 'Patients', value: 0, tone: 'blue' },
             { label: 'Active Admissions', value: 0, tone: 'green' },
@@ -68,7 +68,7 @@ const fallbackDashboards: Record<string, OrganizationDashboardData> = {
     },
     UA: {
         ...orgFallbacks.ua,
-        accent: '#F97316',
+        accent: '#0C7075',
         kpis: [
             { label: 'Bookings', value: 0, tone: 'orange' },
             { label: 'Dispatch Active', value: 0, tone: 'blue' },
@@ -85,7 +85,7 @@ const fallbackDashboards: Record<string, OrganizationDashboardData> = {
     },
     UEO: {
         ...orgFallbacks.ueo,
-        accent: '#3f5f6a',
+        accent: '#0F969C',
         kpis: [
             { label: 'Active Enquiries', value: 0, tone: 'teal' },
             { label: 'New Leads', value: 0, tone: 'blue' },
@@ -176,8 +176,8 @@ function UncfFoundationCommandCenter() {
                         <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${tone}`}>
                             <Icon className="h-5 w-5" />
                         </span>
-                        <p className="mt-3 text-2xl font-black text-slate-950">{value}</p>
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</p>
+                        <p className="mt-3 text-2xl font-extrabold text-slate-950">{value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-500">{label}</p>
                     </div>
                 ))}
             </section>
@@ -188,7 +188,7 @@ function UncfFoundationCommandCenter() {
                         key={tab}
                         type="button"
                         onClick={() => setActiveTab(tab)}
-                        className={`rounded-xl px-4 py-2 text-sm font-black ${activeTab === tab ? 'bg-[#3f5f6a] text-white' : 'bg-white text-slate-700 shadow-sm'}`}
+                        className={`rounded-xl px-4 py-2 text-sm font-extrabold ${activeTab === tab ? 'bg-[#0F969C] text-white' : 'bg-white text-slate-700 shadow-sm'}`}
                     >
                         {tab}
                     </button>
@@ -283,13 +283,13 @@ function UncfFoundationCommandCenter() {
 function FoundationPanel({ title, rows }: { title: string; rows: Array<{ title: string; detail: string; status: string }> }) {
     return (
         <section className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <h2 className="text-lg font-black text-slate-950">{title}</h2>
+            <h2 className="text-lg font-extrabold text-slate-950">{title}</h2>
             <div className="mt-3 space-y-3">
                 {rows.map((row) => (
                     <div key={`${row.title}-${row.status}`} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                        <p className="font-black text-slate-950">{row.title}</p>
+                        <p className="font-extrabold text-slate-950">{row.title}</p>
                         <p className="mt-1 text-sm font-semibold text-slate-600">{row.detail}</p>
-                        <p className="mt-2 text-xs font-black uppercase tracking-[0.12em] text-primary-700">{row.status}</p>
+                        <p className="mt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-primary-700">{row.status}</p>
                     </div>
                 ))}
             </div>
@@ -301,7 +301,7 @@ function ProjectTable() {
     return (
         <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm">
             <table className="w-full min-w-[860px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+                <thead className="bg-slate-50 text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
                     <tr>
                         <th className="px-4 py-3">Project</th>
                         <th className="px-4 py-3">Status</th>
@@ -314,7 +314,7 @@ function ProjectTable() {
                 <tbody>
                     {uncfProjects.map((project) => (
                         <tr key={project.name} className="border-t border-slate-100">
-                            <td className="px-4 py-4 font-black text-slate-950">{project.name}</td>
+                            <td className="px-4 py-4 font-extrabold text-slate-950">{project.name}</td>
                             <td className="px-4 py-4 font-semibold text-primary-700">{project.status}</td>
                             <td className="px-4 py-4">{currency(project.target)}</td>
                             <td className="px-4 py-4">{currency(project.collected)}</td>
@@ -336,10 +336,10 @@ function CampaignTable() {
                 return (
                     <section key={campaign.channel} className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
                         <Icon className="h-5 w-5 text-primary-700" />
-                        <h2 className="mt-3 text-lg font-black text-slate-950">{campaign.channel}</h2>
+                        <h2 className="mt-3 text-lg font-extrabold text-slate-950">{campaign.channel}</h2>
                         <p className="mt-1 text-sm font-semibold text-slate-600">{campaign.project}</p>
-                        <p className="mt-3 text-2xl font-black text-slate-950">{campaign.leads}</p>
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Leads generated</p>
+                        <p className="mt-3 text-2xl font-extrabold text-slate-950">{campaign.leads}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Leads generated</p>
                         <p className="mt-3 text-sm font-bold text-amber-700">{campaign.status}</p>
                     </section>
                 )
@@ -360,7 +360,7 @@ function KpiCard({ kpi, index }: { kpi: OrganizationKPI; index: number }) {
                 </div>
                 <span className={`h-2.5 w-2.5 rounded-full ${tone.icon}`} />
             </div>
-            <p className="mt-4 text-2xl font-black leading-none text-gray-950 dark:text-gray-100">{formatValue(kpi)}</p>
+            <p className="mt-4 text-2xl font-extrabold leading-none text-gray-950 dark:text-gray-100">{formatValue(kpi)}</p>
             <p className="mt-2 text-sm font-bold text-gray-500 dark:text-gray-400">{kpi.label}</p>
         </div>
     )
@@ -424,8 +424,8 @@ const getMonthSummary = (dashboard: OrganizationDashboardData) => {
 function FocusPanel({ title, detail, status, tone }: { title: string; detail: string; status: string; tone: string }) {
     return (
         <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
-            <div className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${tone}`}>{status}</div>
-            <h3 className="mt-4 text-lg font-black text-gray-950 dark:text-gray-100">{title}</h3>
+            <div className={`inline-flex rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-[0.12em] ${tone}`}>{status}</div>
+            <h3 className="mt-4 text-lg font-extrabold text-gray-950 dark:text-gray-100">{title}</h3>
             <p className="mt-2 text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400">{detail}</p>
         </div>
     )
@@ -437,7 +437,7 @@ function TaskStatusPanel({ tasks }: { tasks: Array<{ name: string; value: number
         <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">Workload Status</h2>
+                    <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">Workload Status</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Live task split from current records</p>
                 </div>
                 <ClipboardCheck className="h-5 w-5 text-primary-500" />
@@ -467,7 +467,7 @@ function MonthSnapshot({ items }: { items: Array<{ label: string; value: string 
         <section className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">Current Month Snapshot</h2>
+                    <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">Current Month Snapshot</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Compact trend readout without heavy charts</p>
                 </div>
                 <TrendingUp className="h-5 w-5 text-primary-500" />
@@ -475,8 +475,8 @@ function MonthSnapshot({ items }: { items: Array<{ label: string; value: string 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 {items.map((item) => (
                     <div key={item.label} className="rounded-lg bg-gray-50 p-3 dark:bg-white/5">
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-gray-500">{item.label}</p>
-                        <p className="mt-2 text-2xl font-black text-gray-950 dark:text-gray-100">{typeof item.value === 'number' ? new Intl.NumberFormat('en-IN').format(item.value) : item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-gray-500">{item.label}</p>
+                        <p className="mt-2 text-2xl font-extrabold text-gray-950 dark:text-gray-100">{typeof item.value === 'number' ? new Intl.NumberFormat('en-IN').format(item.value) : item.value}</p>
                     </div>
                 ))}
             </div>
@@ -533,14 +533,14 @@ function OrganizationAnalyticsDashboard({ routeOrg }: { routeOrg: keyof typeof o
                 </div>
 
                 <div className="min-h-[300px] rounded-lg border border-gray-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
-                    <h2 className="text-lg font-black text-gray-950 dark:text-gray-100">Recent Activity</h2>
+                    <h2 className="text-lg font-extrabold text-gray-950 dark:text-gray-100">Recent Activity</h2>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Latest workflow updates from the database</p>
                     <div className="mt-4 space-y-3">
                         {dashboard.activities.length > 0 ? dashboard.activities.map((activity) => (
                             <div key={activity.id} className="flex gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-white/10 dark:bg-white/5">
                                 <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: dashboard.accent }} />
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-black text-gray-900 dark:text-gray-100">{activity.title}</p>
+                                    <p className="truncate text-sm font-extrabold text-gray-900 dark:text-gray-100">{activity.title}</p>
                                     <p className="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">{activity.description}</p>
                                 </div>
                             </div>

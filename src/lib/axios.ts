@@ -26,7 +26,7 @@ const getApiBaseUrl = () => {
     try {
         const appUrl = new URL(window.location.origin)
         if (!hasConfiguredUrl && ['localhost', '127.0.0.1'].includes(appUrl.hostname)) {
-            return 'http://localhost:4000/api/v1'
+            return 'https://backend-erp-1-c5qf.onrender.com/api/v1'
         }
 
         const apiUrl = new URL(configuredUrl)

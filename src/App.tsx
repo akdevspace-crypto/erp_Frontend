@@ -73,12 +73,16 @@ const ClientPortalDashboard = lazy(() => import('./features/client_portal/pages/
 const ClientPortalProfile = lazy(() => import('./features/client_portal/pages/ClientPortalProfile').then(m => ({ default: m.ClientPortalProfile })))
 const ClientPortalServices = lazy(() => import('./features/client_portal/pages/ClientPortalServices').then(m => ({ default: m.ClientPortalServices })))
 const ClientPortalMedicines = lazy(() => import('./features/client_portal/pages/ClientPortalMedicines').then(m => ({ default: m.ClientPortalMedicines })))
+const ClientPortalHealthRecords = lazy(() => import('./features/client_portal/pages/ClientPortalHealthRecords').then(m => ({ default: m.ClientPortalHealthRecords })))
 const ClientPortalComplaints = lazy(() => import('./features/client_portal/pages/ClientPortalComplaints').then(m => ({ default: m.ClientPortalComplaints })))
 const ClientPortalNotifications = lazy(() => import('./features/client_portal/pages/ClientPortalNotifications').then(m => ({ default: m.ClientPortalNotifications })))
 const ClientPortalAccess = lazy(() => import('./features/client_portal/pages/ClientPortalAccess').then(m => ({ default: m.ClientPortalAccess })))
 
 // In-House & Accounts
 const Revenue = lazy(() => import('./features/inhouse_care/pages/Revenue').then(m => ({ default: m.Revenue })))
+const ElderADL = lazy(() => import('./features/inhouse_care/pages/ElderADL').then(m => ({ default: m.ElderADL })))
+const EventCalendar = lazy(() => import('./features/inhouse_care/pages/EventCalendar').then(m => ({ default: m.EventCalendar })))
+const IncidentReports = lazy(() => import('./features/inhouse_care/pages/IncidentReports').then(m => ({ default: m.IncidentReports })))
 const Vitals = lazy(() => import('./features/inhouse_care/pages/Vitals').then(m => ({ default: m.Vitals })))
 const Cashbox = lazy(() => import('./features/accounts/pages/Cashbox').then(m => ({ default: m.Cashbox })))
 const CashboxPending = lazy(() => import('./features/accounts/pages/CashboxPending').then(m => ({ default: m.CashboxPending })))
@@ -156,6 +160,8 @@ const AllowanceTracking = lazy(() => import('./features/finance/pages/AllowanceT
 const Invoice = lazy(() => import('./features/finance/pages/Invoice').then(m => ({ default: m.Invoice })))
 const Renewals = lazy(() => import('./features/finance/pages/Renewals').then(m => ({ default: m.Renewals })))
 const PatientDailyCost = lazy(() => import('./features/patient_billing/pages/PatientDailyCost').then(m => ({ default: m.PatientDailyCost })))
+const PatientManualBilling = lazy(() => import('./features/patient_billing/pages/PatientManualBilling').then(m => ({ default: m.PatientManualBilling })))
+const ElderBilling = lazy(() => import('./features/finance/pages/ElderBilling').then(m => ({ default: m.ElderBilling })))
 
 // Security New Modules
 const GateManagement = lazy(() => import('./features/security/pages/GateManagement').then(m => ({ default: m.GateManagement })))
@@ -238,6 +244,7 @@ function App() {
                   <Route path="inventory/elder-dashboard" element={<Navigate to="/inventory" replace />} />
                   <Route path="task-log/dashboard" element={<Suspense fallback={<SkeletonLoader />}><TaskLogCoordinatorDashboard /></Suspense>} />
                   <Route path="finance/elder-dashboard" element={<Suspense fallback={<SkeletonLoader />}><ElderFinanceManagerDashboard /></Suspense>} />
+                  <Route path="finance/elder-billing" element={<Suspense fallback={<SkeletonLoader />}><ElderBilling /></Suspense>} />
                   <Route path="healthcare/patient-care-dashboard" element={<Suspense fallback={<SkeletonLoader />}><PatientCareManagerDashboard /></Suspense>} />
                   <Route path="allocation/dashboard" element={<Suspense fallback={<SkeletonLoader />}><CareAllocationManagerDashboard /></Suspense>} />
                   <Route path="inventory/medical-dashboard" element={<Navigate to="/inventory" replace />} />
@@ -314,12 +321,16 @@ function App() {
                   <Route path="client-portal/profile" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalProfile /></Suspense>} />
                   <Route path="client-portal/services" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalServices /></Suspense>} />
                   <Route path="client-portal/medicines" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalMedicines /></Suspense>} />
+                  <Route path="client-portal/health-records" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalHealthRecords /></Suspense>} />
                   <Route path="client-portal/complaints" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalComplaints /></Suspense>} />
                   <Route path="client-portal/notifications" element={<Suspense fallback={<SkeletonLoader />}><ClientPortalNotifications /></Suspense>} />
 
                   {/* In-House Care */}
                   <Route path="inhouse-care/revenue" element={<Suspense fallback={<SkeletonLoader />}><Revenue /></Suspense>} />
                   <Route path="inhouse-care/vitals" element={<Suspense fallback={<SkeletonLoader />}><Vitals /></Suspense>} />
+                  <Route path="inhouse-care/adl" element={<Suspense fallback={<SkeletonLoader />}><ElderADL /></Suspense>} />
+                  <Route path="inhouse-care/events" element={<Suspense fallback={<SkeletonLoader />}><EventCalendar /></Suspense>} />
+                  <Route path="inhouse-care/incidents" element={<Suspense fallback={<SkeletonLoader />}><IncidentReports /></Suspense>} />
                   <Route path="healthcare/vitals" element={<Suspense fallback={<SkeletonLoader />}><Vitals /></Suspense>} />
 
                   {/* Accounts Module */}
@@ -414,6 +425,7 @@ function App() {
                   <Route path="finance/allowance-tracking" element={<Suspense fallback={<SkeletonLoader />}><AllowanceTracking /></Suspense>} />
                   <Route path="finance/invoice" element={<Suspense fallback={<SkeletonLoader />}><Invoice /></Suspense>} />
                   <Route path="finance/patient-daily-cost" element={<Suspense fallback={<SkeletonLoader />}><PatientDailyCost /></Suspense>} />
+                  <Route path="finance/manual-billing" element={<Suspense fallback={<SkeletonLoader />}><PatientManualBilling /></Suspense>} />
                   <Route path="finance/renewals" element={<Suspense fallback={<SkeletonLoader />}><Renewals /></Suspense>} />
 
                   {/* Security New Routes */}

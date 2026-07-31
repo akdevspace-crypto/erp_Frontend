@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const resolveSocketUrl = () => {
-    const configuredUrl = import.meta.env.VITE_SOCKET_URL || "https://n32rn7gl-4000.inc1.devtunnels.ms";
+    const configuredUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:4000";
 
     if (typeof window === "undefined") {
         return configuredUrl;
