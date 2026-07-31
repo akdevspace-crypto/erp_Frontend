@@ -100,6 +100,11 @@ export function PatientManualBilling() {
         amount: initField(''), monthlyEssentials: initField(''), diapers: initField(''), gloves: initField(''), mask: initField(''), underpad: initField('')
     })
 
+    const [additionalCharges, setAdditionalCharges] = useState({
+        previousPendingPayable: initField(''),
+        upcomingBedCharge: { include: 'NO', amount: initField('') }
+    })
+
     const [elderCore, setElderCore] = useState({
         roomSharing: '', billSelection: '', monthlyBedCharge: initField(''), amount: initField(''), laundry: initField('1800'), eb: initField('700'), hospitalVisit: initField(''), ambulance: initField(''), doctorCheckup: initField('500'), physiotherapy: initField(''), counseling: initField(''), occupational: initField(''), speech: initField(''), nursing: initField(''), caregiverDay: initField(''), caregiverNight: initField(''), dressing: initField(''), firstAid: initField(''), specialCare: initField(''), gas: initField('1000')
     })
@@ -188,8 +193,12 @@ export function PatientManualBilling() {
                 });
             };
 
-            addFromObj(elderCore);
             addFromObj(balances);
+            addFromObj(elderCore);
+            addFromObj({ prev: additionalCharges.previousPendingPayable });
+            if (additionalCharges.upcomingBedCharge.include === 'YES') {
+                addFromObj({ upcoming: additionalCharges.upcomingBedCharge.amount })
+            }
             grossTotal += parseFloat(attender.price) || 0;
             grossTotal += parseFloat(outsideAttender.price) || 0;
 
@@ -238,6 +247,17 @@ export function PatientManualBilling() {
         const generatedAt = new Date()
         const totalsCalculated = calculateTotals()
         const currentMonthName = billingMonthYear || `${generatedAt.toLocaleString('default', { month: 'long' })} - ${generatedAt.getFullYear()}`
+        
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        let nextMonthName = 'Upcoming Month'
+        if (currentMonthName) {
+            const lower = currentMonthName.toLowerCase()
+            const foundIdx = months.findIndex(m => lower.includes(m.toLowerCase()))
+            if (foundIdx !== -1) {
+                nextMonthName = months[(foundIdx + 1) % 12]
+            }
+        }
+
         const accountHolder = 'Universal Elder Care'
         const upi = upiId || 'universaleldercare@upi'
         const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=MonthlyPatientInvoice`
@@ -327,16 +347,26 @@ export function PatientManualBilling() {
         coreRows += renderRow('Gas', elderCore.gas)
         elderRows += renderSection('CORE ITEMS & SERVICES', coreRows)
 
+        // PREVIOUS PAYABLE AMOUNT
+        let additionalRows = '';
+        additionalRows += renderRow('Previous Pending Payable Amount', additionalCharges.previousPendingPayable)
+        if (additionalCharges.upcomingBedCharge.include === 'YES') {
+            additionalRows += renderRow(`${nextMonthName} Bed Charge`, additionalCharges.upcomingBedCharge.amount)
+        }
+        if (additionalRows && billType === 'ELDER_CARE') {
+            elderRows += renderSection('PREVIOUS PAYABLE AMOUNT', additionalRows)
+        }
+
         // MEDICAL
         let medRows = '';
         const medVal = calcMedTotal('medicines');
-        if (medVal > 100) medRows += renderRow(`Medicines/Tablets (Count: ${medical.medicines.count || 0} + 100 Base)`, medVal);
+        if (medVal > 100) medRows += renderRow(`Medicines/Tablets (Qty: ${medical.medicines.count || 0})`, medVal);
 
         ['diapers', 'gloves', 'mask', 'underpad', 'rubbersheet', 'readymade'].forEach((k) => {
             const item = medical[k as keyof typeof medical] as any;
             const val = calcMedTotal(k as keyof typeof medical);
             if (val > 0) {
-                medRows += renderRow(`${k.charAt(0).toUpperCase() + k.slice(1)} (Qty: ${item.qty || 0}, Rate: ${item.rate} ${item.disposal ? '+ ' + item.disposal + ' disp' : ''})`, val);
+                medRows += renderRow(`${k.charAt(0).toUpperCase() + k.slice(1)} (Qty: ${item.qty || 0})`, val);
             }
         });
         medRows += renderRow('Uro Bag', medical.uroBag.price)
@@ -399,33 +429,7 @@ export function PatientManualBilling() {
         `
 
         let paymentInfoHtml = ''
-        if (isValid(paymentInfo.doneDate) || isValid(paymentInfo.mode) || isValid(paymentInfo.bankName)) {
-            paymentInfoHtml = `
-                <div class="bold mt-4" style="font-size: 14px;">PAYMENT INFORMATION</div>
-                <table class="payment-table mt-2">
-                    <tbody>
-                        <tr>
-                            <td><strong>Payment Done Date:</strong> ${htmlEscape(paymentInfo.doneDate || '-')}</td>
-                            <td><strong>Material Received Date:</strong> ${htmlEscape(paymentInfo.receivedDate || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Payment Mode:</strong> ${htmlEscape(paymentInfo.mode || '-')}</td>
-                            <td><strong>Material Receiving Mode:</strong> ${htmlEscape(paymentInfo.receivingMode || '-')}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Bank Name:</strong> ${htmlEscape(paymentInfo.bankName || '-')}</td>
-                            <td><strong>Gpay Number:</strong> ${htmlEscape(paymentInfo.gpay || '-')}</td>
-                        </tr>
-                        ${isValid(paymentInfo.balanceAmount) ? `
-                            <tr>
-                                <td><strong>Balance Amount:</strong> Rs ${htmlEscape(paymentInfo.balanceAmount)}</td>
-                                <td><strong>Balance Item:</strong> ${htmlEscape(paymentInfo.balanceItem || '-')}</td>
-                            </tr>
-                        ` : ''}
-                    </tbody>
-                </table>
-            `
-        }
+        // Payment info is collected for the backend only, not shown on the bill.
 
         return `<!doctype html>
 <html>
@@ -843,6 +847,18 @@ export function PatientManualBilling() {
                                     <SubsidyField label="Gloves Bal. (Rs/No)" priceObj={balances.gloves} onChange={(v: any) => setBalances({ ...balances, gloves: v })} />
                                     <SubsidyField label="Mask Bal. (Rs/No)" priceObj={balances.mask} onChange={(v: any) => setBalances({ ...balances, mask: v })} />
                                     <SubsidyField label="Under Pad Bal. (Rs/No)" priceObj={balances.underpad} onChange={(v: any) => setBalances({ ...balances, underpad: v })} />
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Previous Payable Amount</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <SubsidyField label="Prev. Pending Payable Amt" priceObj={additionalCharges.previousPendingPayable} onChange={(v: any) => setAdditionalCharges({ ...additionalCharges, previousPendingPayable: v })} />
+                                    
+                                    <Select label="Inc. Upcoming Bed Chg?" value={additionalCharges.upcomingBedCharge.include} onChange={(v: string) => setAdditionalCharges({ ...additionalCharges, upcomingBedCharge: { ...additionalCharges.upcomingBedCharge, include: v } })} options={['NO', 'YES']} />
+                                    {additionalCharges.upcomingBedCharge.include === 'YES' && (
+                                        <SubsidyField label="Upcoming Bed Charge" priceObj={additionalCharges.upcomingBedCharge.amount} onChange={(v: any) => setAdditionalCharges({ ...additionalCharges, upcomingBedCharge: { ...additionalCharges.upcomingBedCharge, amount: v } })} />
+                                    )}
                                 </div>
                             </div>
 
