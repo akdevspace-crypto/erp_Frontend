@@ -273,7 +273,7 @@ export function DailyTaskApproval() {
                     {approvedTask && (
                         <div className="mb-4 flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 md:flex-row md:items-center md:justify-between">
                             <div>
-                                <p className="text-sm font-black text-emerald-900">Duty approved</p>
+                                <p className="text-sm font-extrabold text-emerald-900">Duty approved</p>
                                 <p className="text-sm font-semibold text-emerald-700">
                                     Continue to the workflow timeline to complete healthcare monitoring, billing, customer care, renewal, and repeat service.
                                 </p>
@@ -282,13 +282,13 @@ export function DailyTaskApproval() {
                                 <button
                                     type="button"
                                     onClick={() => navigate(`/workflow/timeline?search=${encodeURIComponent(approvedTask.refNo || approvedTask.id)}`)}
-                                    className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-emerald-800"
+                                    className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white hover:bg-emerald-800"
                                 >
                                     Continue Workflow
                                 </button>
                                 <Link
                                     to="/finance/invoice"
-                                    className="rounded-md border border-emerald-300 bg-white px-4 py-2 text-xs font-black uppercase tracking-wide text-emerald-700 hover:bg-emerald-100"
+                                    className="rounded-md border border-emerald-300 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-emerald-700 hover:bg-emerald-100"
                                 >
                                     Open Billing
                                 </Link>
@@ -335,7 +335,7 @@ export function DailyTaskApproval() {
                         <>
                             <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
                                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-700">Staff Task Review</p>
-                                <h3 className="mt-2 text-lg font-black text-slate-900">{selectedGroup.staffName}</h3>
+                                <h3 className="mt-2 text-lg font-extrabold text-slate-900">{selectedGroup.staffName}</h3>
                                 <p className="mt-1 text-sm font-semibold text-slate-600">
                                     {selectedGroup.staffId} | {selectedGroup.date} | {selectedGroup.tasks.length} task(s)
                                 </p>
@@ -347,7 +347,7 @@ export function DailyTaskApproval() {
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div>
                                                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-gray-400">Task {index + 1}</p>
-                                                <h4 className="mt-1 text-base font-black text-slate-900">{task.title}</h4>
+                                                <h4 className="mt-1 text-base font-extrabold text-slate-900">{task.title}</h4>
                                                 <p className="mt-2 whitespace-pre-line text-sm text-slate-600">
                                                     {task.description || 'No description added.'}
                                                 </p>

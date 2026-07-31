@@ -60,7 +60,7 @@ export function EntryLogs() {
 
     const columns: Column<EntryLogRow>[] = [
         { key: 'entryType', header: 'Type', cell: (entry) => entry.entryType === 'VEHICLE' ? 'Vehicle' : entry.entryType === 'STAFF' ? 'Staff' : 'Visitor', sortable: true },
-        { key: 'visitorName', header: 'Name / Vehicle', cell: (entry) => entry.entryType === 'VEHICLE' ? <span className="font-black text-slate-900">{entry.vehicleNo}</span> : entry.entryType === 'STAFF' ? <span className="font-black text-slate-900">{entry.staffName || entry.empId}</span> : entry.visitorName, sortable: true },
+        { key: 'visitorName', header: 'Name / Vehicle', cell: (entry) => entry.entryType === 'VEHICLE' ? <span className="font-extrabold text-slate-900">{entry.vehicleNo}</span> : entry.entryType === 'STAFF' ? <span className="font-extrabold text-slate-900">{entry.staffName || entry.empId}</span> : entry.visitorName, sortable: true },
         { key: 'mobile', header: 'Mobile', cell: (entry) => entry.entryType === 'VEHICLE' ? entry.driverMobile || '-' : entry.mobile },
         { key: 'purpose', header: 'Purpose' },
         { key: 'checkInAt', header: 'In Time', cell: (entry) => formatTime(entry.checkInAt), sortable: true },
@@ -116,7 +116,7 @@ export function EntryLogs() {
                         className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold text-slate-700 outline-none focus:border-primary-400"
                     />
                     {dateFilter ? (
-                        <button type="button" onClick={() => setDateFilter('')} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
+                        <button type="button" onClick={() => setDateFilter('')} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-slate-50">
                             Clear Date
                         </button>
                     ) : null}
@@ -133,7 +133,7 @@ export function EntryLogs() {
                     <button
                         type="button"
                         onClick={() => setSelectedEntry(entry)}
-                        className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-black text-slate-700 hover:bg-slate-200"
+                        className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-extrabold text-slate-700 hover:bg-slate-200"
                     >
                         <Eye className="h-3.5 w-3.5" />
                         Details

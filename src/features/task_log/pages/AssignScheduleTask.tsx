@@ -338,10 +338,10 @@ export function AssignScheduleTask() {
                     )}
 
                     <section className="rounded-[28px] border border-gray-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.06)] overflow-hidden">
-                        <div className="flex flex-col gap-3 border-b border-primary-100 bg-gradient-to-r from-[#3f5f6a] via-[#7b8f5d] to-[#1f3b4d] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-col gap-3 border-b border-primary-100 bg-gradient-to-r from-[#0F969C] via-[#6DA5C0] to-[#294D61] px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Task Log Workspace</p>
-                                <h2 className="mt-1 text-2xl font-black tracking-tight">Update Assign Schedule Task</h2>
+                                <h2 className="mt-1 text-2xl font-extrabold tracking-tight">Update Assign Schedule Task</h2>
                             </div>
                             <button
                                 onClick={() => setCurrentView('list')}
@@ -352,13 +352,13 @@ export function AssignScheduleTask() {
                             </button>
                         </div>
 
-                        <div className="space-y-6 bg-gradient-to-b from-[#f2f5ea] via-white to-white px-5 py-6 sm:px-7">
+                        <div className="space-y-6 bg-gradient-to-b from-[#F7FAFC] via-white to-white px-5 py-6 sm:px-7">
                             <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-                                <div className="rounded-[24px] border border-[#3f5f6a]/15 bg-white p-5 shadow-[0_10px_30px_rgba(63,95,106,0.08)]">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#1f3b4d]">Staff Reference</p>
+                                <div className="rounded-[24px] border border-[#0F969C]/15 bg-white p-5 shadow-[0_10px_30px_rgba(15,150,156,0.08)]">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#294D61]">Staff Reference</p>
                                     <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <div>
-                                            <p className="text-3xl font-black tracking-tight text-slate-900">{selectedStaff.empId}</p>
+                                            <p className="text-3xl font-extrabold tracking-tight text-slate-900">{selectedStaff.empId}</p>
                                             <p className="mt-1 text-sm font-medium text-slate-500">{selectedStaff.name}</p>
                                         </div>
                                         <div className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
@@ -371,27 +371,27 @@ export function AssignScheduleTask() {
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Total</p>
-                                        <p className="mt-2 text-2xl font-black text-slate-900">{scheduledTaskSummary.total}</p>
+                                        <p className="mt-2 text-2xl font-extrabold text-slate-900">{scheduledTaskSummary.total}</p>
                                     </div>
                                     <div className="rounded-[22px] border border-emerald-200 bg-emerald-50 p-4">
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-500">Completed</p>
-                                        <p className="mt-2 text-2xl font-black text-emerald-700">{scheduledTaskSummary.completed}</p>
+                                        <p className="mt-2 text-2xl font-extrabold text-emerald-700">{scheduledTaskSummary.completed}</p>
                                     </div>
                                     <div className="rounded-[22px] border border-amber-200 bg-amber-50 p-4">
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">In Progress</p>
-                                        <p className="mt-2 text-2xl font-black text-amber-700">{scheduledTaskSummary.inProgress}</p>
+                                        <p className="mt-2 text-2xl font-extrabold text-amber-700">{scheduledTaskSummary.inProgress}</p>
                                     </div>
                                     <div className="rounded-[22px] border border-sky-200 bg-sky-50 p-4">
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">Assigned</p>
-                                        <p className="mt-2 text-2xl font-black text-sky-700">{scheduledTaskSummary.assigned}</p>
+                                        <p className="mt-2 text-2xl font-extrabold text-sky-700">{scheduledTaskSummary.assigned}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
                                 <div className="grid gap-px bg-gray-200 md:grid-cols-4">
-                                    <div className="bg-[#e6fbf8] px-5 py-4">
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1f3b4d]">Unit Name</p>
+                                    <div className="bg-[#F7FAFC] px-5 py-4">
+                                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#294D61]">Unit Name</p>
                                         <p className="mt-2 text-lg font-bold text-slate-900">Universal Elder Care</p>
                                         <p className="text-sm text-slate-500">Coimbatore</p>
                                     </div>
@@ -409,7 +409,7 @@ export function AssignScheduleTask() {
                                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Action</p>
                                         <button
                                             onClick={handleAddNewTask}
-                                            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#3f5f6a] to-[#1f3b4d] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(63,95,106,0.22)] hover:-translate-y-0.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#0F969C] to-[#294D61] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,150,156,0.22)] hover:-translate-y-0.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             <Plus className="h-4 w-4" />
                                             Add New Task
@@ -419,8 +419,8 @@ export function AssignScheduleTask() {
                             </div>
 
                             <section className="overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]">
-                                <div className="border-b border-cyan-200 bg-gradient-to-r from-[#c6f5f1] to-[#e6fbf8] px-5 py-4">
-                                    <h3 className="text-lg font-black tracking-tight text-slate-900">Schedule Task History</h3>
+                                <div className="border-b border-cyan-200 bg-gradient-to-r from-[#6DA5C0] to-[#F7FAFC] px-5 py-4">
+                                    <h3 className="text-lg font-extrabold tracking-tight text-slate-900">Schedule Task History</h3>
                                     <p className="mt-1 text-sm font-medium text-slate-500">A cleaner version of the legacy task history panel using your current palette.</p>
                                 </div>
 
@@ -432,8 +432,8 @@ export function AssignScheduleTask() {
                                     </div>
                                 ) : tasksForSelectedStaff.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-                                        <CalendarDays className="h-10 w-10 text-[#3f5f6a]/40" />
-                                        <p className="mt-4 text-2xl font-black tracking-tight text-slate-900">No Task Added</p>
+                                        <CalendarDays className="h-10 w-10 text-[#0F969C]/40" />
+                                        <p className="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">No Task Added</p>
                                         <p className="mt-2 max-w-md text-sm font-medium text-slate-500">Create the first scheduled task for this staff member to populate the history section.</p>
                                     </div>
                                 ) : (
@@ -452,7 +452,7 @@ export function AssignScheduleTask() {
                                                 {tasksForSelectedStaff.map((task, index) => {
                                                     const statusMeta = taskStatusMeta[task.status] || taskStatusMeta.ASSIGNED
                                                     return (
-                                                        <tr key={task.id} className="transition-colors hover:bg-[#3f5f6a]/4">
+                                                        <tr key={task.id} className="transition-colors hover:bg-[#0F969C]/4">
                                                             <td className="px-5 py-5 text-sm font-bold text-slate-500">{index + 1}</td>
                                                             <td className="px-5 py-5 align-top">
                                                                 <div className="text-sm font-bold text-slate-900">{task.assignedBy || 'System'}</div>
@@ -478,7 +478,7 @@ export function AssignScheduleTask() {
                                                             <td className="px-5 py-5 align-top">
                                                                 <button
                                                                     onClick={() => setSelectedHistoryTask(task)}
-                                                                    className="inline-flex items-center gap-2 rounded-2xl border border-[#3f5f6a]/20 bg-[#3f5f6a]/8 px-3 py-2 text-sm font-semibold text-[#1f3b4d] hover:bg-[#3f5f6a]/12 transition-colors"
+                                                                    className="inline-flex items-center gap-2 rounded-2xl border border-[#0F969C]/20 bg-[#0F969C]/8 px-3 py-2 text-sm font-semibold text-[#294D61] hover:bg-[#0F969C]/12 transition-colors"
                                                                 >
                                                                     <Clock3 className="h-4 w-4" />
                                                                     View Details
@@ -581,9 +581,9 @@ export function AssignScheduleTask() {
             >
                 {selectedHistoryTask ? (
                     <div className="space-y-5 p-1">
-                        <div className="rounded-3xl border border-[#3f5f6a]/15 bg-[#f2f5ea] p-5">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#1f3b4d]">Task Overview</p>
-                            <h4 className="mt-2 text-xl font-black tracking-tight text-slate-900">{selectedHistoryTask.title}</h4>
+                        <div className="rounded-3xl border border-[#0F969C]/15 bg-[#F7FAFC] p-5">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#294D61]">Task Overview</p>
+                            <h4 className="mt-2 text-xl font-extrabold tracking-tight text-slate-900">{selectedHistoryTask.title}</h4>
                             <p className="mt-2 text-sm font-medium text-slate-500">{selectedHistoryTask.description || 'Scheduled staff task'}</p>
                         </div>
 

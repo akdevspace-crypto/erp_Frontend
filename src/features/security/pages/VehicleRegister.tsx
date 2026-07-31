@@ -71,7 +71,7 @@ export function VehicleRegister() {
     }
 
     const columns: Column<GateEntry>[] = [
-        { key: 'vehicleNo', header: 'Vehicle No', sortable: true, cell: (entry) => <span className="font-black text-slate-900">{entry.vehicleNo}</span> },
+        { key: 'vehicleNo', header: 'Vehicle No', sortable: true, cell: (entry) => <span className="font-extrabold text-slate-900">{entry.vehicleNo}</span> },
         { key: 'vehicleType', header: 'Type', cell: (entry) => entry.vehicleType || '-' },
         { key: 'driverName', header: 'Driver', cell: (entry) => entry.driverName || '-' },
         { key: 'driverMobile', header: 'Mobile', cell: (entry) => entry.driverMobile || '-' },
@@ -96,8 +96,8 @@ export function VehicleRegister() {
                     { label: 'Checked Out', value: vehicleEntries.filter((entry) => normalizeStatus(entry.status) === 'checked out').length, tone: 'bg-emerald-50 text-emerald-700' }
                 ].map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 px-4 py-3 ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -105,7 +105,7 @@ export function VehicleRegister() {
             <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex items-center gap-2">
                     <Plus className="h-5 w-5 text-primary-600" />
-                    <h2 className="text-lg font-black text-slate-950">New Vehicle Entry</h2>
+                    <h2 className="text-lg font-extrabold text-slate-950">New Vehicle Entry</h2>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
                     <Input label="Vehicle No." value={formData.vehicleNo} onChange={(event) => handleChange('vehicleNo', event.target.value)} required />
@@ -122,7 +122,7 @@ export function VehicleRegister() {
                         <button
                             type="submit"
                             disabled={createVehicleEntry.isPending}
-                            className="h-11 w-full rounded-xl bg-primary-600 px-4 text-sm font-black text-white shadow-sm hover:bg-primary-700 disabled:opacity-60 md:max-w-xs"
+                            className="h-11 w-full rounded-xl bg-primary-600 px-4 text-sm font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:opacity-60 md:max-w-xs"
                         >
                             {createVehicleEntry.isPending ? 'Saving...' : 'Check In Vehicle'}
                         </button>
@@ -133,13 +133,13 @@ export function VehicleRegister() {
             <section className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h2 className="text-lg font-black text-slate-950">Active Vehicles</h2>
+                        <h2 className="text-lg font-extrabold text-slate-950">Active Vehicles</h2>
                         <p className="text-sm font-bold text-slate-500">Vehicles currently inside and waiting for checkout.</p>
                     </div>
                     <button
                         type="button"
                         onClick={() => refetch()}
-                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 hover:bg-slate-50"
+                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 hover:bg-slate-50"
                     >
                         <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
                         Refresh
@@ -160,7 +160,7 @@ export function VehicleRegister() {
                                 <button
                                     type="button"
                                     onClick={() => setSelectedEntry(entry)}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 hover:bg-primary-100"
+                                    className="inline-flex items-center gap-1 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                                 >
                                     <Eye className="h-3.5 w-3.5" />
                                     Details
@@ -169,7 +169,7 @@ export function VehicleRegister() {
                                     type="button"
                                     onClick={() => handleCheckout(entry)}
                                     disabled={checkoutEntry.isPending}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-600 hover:bg-rose-100 disabled:opacity-60"
+                                    className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-600 hover:bg-rose-100 disabled:opacity-60"
                                 >
                                     <LogOut className="h-3.5 w-3.5" />
                                     Check Out

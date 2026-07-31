@@ -159,7 +159,7 @@ export function Notifications() {
                                 </div>
                                 <p className="text-sm text-gray-600">{notif.message}</p>
                                 {notif.targetUrl && (
-                                    <p className="mt-2 text-xs font-black uppercase tracking-wide text-primary-600">
+                                    <p className="mt-2 text-xs font-extrabold uppercase tracking-wide text-primary-600">
                                         Open workflow step
                                     </p>
                                 )}

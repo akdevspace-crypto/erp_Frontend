@@ -80,7 +80,7 @@ export function MyLeave() {
                 action={
                     <button
                         onClick={() => setIsDrawerOpen(true)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-[#1f3b4d]"
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-extrabold text-white shadow-sm hover:bg-[#294D61]"
                     >
                         <CalendarPlus className="h-4 w-4" />
                         Apply Leave
@@ -96,8 +96,8 @@ export function MyLeave() {
                     { label: 'Rejected', value: summary.rejected, tone: 'bg-red-50 text-red-700' }
                 ].map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 px-4 py-3 ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>
@@ -115,7 +115,7 @@ export function MyLeave() {
                     <form onSubmit={handleSubmit} className="h-full w-full max-w-md overflow-y-auto bg-white p-6 shadow-2xl dark:bg-black">
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-xl font-black text-slate-950 dark:text-white">Apply Leave</h2>
+                                <h2 className="text-xl font-extrabold text-slate-950 dark:text-white">Apply Leave</h2>
                                 <p className="mt-1 text-sm font-semibold text-slate-500">This request will be sent to HR for approval.</p>
                             </div>
                             <button
@@ -129,7 +129,7 @@ export function MyLeave() {
 
                         <div className="mt-6 space-y-4">
                             <label className="block">
-                                <span className="text-xs font-black uppercase tracking-wide text-slate-500">Leave Type</span>
+                                <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Leave Type</span>
                                 <select
                                     value={formData.leaveType}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, leaveType: e.target.value }))}
@@ -145,7 +145,7 @@ export function MyLeave() {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <label className="block">
-                                    <span className="text-xs font-black uppercase tracking-wide text-slate-500">From</span>
+                                    <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">From</span>
                                     <input
                                         required
                                         type="date"
@@ -155,7 +155,7 @@ export function MyLeave() {
                                     />
                                 </label>
                                 <label className="block">
-                                    <span className="text-xs font-black uppercase tracking-wide text-slate-500">To</span>
+                                    <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">To</span>
                                     <input
                                         required
                                         type="date"
@@ -167,7 +167,7 @@ export function MyLeave() {
                             </div>
 
                             <label className="block">
-                                <span className="text-xs font-black uppercase tracking-wide text-slate-500">Reason</span>
+                                <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Reason</span>
                                 <textarea
                                     value={formData.reason}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, reason: e.target.value }))}
@@ -182,14 +182,14 @@ export function MyLeave() {
                             <button
                                 type="button"
                                 onClick={() => setIsDrawerOpen(false)}
-                                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-600"
+                                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-extrabold text-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={createLeave.isPending}
-                                className="rounded-xl bg-[#3f5f6a] px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-[#1f3b4d] disabled:opacity-60"
+                                className="rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-extrabold text-white shadow-sm hover:bg-[#294D61] disabled:opacity-60"
                             >
                                 Submit to HR
                             </button>

@@ -200,7 +200,7 @@ export function ScheduleTaskApproval() {
                 {/* 3-Metric Summary Banner */}
                 <div className="grid grid-cols-3 divide-x divide-gray-200 border-b border-gray-200 py-6">
                     <div className="flex justify-center items-center">
-                        <span className="text-xl font-medium text-[#3f5f6a]">Approval Pending - {approvalPendingCount.toString().padStart(2, '0')}</span>
+                        <span className="text-xl font-medium text-[#0F969C]">Approval Pending - {approvalPendingCount.toString().padStart(2, '0')}</span>
                     </div>
                     <div className="flex justify-center items-center">
                         <span className="text-xl font-medium text-[#28a745]">Approved - {approvedCount.toString().padStart(2, '0')}</span>
@@ -252,7 +252,7 @@ export function ScheduleTaskApproval() {
                         <>
                             <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
                                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-700">Task</p>
-                                <h3 className="mt-2 text-lg font-black text-slate-900">{selectedTask.title}</h3>
+                                <h3 className="mt-2 text-lg font-extrabold text-slate-900">{selectedTask.title}</h3>
                                 <p className="mt-2 whitespace-pre-line text-sm text-slate-600">
                                     {selectedTask.description || 'No description added.'}
                                 </p>

@@ -97,26 +97,6 @@ const userTemplates = [
         description: 'Basic profile, notification, and task-log access'
     },
     {
-        id: 'family-member',
-        organization: 'Client Portal',
-        label: 'Family Member',
-        roleName: 'Family Member',
-        firstName: 'Family',
-        lastName: 'Member',
-        emailPrefix: 'client.family',
-        description: 'Client portal access for service history, payments, feedback, and complaints'
-    },
-    {
-        id: 'client-family-member',
-        organization: 'Client Portal',
-        label: 'Client Family Member',
-        roleName: 'Client Family Member',
-        firstName: 'Client',
-        lastName: 'Family',
-        emailPrefix: 'client.portal',
-        description: 'Family login linked by live client email or mobile'
-    },
-    {
         id: 'elder-care-admin',
         organization: 'UEC',
         label: 'Elder Care Admin',
@@ -374,7 +354,7 @@ type UserFormValues = z.output<typeof userFormSchema>
 
 const getUserName = (user: AdminUser) => `${user.firstName} ${user.lastName || ''}`.trim()
 const normalizeEmail = (email: string) => email.trim().toLowerCase()
-const organizationOptions = ['ALL', 'UNCF', 'UEC', 'UHC', 'UA', 'UEO', 'Client Portal'] as const
+const organizationOptions = ['ALL', 'UNCF', 'UEC', 'UHC', 'UA', 'UEO'] as const
 type OrganizationFilter = typeof organizationOptions[number]
 
 const getTemplateOrganizationByRole = (roleName: string) => {
@@ -390,7 +370,6 @@ const getOrganizationFromUnit = (unit?: AdminUser['unit'] | null) => {
 
     return organizationOptions.find((organization) =>
         organization !== 'ALL' &&
-        organization !== 'Client Portal' &&
         unitText.includes(organization)
     ) || null
 }
@@ -434,7 +413,8 @@ export function UserManagement() {
     const deleteUser = useDeleteAdminUser()
 
     const [searchQuery, setSearchQuery] = useState('')
-    const [selectedOrganization, setSelectedOrganization] = useState<OrganizationFilter>('ALL')
+    // Default to internal employee organizations to avoid showing client portal accounts by default
+    const [selectedOrganization, setSelectedOrganization] = useState<OrganizationFilter>('UNCF')
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
     const [selectedTemplateId, setSelectedTemplateId] = useState('')
@@ -472,11 +452,19 @@ export function UserManagement() {
     })
 
     const filteredUsers = users.filter((user) => {
+        if (user.staff || user.staffId) return false;
+        
+        const roleName = String(user.role?.name || '').toLowerCase();
+        if (roleName.includes('client') || roleName.includes('family member')) return false;
+        
+        const org = getUserOrganization(user);
+        if (org === 'Client Portal') return false;
+
         const query = searchQuery.toLowerCase()
-        const matchesOrganization = selectedOrganization === 'ALL' || getUserOrganization(user) === selectedOrganization
+        const matchesOrganization = selectedOrganization === 'ALL' || org === selectedOrganization
         const matchesSearch = getUserName(user).toLowerCase().includes(query) ||
             String(user.email || '').toLowerCase().includes(query) ||
-            String(user.role?.name || '').toLowerCase().includes(query)
+            roleName.includes(query)
 
         return matchesOrganization && matchesSearch
     })
@@ -532,7 +520,7 @@ export function UserManagement() {
         )
 
         if (existingUser) {
-            setError('email', { type: 'manual', message: 'This email is already used by another user' })
+        setError('email', { type: 'manual', message: 'This email is already used by another employee account' })
             return
         }
 
@@ -560,14 +548,14 @@ export function UserManagement() {
     }
 
     const handleDelete = async (user: AdminUser) => {
-        if (!window.confirm(`Delete user ${user.email}?`)) return
+        if (!window.confirm(`Delete employee account ${user.email}?`)) return
         await deleteUser.mutateAsync(user.id)
     }
 
     const columns: Column<AdminUser>[] = [
         {
             key: 'name',
-            header: 'User',
+            header: 'Employee',
             sortable: true,
             cell: (user) => (
                 <div className="flex items-center gap-3">
@@ -584,17 +572,17 @@ export function UserManagement() {
         { key: 'mobile', header: 'Mobile', cell: (user) => user.mobile || '-' },
         { key: 'role', header: 'Role', cell: (user) => user.role?.name || '-' },
         { key: 'unit', header: 'Unit', cell: (user) => user.unit?.name || '-' },
-        { key: 'linkedStaff', header: 'Linked Staff', cell: (user) => user.staff ? `${user.staff.firstName} ${user.staff.lastName || ''}`.trim() : 'Direct User' },
+        { key: 'linkedStaff', header: 'Linked Staff', cell: (user) => user.staff ? `${user.staff.firstName} ${user.staff.lastName || ''}`.trim() : 'Direct Account' },
         { key: 'status', header: 'Status', cell: (user) => <StatusHighlighter value={user.isActive ? 'Active' : 'Inactive'} /> },
         {
             key: 'actions',
             header: 'Actions',
             cell: (user) => (
                 <div className="flex items-center gap-2">
-                    <button onClick={() => openEdit(user)} className="rounded-lg p-2 text-blue-600 hover:bg-blue-50" title="Edit user">
+                    <button onClick={() => openEdit(user)} className="rounded-lg p-2 text-blue-600 hover:bg-blue-50" title="Edit employee account">
                         <Edit2 className="h-4 w-4" />
                     </button>
-                    <button onClick={() => handleDelete(user)} className="rounded-lg p-2 text-red-600 hover:bg-red-50" title="Delete user">
+                    <button onClick={() => handleDelete(user)} className="rounded-lg p-2 text-red-600 hover:bg-red-50" title="Delete employee account">
                         <Trash2 className="h-4 w-4" />
                     </button>
                 </div>
@@ -603,24 +591,24 @@ export function UserManagement() {
     ]
 
     return (
-        <div className="flex h-full flex-col space-y-5 bg-transparent dark:bg-black">
-            <PageHeader title="User Management" subtitle="Create users, assign roles, choose unit access, and control login status." breadcrumbs={[{ label: 'Super Admin' }, { label: 'User Management' }]} />
+        <div className="flex h-full min-w-0 flex-1 min-h-0 flex-col space-y-5 overflow-y-auto bg-transparent dark:bg-black">
+            <PageHeader title="Employee Management" subtitle="Create employee login accounts, assign roles, choose unit access, and control login status." breadcrumbs={[{ label: 'Super Admin' }, { label: 'Employee Management' }]} />
 
             <div className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-black">
                 <div>
-                    <h2 className="text-base font-black text-gray-900 dark:text-gray-100">System Users</h2>
-                    <p className="text-sm font-medium text-gray-500">Direct login accounts for admins and operators</p>
+                    <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100">Employee Accounts</h2>
+                    <p className="text-sm font-medium text-gray-500">Direct login accounts for admins, staff, and operators</p>
                 </div>
                 <button onClick={openCreate} className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary-600 px-4 text-sm font-bold text-white shadow-sm hover:bg-primary-700">
                     <Plus className="h-4 w-4" />
-                    Create User
+                    Create Employee
                 </button>
             </div>
 
             <FilterSection
                 searchQuery={searchQuery}
                 onSearchChange={(event) => setSearchQuery(event.target.value)}
-                searchPlaceholder="Search users, email, or role..."
+                searchPlaceholder="Search employees, email, or role..."
                 filters={[
                     {
                         name: 'organization',
@@ -634,13 +622,21 @@ export function UserManagement() {
                 ]}
             />
 
-            <DataTable data={filteredUsers} columns={columns} keyExtractor={(user) => user.id} />
+            <DataTable 
+                data={filteredUsers} 
+                columns={columns} 
+                keyExtractor={(user) => user.id} 
+                showScrollbars
+                minTableWidth="1200px"
+                spreadColumns
+                fullHeight={false}
+            />
 
-            <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editingUser ? 'Edit User' : 'Create User'} size="lg">
+            <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title={editingUser ? 'Edit Employee Account' : 'Create Employee Account'} size="lg">
                 <form onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col gap-6">
                     {!editingUser && (
                         <div className="rounded-lg border border-primary-100 bg-primary-50/70 p-4 dark:border-primary-500/20 dark:bg-primary-500/10">
-                            <label className="mb-2 block text-sm font-black text-gray-900 dark:text-gray-100">Organization User Template</label>
+                            <label className="mb-2 block text-sm font-extrabold text-gray-900 dark:text-gray-100">Employee Account Template</label>
                             <select
                                 value={selectedTemplateId}
                                 onChange={(event) => applyTemplate(event.target.value)}
@@ -687,7 +683,7 @@ export function UserManagement() {
                             Cancel
                         </button>
                         <button type="submit" disabled={createUser.isPending || updateUser.isPending} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-bold text-white hover:bg-primary-700 disabled:opacity-60">
-                            {createUser.isPending || updateUser.isPending ? 'Saving...' : 'Save User'}
+                            {createUser.isPending || updateUser.isPending ? 'Saving...' : 'Save Employee'}
                         </button>
                     </div>
                 </form>

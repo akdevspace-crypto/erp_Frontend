@@ -33,8 +33,8 @@ const escapeHtml = (value?: string | null) =>
 
 const DetailBox = ({ label, value }: { label: string; value?: string | null }) => (
     <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-        <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">{label}</p>
-        <p className="mt-1 break-words text-sm font-black text-slate-900">{value || '-'}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-wide text-slate-400">{label}</p>
+        <p className="mt-1 break-words text-sm font-extrabold text-slate-900">{value || '-'}</p>
     </div>
 )
 
@@ -65,7 +65,7 @@ export function VisitorPassModal({ entry, onClose }: VisitorPassModalProps) {
                         .pass { border: 1px solid #cbd5e1; border-radius: 18px; padding: 24px; max-width: 560px; }
                         .top { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; }
                         h1 { margin: 0; font-size: 24px; }
-                        .badge { border: 1px solid #3f5f6a; color: #1f3b4d; border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 12px; }
+                        .badge { border: 1px solid #0F969C; color: #294D61; border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 12px; }
                         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
                         .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
                         .label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: .08em; }
@@ -121,8 +121,8 @@ export function VisitorPassModal({ entry, onClose }: VisitorPassModalProps) {
                 <div className="rounded-2xl border border-primary-100 bg-primary-50 p-4">
                     <div className="flex items-start justify-between gap-3">
                         <div>
-                            <p className="text-[11px] font-black uppercase tracking-wide text-primary-700">Pass No</p>
-                            <p className="mt-1 text-xl font-black text-slate-950">{passNo(entry)}</p>
+                            <p className="text-[11px] font-extrabold uppercase tracking-wide text-primary-700">Pass No</p>
+                            <p className="mt-1 text-xl font-extrabold text-slate-950">{passNo(entry)}</p>
                         </div>
                         <StatusHighlighter value={entry.status} />
                     </div>
@@ -148,7 +148,7 @@ export function VisitorPassModal({ entry, onClose }: VisitorPassModalProps) {
                 <button
                     type="button"
                     onClick={handlePrint}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 hover:bg-slate-50"
                 >
                     <Printer className="h-4 w-4" />
                     Print {isVehicle ? 'vehicle' : isStaff ? 'staff' : 'visitor'} pass

@@ -108,7 +108,7 @@ export function SecurityReports() {
 
     const columns: Column<SecurityReportRow>[] = [
         { key: 'entryType', header: 'Type', cell: entryTypeLabel, sortable: true },
-        { key: 'visitorName', header: 'Name / Ref', cell: (entry) => <span className="font-black text-slate-900">{entryName(entry)}</span>, sortable: true },
+        { key: 'visitorName', header: 'Name / Ref', cell: (entry) => <span className="font-extrabold text-slate-900">{entryName(entry)}</span>, sortable: true },
         { key: 'mobile', header: 'Mobile', cell: (entry) => entry.entryType === 'VEHICLE' ? entry.driverMobile || '-' : entry.mobile || '-' },
         { key: 'purpose', header: 'Purpose', cell: (entry) => entry.purpose || '-' },
         { key: 'checkInAt', header: 'In Time', cell: (entry) => formatTime(entry.checkInAt), sortable: true },
@@ -125,11 +125,11 @@ export function SecurityReports() {
                 breadcrumbs={[{ label: 'Security' }, { label: 'Reports' }]}
                 action={(
                     <div className="flex flex-wrap gap-2">
-                        <button type="button" onClick={handlePrint} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50">
+                        <button type="button" onClick={handlePrint} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700 hover:bg-slate-50">
                             <Printer className="h-4 w-4" />
                             Print
                         </button>
-                        <button type="button" onClick={handleExportCsv} className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-primary-700">
+                        <button type="button" onClick={handleExportCsv} className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-primary-700">
                             <Download className="h-4 w-4" />
                             Export CSV
                         </button>
@@ -139,7 +139,7 @@ export function SecurityReports() {
 
             <section className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-end gap-3">
-                    <label className="flex flex-col gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                    <label className="flex flex-col gap-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">
                         Report Date
                         <input
                             type="date"
@@ -148,7 +148,7 @@ export function SecurityReports() {
                             className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-bold normal-case tracking-normal text-slate-700 outline-none focus:border-primary-400"
                         />
                     </label>
-                    <label className="flex flex-col gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                    <label className="flex flex-col gap-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">
                         Movement Type
                         <select
                             value={typeFilter}
@@ -167,8 +167,8 @@ export function SecurityReports() {
             <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-6">
                 {summary.map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </div>
                 ))}
             </div>

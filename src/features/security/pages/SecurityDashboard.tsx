@@ -61,7 +61,7 @@ export function SecurityDashboard() {
 
     const columns: Column<GateEntry>[] = [
         { key: 'entryType', header: 'Type', cell: entryTypeLabel, sortable: true },
-        { key: 'visitorName', header: 'Name / Ref', cell: (entry) => <span className="font-black text-slate-900">{entryName(entry)}</span>, sortable: true },
+        { key: 'visitorName', header: 'Name / Ref', cell: (entry) => <span className="font-extrabold text-slate-900">{entryName(entry)}</span>, sortable: true },
         { key: 'purpose', header: 'Purpose', cell: (entry) => entry.purpose || '-' },
         { key: 'checkInAt', header: 'Check In', cell: (entry) => formatTime(entry.checkInAt), sortable: true },
         { key: 'recordedBy', header: 'Recorded By', cell: (entry) => entry.recordedBy || '-' },
@@ -76,8 +76,8 @@ export function SecurityDashboard() {
                 breadcrumbs={[{ label: 'UNCF' }, { label: 'Security' }, { label: 'Dashboard' }]}
                 action={(
                     <div className="flex flex-wrap gap-2">
-                        <Link to="/security/gate-management" className="rounded-full bg-primary-600 px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-primary-700">Gate Entry</Link>
-                        <Link to="/security/entry-logs" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50">Entry Logs</Link>
+                        <Link to="/security/gate-management" className="rounded-full bg-primary-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm hover:bg-primary-700">Gate Entry</Link>
+                        <Link to="/security/entry-logs" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700 hover:bg-slate-50">Entry Logs</Link>
                     </div>
                 )}
             />
@@ -86,8 +86,8 @@ export function SecurityDashboard() {
                 {stats.map((item) => (
                     <Link key={item.label} to={item.href} className={`rounded-2xl border border-slate-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${item.tone}`}>
                         <item.icon className="mb-3 h-5 w-5" />
-                        <p className="text-2xl font-black">{item.value}</p>
-                        <p className="text-xs font-black uppercase tracking-wide">{item.label}</p>
+                        <p className="text-2xl font-extrabold">{item.value}</p>
+                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
                     </Link>
                 ))}
             </div>
@@ -95,8 +95,8 @@ export function SecurityDashboard() {
             <section className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <p className="text-xs font-black uppercase tracking-[0.2em] text-primary-600">Action Queue</p>
-                        <h2 className="text-xl font-black text-slate-950">Currently inside</h2>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary-600">Action Queue</p>
+                        <h2 className="text-xl font-extrabold text-slate-950">Currently inside</h2>
                         <p className="text-sm font-bold text-slate-500">Open movements that still need checkout.</p>
                     </div>
                     <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
@@ -110,7 +110,7 @@ export function SecurityDashboard() {
                                 key={value}
                                 type="button"
                                 onClick={() => setQueueType(value)}
-                                className={`rounded-lg px-3 py-1.5 text-xs font-black ${queueType === value ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-600'}`}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-extrabold ${queueType === value ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-600'}`}
                             >
                                 {label}
                             </button>
@@ -124,7 +124,7 @@ export function SecurityDashboard() {
                     isLoading={isLoading}
                     emptyStateMessage="No active gate movements waiting for checkout."
                     actions={(entry) => (
-                        <Link to={entry.entryType === 'STAFF' ? '/security/staff-register' : entry.entryType === 'VEHICLE' ? '/security/vehicle-register' : '/security/gate-management'} className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 hover:bg-primary-100">
+                        <Link to={entry.entryType === 'STAFF' ? '/security/staff-register' : entry.entryType === 'VEHICLE' ? '/security/vehicle-register' : '/security/gate-management'} className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 hover:bg-primary-100">
                             Open
                         </Link>
                     )}
@@ -137,7 +137,7 @@ export function SecurityDashboard() {
                     { label: 'Vehicle Register', href: '/security/vehicle-register' },
                     { label: 'Staff Register', href: '/security/staff-register' }
                 ].map((item) => (
-                    <Link key={item.href} to={item.href} className="rounded-2xl border border-slate-100 bg-white p-4 text-sm font-black text-slate-700 shadow-sm hover:bg-primary-50 hover:text-primary-700">
+                    <Link key={item.href} to={item.href} className="rounded-2xl border border-slate-100 bg-white p-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-primary-50 hover:text-primary-700">
                         <ClipboardList className="mb-3 h-5 w-5 text-primary-600" />
                         {item.label}
                     </Link>

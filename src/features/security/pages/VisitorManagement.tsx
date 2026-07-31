@@ -32,7 +32,7 @@ export function VisitorManagement() {
     }, [entries, searchQuery])
 
     const columns: Column<GateEntry>[] = [
-        { key: 'visitorName', header: 'Visitor', sortable: true, cell: (entry) => <span className="font-black text-slate-900">{entry.visitorName || '-'}</span> },
+        { key: 'visitorName', header: 'Visitor', sortable: true, cell: (entry) => <span className="font-extrabold text-slate-900">{entry.visitorName || '-'}</span> },
         { key: 'mobile', header: 'Mobile' },
         { key: 'purpose', header: 'Purpose' },
         { key: 'visitingPerson', header: 'Visiting', cell: (entry) => entry.visitingPerson || '-' },
@@ -62,7 +62,7 @@ export function VisitorManagement() {
                     <button
                         type="button"
                         onClick={() => setSelectedEntry(entry)}
-                        className="inline-flex items-center gap-1 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-black text-primary-700 hover:bg-primary-100"
+                        className="inline-flex items-center gap-1 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 hover:bg-primary-100"
                     >
                         <Eye className="h-3.5 w-3.5" />
                         View Pass
