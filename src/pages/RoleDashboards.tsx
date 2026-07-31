@@ -696,7 +696,7 @@ export function FinanceManagerDashboard() {
 }
 
 export function ElderCareAdminDashboard() {
-    const { data: inHouseAllocations = [], isLoading: isInHouseLoading } = useInHouseAllocations()
+    const { isLoading: isInHouseLoading } = useInHouseAllocations()
     const { data: stock = [], isLoading: isStockLoading } = useInventoryStock()
     const { data: approvalTasks = [], isLoading: isTaskLoading } = useApprovalTasks()
     const { data: uecAdminData, isLoading: isUecAdminLoading } = useUecAdminDashboard()
