@@ -1,437 +1,895 @@
-import { useState } from 'react'
-import { FileText, Smartphone } from 'lucide-react'
-import { PageHeader } from '../../../components/PageHeader';
+import { useState, useEffect } from "react";
+import { FileText, Smartphone } from "lucide-react";
+import { PageHeader } from "../../../components/PageHeader";
 // api import removed
-import html2pdf from 'html2pdf.js';
+import html2pdf from "html2pdf.js";
 
-const Field = ({ label, value, onChange, placeholder, type = 'text' }: any) => (
+const Field = ({ label, value, onChange, placeholder, type = "text" }: any) => (
+  <div>
+    <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">
+      {label}
+    </label>
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
+    />
+  </div>
+);
+
+const SubsidyField = ({ label, priceObj, onChange }: any) => {
+  const hasSubsidy = !!priceObj?.subsidy;
+  return (
     <div>
-        <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{label}</label>
-        <input
-            type={type}
-            placeholder={placeholder}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+      <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">
+        {label}
+      </label>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <input
+            type="number"
+            placeholder="Rate (₹)"
+            value={priceObj?.rate || ""}
+            onChange={(e) => onChange({ ...priceObj, rate: e.target.value })}
             className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
-        />
-    </div>
-)
-
-const SubsidyField = ({ label, priceObj, onChange }: any) => (
-    <div>
-        <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{label}</label>
-        <div className="flex gap-2">
-            <div className="flex-1">
-                <input
-                    type="number"
-                    placeholder="Price (₹)"
-                    value={priceObj?.price || ''}
-                    onChange={(e) => onChange({ ...priceObj, price: e.target.value })}
-                    className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
-                />
-            </div>
-            <div className="flex-1">
-                <input
-                    type="number"
-                    placeholder="Subsidy (₹)"
-                    value={priceObj?.subsidy || ''}
-                    onChange={(e) => onChange({ ...priceObj, subsidy: e.target.value })}
-                    className="h-10 w-full rounded-lg border border-orange-200 bg-orange-50 px-3 text-sm font-semibold text-orange-700 outline-none focus:border-orange-500 placeholder:text-orange-300"
-                />
-            </div>
+          />
         </div>
+        <div className="flex-1">
+          <input
+            type="number"
+            placeholder="Subsidy (₹)"
+            value={priceObj?.subsidy || ""}
+            onChange={(e) => onChange({ ...priceObj, subsidy: e.target.value })}
+            className={`h-10 w-full rounded-lg px-3 text-sm font-semibold outline-none transition-colors ${hasSubsidy ? "border-2 border-orange-500 bg-orange-100 text-orange-900 shadow-sm" : "border border-orange-200 bg-orange-50 text-orange-700 focus:border-orange-500 placeholder:text-orange-300"}`}
+          />
+        </div>
+      </div>
     </div>
-)
+  );
+};
 
 const Select = ({ label, value, onChange, options }: any) => (
-    <div>
-        <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{label}</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
-        >
-            <option value="">Select...</option>
-            {options.map((opt: string) => (
-                <option key={opt} value={opt}>{opt}</option>
-            ))}
-        </select>
-    </div>
-)
+  <div>
+    <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">
+      {label}
+    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
+    >
+      <option value="">Select...</option>
+      {options.map((opt: string) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
 const htmlEscape = (str: string | number) =>
-    String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+  String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 const invoiceMoney = (val: number | string | null | undefined) =>
-    Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  Number(val || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 export function PatientManualBilling() {
-    const [isSending, setIsSending] = useState(false)
-    const [billType, setBillType] = useState<'ELDER_CARE' | 'HOME_CARE'>('ELDER_CARE')
+  const [isSending, setIsSending] = useState(false);
+  const [billType, setBillType] = useState<"ELDER_CARE" | "HOME_CARE">(
+    "ELDER_CARE",
+  );
 
-    // Header Fields
-    const [patientName, setPatientName] = useState('')
-    const [patientAge, setPatientAge] = useState('')
-    const [patientSex, setPatientSex] = useState('')
-    const [patientDob, setPatientDob] = useState('')
-    const [patientId, setPatientId] = useState('')
+  // Header Fields
+  const [patientName, setPatientName] = useState("");
+  const [patientAge, setPatientAge] = useState("");
+  const [patientSex, setPatientSex] = useState("");
+  const [patientDob, setPatientDob] = useState("");
+  const [patientId, setPatientId] = useState("");
 
-    const [billId, setBillId] = useState('')
-    const [billingMonthYear, setBillingMonthYear] = useState('')
+  const [membershipPlan, setMembershipPlan] = useState("");
+  const [membershipCategory, setMembershipCategory] = useState("");
 
-    const [guardianName, setGuardianName] = useState('')
-    const [guardianContact, setGuardianContact] = useState('')
-    const [guardianAddress, setGuardianAddress] = useState('')
-    const [upiId, setUpiId] = useState('mab.037347029020081@axisbank')
+  const [billId, setBillId] = useState("");
+  const [billingMonthYear, setBillingMonthYear] = useState("");
+  const [billingFrequency, setBillingFrequency] = useState("Monthly");
+  const [billingDays, setBillingDays] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState("");
 
-    // Payment Info
-    const [paymentInfo, setPaymentInfo] = useState({
-        doneDate: '', receivedDate: '', mode: '', bankName: '', gpay: '', receivingMode: '', balanceAmount: '', balanceItem: ''
-    })
+  const [guardianName, setGuardianName] = useState("");
+  const [guardianContact, setGuardianContact] = useState("");
+  const [guardianAddress, setGuardianAddress] = useState("");
+  const [upiId, setUpiId] = useState("mab.037347029020081@axisbank");
 
-    // Core Elder Care Fields
-    const initField = (price?: any) => ({ price: String(price || ''), subsidy: '' });
-    const [balances, setBalances] = useState({
-        amount: initField(''), monthlyEssentials: initField(''), diapers: initField(''), gloves: initField(''), mask: initField(''), underpad: initField('')
-    })
+  // --- NEW 19-CATEGORY STATE ---
+  // 1. Care Staff Services
+  const [careStaff, setCareStaff] = useState({
+    careGiver: { shift: "", type: "", rate: "", subsidy: "" },
+    nursingCare: { shift: "", rate: "", subsidy: "" },
+    specialCare: { shift: "", rate: "", subsidy: "" },
+    palliativeCare: { type: "", rate: "", subsidy: "" },
+    dementiaCare: { type: "", rate: "", subsidy: "" },
+    alzheimersCare: { type: "", rate: "", subsidy: "" },
+    dressing: { qty: "", rate: "", subsidy: "" },
+    firstAid: { qty: "", rate: "", subsidy: "" },
+  });
 
-    const [additionalCharges, setAdditionalCharges] = useState({
-        previousPendingPayable: initField(''),
-        upcomingBedCharge: { include: 'NO', amount: initField('') }
-    })
+  // 2. Therapy & Consultation
+  const [therapy, setTherapy] = useState({
+    doctorVisit: { type: "", mode: "", rate: "", subsidy: "" },
+    physiotherapy: { sessionType: "", sessions: "", rate: "", subsidy: "" },
+    occupationalTherapy: {
+      sessionType: "",
+      sessions: "",
+      rate: "",
+      subsidy: "",
+    },
+    speechTherapy: { sessionType: "", sessions: "", rate: "", subsidy: "" },
+    geriatricCounseling: {
+      sessionType: "",
+      sessions: "",
+      rate: "",
+      subsidy: "",
+    },
+    psychiatricCounseling: {
+      sessionType: "",
+      sessions: "",
+      rate: "",
+      subsidy: "",
+    },
+    yoga: { sessionType: "", sessions: "", rate: "", subsidy: "" },
+  });
 
-    const [elderCore, setElderCore] = useState({
-        roomSharing: '', billSelection: '', monthlyBedCharge: initField(''), amount: initField(''), laundry: initField('1800'), eb: initField('700'), hospitalVisit: initField(''), ambulance: initField(''), doctorCheckup: initField('500'), physiotherapy: initField(''), counseling: initField(''), occupational: initField(''), speech: initField(''), nursing: initField(''), caregiverDay: initField(''), caregiverNight: initField(''), dressing: initField(''), firstAid: initField(''), specialCare: initField(''), gas: initField('1000')
-    })
+  // 3. Medical Support
+  const [medicalSupport, setMedicalSupport] = useState({
+    medicines: [{ id: Date.now(), name: "", qty: "", rate: "", subsidy: "" }],
+    labTests: [{ id: Date.now(), name: "", qty: "", rate: "", subsidy: "" }],
+    icuAtHome: { duration: "", rate: "", subsidy: "" },
+    surgicalEquipment: [
+      { id: Date.now(), name: "", qty: "", type: "", rate: "", subsidy: "" },
+    ],
+  });
 
-    const [attender, setAttender] = useState({ shift: '', price: '', subsidy: '' })
-    const [outsideAttender, setOutsideAttender] = useState({ shift: '', price: '', subsidy: '' })
+  // 4. Transportation
+  const [transportation, setTransportation] = useState({
+    ambulance: { type: "", oxygen: "", trips: "", rate: "", subsidy: "" },
+    taxi: { distance: "", trips: "", rate: "" },
+    auto: { distance: "", trips: "", rate: "" },
+    seniorCab: { distance: "", trips: "", rate: "" },
+  });
 
-    // Medical Products (Complex Logic)
-    const [medical, setMedical] = useState({
-        medicines: { count: '', baseAmount: '100', subsidy: '' },
-        diapers: { qty: '', rate: '70', disposal: '', subsidy: '' },
-        gloves: { qty: '', rate: '75', disposal: '', subsidy: '' },
-        mask: { qty: '', rate: '4', disposal: '', subsidy: '' },
-        underpad: { qty: '', rate: '60', disposal: '', subsidy: '' },
-        rubbersheet: { qty: '', rate: '700', disposal: '', subsidy: '' },
-        readymade: { qty: '', rate: '1500', disposal: '', subsidy: '' },
-        uroBag: { price: '', subsidy: '' },
-        catheter: { price: '', subsidy: '' },
-        labTest: { price: '', subsidy: '' }
-    })
+  // 5. Personal & Lifestyle Services
+  const [lifestyle, setLifestyle] = useState({
+    beauty: { service: "", rate: "600", subsidy: "" },
+    legal: { consultation: "", documentation: "", other: "" },
+    pooja: { templeVisit: "", homePooja: "", specialEvent: "" },
+    tours: { pilgrimage: "", outing: "", tourism: "" },
+    rendering: {
+      temple: "",
+      bank: "",
+      shopping: "",
+      hospital: "",
+      movie: "",
+      food: "",
+      other: "",
+    },
+    essentialsService: {
+      plumbing: "",
+      electrical: "",
+      civil: "",
+      cctv: "",
+      carpentry: "",
+      welding: "",
+      other: "",
+    },
+  });
 
-    // Food
-    const [food, setFood] = useState({
-        milk: initField('500'), juice: initField(''), snacks: initField('300'), herbalDrinks: initField('200')
-    })
+  // 6. Accommodation
+  const [accommodation, setAccommodation] = useState({
+    bedCharges: { stayType: "", roomSharing: "", rate: "", subsidy: "" },
+    upcomingBedCharge: {
+      enable: "NO",
+      stayType: "",
+      roomSharing: "",
+      rate: "",
+      subsidy: "",
+    },
+  });
 
-    // Consumables & Services
-    const [consumables, setConsumables] = useState({
-        newDress: initField(''), towel: initField(''), bedsheets: initField(''), bedspread: initField(''), newDressStitching: initField(''), oldDressStitching: initField(''), allOut: initField('300'), tv: initField(''), breakage: initField(''), cleaning: initField(''), windingUp: initField(''), beauty: initField('600'), monthlyEssentials: initField(''), cylinder: initField('')
-    })
-
-    // Totals & Subsidies
-    const [totals, setTotals] = useState({
-        lateFee: '', lateMaterialFee: '', uncfSubsidyAmount: '0', uncfSubsidiaryItems: '', totalReversibleItems: ''
-    })
-
-    // Home Care Fields
-    const [homeFields, setHomeFields] = useState<Record<string, { rs: string; qty?: string; subsidy?: string }>>({
-        'Monthly Membership options (1/2/3)': { rs: '' },
-        'Homecare services': { rs: '' },
-        'Care giver shift (Partial/day/night/24*7)': { rs: '' },
-        'Nursing care (Partial/day/night/24*7)': { rs: '' },
-        'Lab test': { rs: '' },
-        'Transport ambulance or taxi': { rs: '' },
-        'Physiotherapy': { rs: '' },
-        'Counseling': { rs: '' },
-        'Beauty services': { rs: '' },
-        'Legal services': { rs: '' },
-        'Rendering services': { rs: '' },
-        'Yoga': { rs: '' },
-        'Surgical Equipments': { rs: '' },
-        'Doctor (General or Speciality)': { rs: '' },
-        'Pooja services': { rs: '' },
-        'LATE FEE': { rs: '' },
-        'UNCF Subsidy': { rs: '0' }
-    })
-
-    // Calculators
-    const calcMedTotal = (key: keyof typeof medical) => {
-        const item = medical[key] as any
-        if (key === 'medicines') {
-            return (parseFloat(item.count) || 0) + (parseFloat(item.baseAmount) || 0)
-        }
-        if ('qty' in item && 'rate' in item && 'disposal' in item) {
-            return ((parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0)) + (parseFloat(item.disposal) || 0)
-        }
-        return parseFloat(item.price) || 0
-    }
-
-
-    const calculateTotals = () => {
-        let grossTotal = 0;
-        let totalSubsidy = 0;
-
-        if (billType === 'ELDER_CARE') {
-            // Helper to add from an object
-            const addFromObj = (obj: any) => {
-                Object.values(obj).forEach(val => {
-                    if (typeof val === 'object' && val !== null) {
-                        grossTotal += (parseFloat((val as any).price) || 0);
-                        totalSubsidy += (parseFloat((val as any).subsidy) || 0);
-                    } else if (typeof val === 'string' || typeof val === 'number') {
-                        // Some fields might just be strings
-                        grossTotal += (parseFloat(String(val)) || 0);
-                    }
-                });
-            };
-
-            addFromObj(balances);
-            addFromObj(elderCore);
-            addFromObj({ prev: additionalCharges.previousPendingPayable });
-            if (additionalCharges.upcomingBedCharge.include === 'YES') {
-                addFromObj({ upcoming: additionalCharges.upcomingBedCharge.amount })
-            }
-            grossTotal += parseFloat(attender.price) || 0;
-            grossTotal += parseFloat(outsideAttender.price) || 0;
-
-            // Medical
-            Object.keys(medical).forEach(k => {
-                const item = medical[k as keyof typeof medical] as any;
-                if (k === 'medicines') {
-                    grossTotal += (parseFloat(item.count) || 0) + (parseFloat(item.baseAmount) || 0);
-                    totalSubsidy += (parseFloat(item.subsidy) || 0);
-                } else if ('qty' in item && 'rate' in item && 'disposal' in item) {
-                    grossTotal += ((parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0)) + (parseFloat(item.disposal) || 0);
-                    totalSubsidy += (parseFloat(item.subsidy) || 0);
-                } else {
-                    grossTotal += parseFloat(item.price) || 0;
-                    totalSubsidy += parseFloat(item.subsidy) || 0;
-                }
-            });
-
-            addFromObj(food);
-            addFromObj(consumables);
-
-            grossTotal += parseFloat(totals.lateFee) || 0;
-            grossTotal += parseFloat(totals.lateMaterialFee) || 0;
-            // Also include UNCF global subsidy amount
-            totalSubsidy += parseFloat(totals.uncfSubsidyAmount) || 0;
-
-        } else {
-            Object.keys(homeFields).forEach((key) => {
-                if (key !== 'UNCF Subsidy') {
-                    grossTotal += parseFloat(String(homeFields[key].rs).replace(/[^0-9.]/g, '')) || 0;
-                }
-            });
-            totalSubsidy += parseFloat(String(homeFields['UNCF Subsidy']?.rs || '').replace(/[^0-9.]/g, '')) || 0;
-        }
-
-        return {
-            grossTotal,
-            totalSubsidy,
-            netPayable: grossTotal - totalSubsidy
-        };
+  useEffect(() => {
+    const getRate = (stayType: string, roomSharing: string) => {
+      if (stayType === "Short-Term Stay") {
+        if (roomSharing === "Single Sharing") return "3500";
+        if (roomSharing === "Double Sharing") return "2500";
+        if (roomSharing === "Four Sharing") return "1500";
+      } else if (stayType === "Long-Term Stay") {
+        if (roomSharing === "Single Sharing") return "45000";
+        if (roomSharing === "Double Sharing") return "35000";
+        if (roomSharing === "Four Sharing") return "25000";
+      }
+      return accommodation.bedCharges.rate || "";
     };
 
-    const { grossTotal: totalAmount, totalSubsidy: subsidy, netPayable: totalPayable } = calculateTotals();
+    const newRate = getRate(
+      accommodation.bedCharges.stayType,
+      accommodation.bedCharges.roomSharing,
+    );
+    if (newRate !== accommodation.bedCharges.rate) {
+      setAccommodation((prev) => ({
+        ...prev,
+        bedCharges: { ...prev.bedCharges, rate: newRate },
+      }));
+    }
+  }, [accommodation.bedCharges.stayType, accommodation.bedCharges.roomSharing]);
 
-    const generateHtml = () => {
-        const generatedAt = new Date()
-        const totalsCalculated = calculateTotals()
-        const currentMonthName = billingMonthYear || `${generatedAt.toLocaleString('default', { month: 'long' })} - ${generatedAt.getFullYear()}`
-        
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        let nextMonthName = 'Upcoming Month'
-        if (currentMonthName) {
-            const lower = currentMonthName.toLowerCase()
-            const foundIdx = months.findIndex(m => lower.includes(m.toLowerCase()))
-            if (foundIdx !== -1) {
-                nextMonthName = months[(foundIdx + 1) % 12]
-            }
+  // 7. Laundry & Utility
+  const [utility, setUtility] = useState({
+    laundry: [{ id: Date.now(), type: "", qty: "", rate: "", subsidy: "" }],
+    electricity: { units: "", rate: "700", subsidy: "" },
+    gas: { cylinder: "", qty: "", rate: "1000" },
+    tvAndMosquito: { rate: "300", subsidy: "" },
+    cleaning: { type: "", rate: "" },
+    windingUpCleaning: { rate: "" },
+    breakage: { itemName: "", qty: "", rate: "" },
+  });
+
+  // 8. Food & Nutrition
+  const [food, setFood] = useState({
+    milk: { qty: "", rate: "500", subsidy: "" },
+    juice: { qty: "", rate: "" },
+    snacks: { qty: "", rate: "300" },
+    herbalDrinks: { qty: "", rate: "200" },
+  });
+
+  // 9. Linen & Personal Items
+  const [linen, setLinen] = useState({
+    newDress: { qty: "", rate: "", subsidy: "" },
+    newTowel: { qty: "", rate: "", subsidy: "" },
+    newBedspread: { qty: "", rate: "", subsidy: "" },
+    newBlanket: { qty: "", rate: "", subsidy: "" },
+    newPillowCover: { qty: "", rate: "", subsidy: "" },
+    newAirbed: { qty: "", rate: "", subsidy: "" },
+    stitching: { qty: "", rate: "", subsidy: "" },
+  });
+
+  // 10. Medical Consumables
+  const [medicalConsumables, setMedicalConsumables] = useState({
+    diapers: { qty: "", rate: "70", subsidy: "" },
+    gloves: { qty: "", rate: "7.50", subsidy: "" },
+    mask: { qty: "", rate: "4", subsidy: "" },
+    underPad: { qty: "", rate: "60", subsidy: "" },
+    bedWipes: { qty: "", rate: "", subsidy: "" },
+    catheter: { qty: "", rate: "", subsidy: "" },
+    uroBag: { qty: "", rate: "", subsidy: "" },
+    rubberSheet: { qty: "", rate: "", subsidy: "" },
+    oxygen: { qty: "", rate: "", subsidy: "" },
+    nebulizer: { qty: "", rate: "", subsidy: "" },
+  });
+
+  // 11. Monthly Essentials
+  const [monthlyEssentials, setMonthlyEssentials] = useState({
+    availPackage: "NO",
+    toothpaste: { qty: "", status: "Pending" },
+    toothbrush: { qty: "", status: "Pending" },
+    bathSoap: { qty: "", status: "Pending" },
+    talcumPowder: { qty: "", status: "Pending" },
+    vibhoothi: { qty: "", status: "Pending" },
+    coconutOil: { qty: "", status: "Pending" },
+    washingPowder: { qty: "", status: "Pending" },
+    fabricFreshener: { qty: "", status: "Pending" },
+    dettol: { qty: "", status: "Pending" },
+    sanitiser: { qty: "", status: "Pending" },
+  });
+
+  // 12. Material Receipt
+  const [materialReceipt, setMaterialReceipt] = useState({
+    receivedDate: "",
+    receivedMode: "Self",
+    diapers: { qty: "" },
+    gloves: { qty: "" },
+    mask: { qty: "" },
+    underPad: { qty: "" },
+    rubberSheet: { qty: "" },
+    medicine: { qty: "" },
+  });
+
+  // 13. Balance Summary
+  const [balanceSummary, setBalanceSummary] = useState({
+    balanceAmount: "",
+    monthlyEssentials: "",
+    diapers: "",
+    gloves: "",
+    mask: "",
+    underPad: "",
+    rubberSheet: "",
+  });
+
+  // 14. Billing Summary & 16. Payment Details
+  const [billingSummary, setBillingSummary] = useState({
+    previousPending: "",
+    lateFee: "",
+    lateMaterialFee: "",
+    paymentDate: "",
+    paymentMode: "",
+    upiApp: "",
+    paidAmount: "",
+    transactionId: "",
+    bankName: "",
+    remarks: "",
+  });
+
+  // 15. Material Dispatch
+  const [materialDispatch, setMaterialDispatch] = useState({
+    diapers: { qty: "" },
+    gloves: { qty: "" },
+    mask: { qty: "" },
+    underPad: { qty: "" },
+    rubberSheet: { qty: "" },
+  });
+
+  // 17. Problem & Resolution
+  const [problemResolution, setProblemResolution] = useState({
+    reportedBy: "",
+    category: "",
+    details: "",
+    resolution: "",
+    resolutionDate: "",
+    status: "",
+  });
+
+  // 18. Feedback & Grievance
+  const [feedback, setFeedback] = useState({
+    feedback: "",
+    rating: "",
+    complaint: "",
+    followUp: "",
+    remarks: "",
+  });
+
+  // 19. Payment Instructions (Config)
+  const [paymentInstructions, setPaymentInstructions] = useState({
+    qr: "",
+    upiId: "",
+    accountName: "",
+    accountNumber: "",
+    ifsc: "",
+    bankName: "",
+    screenshot: "",
+    ref: "",
+    tnc: "",
+  });
+
+  // HOME CARE FIELDS
+  const [homeFields, setHomeFields] = useState<any>({
+    "Monthly Membership": { rs: "" },
+    "Half-Yearly Membership": { rs: "" },
+    "Annual Membership": { rs: "" },
+    "Silver Membership": { rs: "" },
+    "Gold Membership": { rs: "" },
+    "Platinum Membership": { rs: "" },
+    "Home Nursing": { rs: "" },
+    Caregiver: { rs: "" },
+    "Doctor Visit": { rs: "" },
+    Physiotherapy: { rs: "" },
+    "Occupational Therapy": { rs: "" },
+    "Speech Therapy": { rs: "" },
+    Counseling: { rs: "" },
+    Yoga: { rs: "" },
+    "Palliative Care": { rs: "" },
+    "Dementia Care": { rs: "" },
+    "Alzheimer's Care": { rs: "" },
+    "Lab Tests": { rs: "" },
+    "Medicine Delivery": { rs: "" },
+    Transport: { rs: "" },
+    Ambulance: { rs: "" },
+    "Beauty Service": { rs: "" },
+    "Legal Service": { rs: "" },
+    "Pooja Service": { rs: "" },
+    "Tours & Travels": { rs: "" },
+    "Rendering Service": { rs: "" },
+    "Essentials Service": { rs: "" },
+    "LATE FEE": { rs: "" },
+    "UNCF Subsidy": { rs: "0" },
+  });
+
+  // Calculators
+  const calcQtyRate = (item: any) => {
+    if (!item || !item.rate) return { price: 0, subsidy: 0 };
+    const q = parseFloat(item.qty) || 1;
+    const r = parseFloat(item.rate) || 0;
+    const d = parseFloat(item.disposalCharge) || 0;
+    const s = parseFloat(item.subsidy) || 0;
+    return { price: q * r + d, subsidy: s };
+  };
+
+  const calcFlat = (item: any) => {
+    if (!item || !item.rate) return { price: 0, subsidy: 0 };
+    const r = parseFloat(item.rate) || 0;
+    const s = parseFloat(item.subsidy) || 0;
+
+    let multiplier = 1;
+    if (billingFrequency === "Daily") {
+      multiplier = parseInt(billingDays) || 0;
+    }
+    return { price: r * multiplier, subsidy: s * multiplier };
+  };
+
+  const calculateTotals = () => {
+    let grossTotal = 0;
+    let totalSubsidy = 0;
+
+    if (billType === "ELDER_CARE") {
+      const add = (val: any) => {
+        if (val && val.price !== undefined) {
+          grossTotal += parseFloat(val.price) || 0;
+          totalSubsidy += parseFloat(val.subsidy) || 0;
         }
+      };
 
-        const accountHolder = 'Universal Elder Care'
-        const upi = upiId || 'universaleldercare@upi'
-        const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=MonthlyPatientInvoice`
-        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`
-        const logoSrc = `${window.location.origin}/logo-uec.png`
+      // 1. Care Staff
+      add(calcFlat(careStaff.careGiver));
+      add(calcFlat(careStaff.nursingCare));
+      add(calcFlat(careStaff.specialCare));
+      add(calcFlat(careStaff.palliativeCare));
+      add(calcFlat(careStaff.dementiaCare));
+      add(calcFlat(careStaff.alzheimersCare));
+      add(calcQtyRate(careStaff.dressing));
+      add(calcQtyRate(careStaff.firstAid));
 
-        const isValid = (v: any) => {
-            let val = v;
-            if (typeof v === 'object' && v !== null) {
-                val = v.price !== undefined ? v.price : v.rs;
-            }
-            if (val === null || val === undefined) return false;
-            const str = String(val).trim().toLowerCase();
-            if (str === '' || str === '0' || str === '00rs' || str === '0rs' || str === '00') return false;
-            return true;
+      // 2. Therapy
+      Object.values(therapy).forEach((v) => add(calcFlat(v)));
+
+      // 3. Medical Support
+      medicalSupport.medicines.forEach((m) => add(calcQtyRate(m)));
+      medicalSupport.labTests.forEach((l) => add(calcQtyRate(l)));
+      add(calcFlat(medicalSupport.icuAtHome));
+      medicalSupport.surgicalEquipment.forEach((s) => add(calcQtyRate(s)));
+
+      // 4. Transportation
+      add(calcFlat(transportation.ambulance));
+      add(calcFlat(transportation.taxi));
+      add(calcFlat(transportation.auto));
+      add(calcFlat(transportation.seniorCab));
+
+      // 5. Lifestyle
+      add(calcFlat(lifestyle.beauty));
+
+      // 6. Accommodation
+      add(calcFlat(accommodation.bedCharges));
+      if (accommodation.upcomingBedCharge.enable === "YES") {
+        add(calcFlat(accommodation.upcomingBedCharge));
+      }
+
+      // 7. Utility
+      utility.laundry.forEach((l) => add(calcQtyRate(l)));
+      add(calcFlat(utility.electricity));
+      add(calcFlat(utility.tvAndMosquito));
+      add(calcFlat(utility.gas));
+      add(calcFlat(utility.cleaning));
+      add(calcFlat(utility.windingUpCleaning));
+
+      // 8. Food
+      add(calcQtyRate(food.milk));
+
+      // 9. Linen
+      Object.values(linen).forEach((v) => add(calcQtyRate(v)));
+
+      // 10. Consumables
+      Object.values(medicalConsumables).forEach((v) => add(calcQtyRate(v)));
+
+      // 11. Monthly Essentials Package
+      if (monthlyEssentials.availPackage === "YES") {
+        grossTotal += 1000;
+      }
+
+      // 14. Billing Summary (Late fees)
+      grossTotal += parseFloat(billingSummary.lateFee) || 0;
+      grossTotal += parseFloat(billingSummary.lateMaterialFee) || 0;
+      grossTotal += parseFloat(billingSummary.previousPending) || 0;
+    } else {
+      Object.keys(homeFields).forEach((key) => {
+        if (key !== "UNCF Subsidy") {
+          grossTotal +=
+            parseFloat(String(homeFields[key].rs).replace(/[^0-9.]/g, "")) || 0;
         }
+      });
+      totalSubsidy +=
+        parseFloat(
+          String(homeFields["UNCF Subsidy"]?.rs || "").replace(/[^0-9.]/g, ""),
+        ) || 0;
+    }
 
-        const renderRow = (desc: string, amount: any) => {
-            if (!isValid(amount)) return '';
-            let priceVal = amount;
-            let subVal = 0;
-            if (typeof amount === 'object' && amount !== null) {
-                priceVal = amount.price !== undefined ? amount.price : amount.rs;
-                subVal = amount.subsidy;
-            }
-            const price = parseFloat(String(priceVal)) || 0;
-            const subsidy = parseFloat(String(subVal)) || 0;
-            const payable = price - subsidy;
-            return `
+    return { grossTotal, totalSubsidy, netPayable: grossTotal - totalSubsidy };
+  };
+
+  const {
+    grossTotal: totalAmount,
+    totalSubsidy: subsidy,
+    netPayable: totalPayable,
+  } = calculateTotals();
+
+  const generateHtml = () => {
+    const generatedAt = new Date();
+    const totalsCalculated = calculateTotals();
+    const currentMonthName =
+      billingMonthYear ||
+      `${generatedAt.toLocaleString("default", { month: "long" })} - ${generatedAt.getFullYear()}`;
+
+    const accountHolder =
+      paymentInstructions.accountName || "Universal Elder Care";
+    const upi = upiId || paymentInstructions.upiId || "universaleldercare@upi";
+    const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${totalPayable.toFixed(2)}&cu=INR&tn=MonthlyPatientInvoice`;
+    const qrSrc =
+      paymentInstructions.qr ||
+      `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+    const logoSrc = `${window.location.origin}/logo-uec.png`;
+
+    const isValid = (priceObj: any) => {
+      if (!priceObj) return false;
+      const p = parseFloat(priceObj.price) || 0;
+      return p > 0;
+    };
+
+    const renderRow = (desc: string, priceObj: any) => {
+      if (!isValid(priceObj)) return "";
+      const price = parseFloat(priceObj.price) || 0;
+      const sub = parseFloat(priceObj.subsidy) || 0;
+      const payable = price - sub;
+      return `
                 <tr>
                     <td>${htmlEscape(desc)}</td>
                     <td class="text-right">Rs ${invoiceMoney(price)}</td>
-                    <td class="text-right">Rs ${invoiceMoney(subsidy)}</td>
+                    <td class="text-right">Rs ${invoiceMoney(sub)}</td>
                     <td class="text-right">Rs ${invoiceMoney(payable)}</td>
                 </tr>
             `;
-        }
+    };
 
-        const renderSection = (title: string, rowsHtml: string) => {
-            if (!rowsHtml.trim()) return '';
-            return `
+    const renderSection = (title: string, rowsHtml: string) => {
+      if (!rowsHtml.trim()) return "";
+      return `
                 <tr class="section-header">
-                    <td colspan="2">${htmlEscape(title)}</td>
+                    <td colspan="4">${htmlEscape(title)}</td>
                 </tr>
                 ${rowsHtml}
             `;
-        }
+    };
 
-        let elderRows = '';
+    let elderRows = "";
 
-        // BALANCE SUMMARY
-        let balanceRows = '';
-        balanceRows += renderRow('Balance Amount (Rs)', balances.amount)
-        balanceRows += renderRow('Monthly Essentials Balance (Rs)', balances.monthlyEssentials)
-        balanceRows += renderRow('Diapers Balance (Rs / No.)', balances.diapers)
-        balanceRows += renderRow('Gloves Balance (Rs / No.)', balances.gloves)
-        balanceRows += renderRow('Mask Balance (Rs / No.)', balances.mask)
-        balanceRows += renderRow('Under Pad Balance (Rs / No.)', balances.underpad)
-        if (balanceRows && billType === 'ELDER_CARE') {
-            elderRows += renderSection('BALANCE SUMMARY (CARRIED FORWARD)', balanceRows)
-        }
+    // 1. Care Staff
+    let careRows = "";
+    careRows += renderRow(
+      `Care Giver (${careStaff.careGiver.shift || "Shift"})`,
+      calcFlat(careStaff.careGiver),
+    );
+    careRows += renderRow(
+      `Nursing Care (${careStaff.nursingCare.shift || "Shift"})`,
+      calcFlat(careStaff.nursingCare),
+    );
+    careRows += renderRow(
+      `Special Care (${careStaff.specialCare.shift || "Shift"})`,
+      calcFlat(careStaff.specialCare),
+    );
+    careRows += renderRow(
+      "Palliative Care",
+      calcFlat(careStaff.palliativeCare),
+    );
+    careRows += renderRow("Dementia Care", calcFlat(careStaff.dementiaCare));
+    careRows += renderRow(
+      "Alzheimer's Care",
+      calcFlat(careStaff.alzheimersCare),
+    );
+    careRows += renderRow(
+      `Dressing (Qty: ${careStaff.dressing.qty || 1})`,
+      calcQtyRate(careStaff.dressing),
+    );
+    careRows += renderRow(
+      `First Aid (Qty: ${careStaff.firstAid.qty || 1})`,
+      calcQtyRate(careStaff.firstAid),
+    );
+    elderRows += renderSection("1. CARE STAFF SERVICES", careRows);
 
+    // 2. Therapy
+    let therapyRows = "";
+    therapyRows += renderRow("Doctor Visit", calcFlat(therapy.doctorVisit));
+    therapyRows += renderRow("Physiotherapy", calcFlat(therapy.physiotherapy));
+    therapyRows += renderRow(
+      "Occupational Therapy",
+      calcFlat(therapy.occupationalTherapy),
+    );
+    therapyRows += renderRow("Speech Therapy", calcFlat(therapy.speechTherapy));
+    therapyRows += renderRow(
+      "Geriatric Counseling",
+      calcFlat(therapy.geriatricCounseling),
+    );
+    therapyRows += renderRow(
+      "Psychiatric Counseling",
+      calcFlat(therapy.psychiatricCounseling),
+    );
+    therapyRows += renderRow("Yoga", calcFlat(therapy.yoga));
+    elderRows += renderSection("2. THERAPY & CONSULTATION", therapyRows);
 
-        // CORE
-        let coreRows = '';
-        coreRows += renderRow('Monthly Bed Charge', elderCore.monthlyBedCharge)
-        // Balance Amount moved to balances section
-        coreRows += renderRow('Room Sharing', elderCore.roomSharing)
-        coreRows += renderRow('Bill Selection', elderCore.billSelection)
-        coreRows += renderRow('Laundry', elderCore.laundry)
-        coreRows += renderRow('EB', elderCore.eb)
-        coreRows += renderRow('Hospital Visit', elderCore.hospitalVisit)
-        coreRows += renderRow('Ambulance / Transport', elderCore.ambulance)
-        coreRows += renderRow('Doctor Check up', elderCore.doctorCheckup)
-        coreRows += renderRow('Physiotherapy', elderCore.physiotherapy)
-        coreRows += renderRow('Counseling', elderCore.counseling)
-        coreRows += renderRow('Occupational Therapy', elderCore.occupational)
-        coreRows += renderRow('Speech Therapy', elderCore.speech)
-        coreRows += renderRow('Nursing', elderCore.nursing)
-        coreRows += renderRow('Caregiver Day', elderCore.caregiverDay)
-        coreRows += renderRow('Caregiver Night', elderCore.caregiverNight)
-        if (isValid(attender.price)) coreRows += renderRow(`Attender (${attender.shift || 'Shift'})`, attender.price)
-        if (isValid(outsideAttender.price)) coreRows += renderRow(`Outside Attender (${outsideAttender.shift || 'Shift'})`, outsideAttender.price)
-        coreRows += renderRow('Dressing', elderCore.dressing)
-        coreRows += renderRow('First Aid', elderCore.firstAid)
-        coreRows += renderRow('Special Care', elderCore.specialCare)
-        coreRows += renderRow('Gas', elderCore.gas)
-        elderRows += renderSection('CORE ITEMS & SERVICES', coreRows)
+    // 3. Medical Support
+    let medRows = "";
+    medicalSupport.medicines.forEach(
+      (m: any) =>
+        (medRows += renderRow(
+          `Medicine: ${m.name} (Qty: ${m.qty || 1})`,
+          calcQtyRate(m),
+        )),
+    );
+    medicalSupport.labTests.forEach(
+      (l: any) =>
+        (medRows += renderRow(
+          `Lab Test: ${l.name} (Qty: ${l.qty || 1})`,
+          calcQtyRate(l),
+        )),
+    );
+    medRows += renderRow("ICU at Home", calcFlat(medicalSupport.icuAtHome));
+    medicalSupport.surgicalEquipment.forEach(
+      (s: any) =>
+        (medRows += renderRow(
+          `Surgical Eq: ${s.name} (Qty: ${s.qty || 1})`,
+          calcQtyRate(s),
+        )),
+    );
+    elderRows += renderSection("3. MEDICAL SUPPORT", medRows);
 
-        // PREVIOUS PAYABLE AMOUNT
-        let additionalRows = '';
-        additionalRows += renderRow('Previous Pending Payable Amount', additionalCharges.previousPendingPayable)
-        if (additionalCharges.upcomingBedCharge.include === 'YES') {
-            additionalRows += renderRow(`${nextMonthName} Bed Charge`, additionalCharges.upcomingBedCharge.amount)
-        }
-        if (additionalRows && billType === 'ELDER_CARE') {
-            elderRows += renderSection('PREVIOUS PAYABLE AMOUNT', additionalRows)
-        }
+    // 4. Transportation
+    let transportRows = "";
+    transportRows += renderRow("Ambulance", calcFlat(transportation.ambulance));
+    transportRows += renderRow("Taxi", calcFlat(transportation.taxi));
+    transportRows += renderRow("Auto", calcFlat(transportation.auto));
+    transportRows += renderRow(
+      "Senior Friendly Cab",
+      calcFlat(transportation.seniorCab),
+    );
+    elderRows += renderSection("4. TRANSPORTATION", transportRows);
 
-        // MEDICAL
-        let medRows = '';
-        const medVal = calcMedTotal('medicines');
-        if (medVal > 100) medRows += renderRow(`Medicines/Tablets (Qty: ${medical.medicines.count || 0})`, medVal);
+    // 5. Lifestyle
+    let lifeRows = "";
+    lifeRows += renderRow("Beauty Service", calcFlat(lifestyle.beauty));
+    elderRows += renderSection("5. PERSONAL & LIFESTYLE SERVICES", lifeRows);
 
-        ['diapers', 'gloves', 'mask', 'underpad', 'rubbersheet', 'readymade'].forEach((k) => {
-            const item = medical[k as keyof typeof medical] as any;
-            const val = calcMedTotal(k as keyof typeof medical);
-            if (val > 0) {
-                medRows += renderRow(`${k.charAt(0).toUpperCase() + k.slice(1)} (Qty: ${item.qty || 0})`, val);
-            }
+    // 6. Accommodation
+    let accRows = "";
+    accRows += renderRow("Bed Charges", calcFlat(accommodation.bedCharges));
+    if (accommodation.upcomingBedCharge.enable === "YES") {
+      accRows += renderRow(
+        "Upcoming Month Bed Charge",
+        calcFlat(accommodation.upcomingBedCharge),
+      );
+    }
+    elderRows += renderSection("6. ACCOMMODATION", accRows);
+
+    // 7. Utility
+    let utilRows = "";
+    utility.laundry.forEach(
+      (l: any) =>
+        (utilRows += renderRow(
+          `Laundry (${l.type || "Item"})`,
+          calcQtyRate(l),
+        )),
+    );
+    utilRows += renderRow("Electricity", calcFlat(utility.electricity));
+    utilRows += renderRow("Cleaning", calcFlat(utility.cleaning));
+    utilRows += renderRow(
+      "Winding-up Cleaning",
+      calcFlat(utility.windingUpCleaning),
+    );
+    elderRows += renderSection("7. LAUNDRY & UTILITY", utilRows);
+
+    // 8. Food
+    let foodRows = "";
+    foodRows += renderRow(
+      `Milk (Qty: ${food.milk.qty || 1})`,
+      calcQtyRate(food.milk),
+    );
+    elderRows += renderSection("8. FOOD & NUTRITION", foodRows);
+
+    // 9. Linen
+    let linenRows = "";
+    linenRows += renderRow(
+      `New Dress (Qty: ${linen.newDress.qty || 1})`,
+      calcQtyRate(linen.newDress),
+    );
+    linenRows += renderRow(
+      `New Towel (Qty: ${linen.newTowel.qty || 1})`,
+      calcQtyRate(linen.newTowel),
+    );
+    linenRows += renderRow(
+      `New Bedspread (Qty: ${linen.newBedspread.qty || 1})`,
+      calcQtyRate(linen.newBedspread),
+    );
+    linenRows += renderRow(
+      `New Blanket (Qty: ${linen.newBlanket.qty || 1})`,
+      calcQtyRate(linen.newBlanket),
+    );
+    linenRows += renderRow(
+      `New Pillow Cover (Qty: ${linen.newPillowCover.qty || 1})`,
+      calcQtyRate(linen.newPillowCover),
+    );
+    linenRows += renderRow(
+      `New Airbed (Qty: ${linen.newAirbed.qty || 1})`,
+      calcQtyRate(linen.newAirbed),
+    );
+    linenRows += renderRow(
+      `Stitching (Qty: ${linen.stitching.qty || 1})`,
+      calcQtyRate(linen.stitching),
+    );
+    elderRows += renderSection("9. LINEN & PERSONAL ITEMS", linenRows);
+
+    // 10. Consumables
+    let consRows = "";
+    consRows += renderRow(
+      `Diapers (Qty: ${medicalConsumables.diapers.qty || 1})`,
+      calcQtyRate(medicalConsumables.diapers),
+    );
+    consRows += renderRow(
+      `Gloves (Qty: ${medicalConsumables.gloves.qty || 1})`,
+      calcQtyRate(medicalConsumables.gloves),
+    );
+    consRows += renderRow(
+      `Mask (Qty: ${medicalConsumables.mask.qty || 1})`,
+      calcQtyRate(medicalConsumables.mask),
+    );
+    consRows += renderRow(
+      `Under Pad (Qty: ${medicalConsumables.underPad.qty || 1})`,
+      calcQtyRate(medicalConsumables.underPad),
+    );
+    consRows += renderRow(
+      `Bed Wipes (Qty: ${medicalConsumables.bedWipes.qty || 1})`,
+      calcQtyRate(medicalConsumables.bedWipes),
+    );
+    consRows += renderRow(
+      `Catheter (Qty: ${medicalConsumables.catheter.qty || 1})`,
+      calcQtyRate(medicalConsumables.catheter),
+    );
+    consRows += renderRow(
+      `Uro Bag (Qty: ${medicalConsumables.uroBag.qty || 1})`,
+      calcQtyRate(medicalConsumables.uroBag),
+    );
+    consRows += renderRow(
+      `Rubber Sheet (Qty: ${medicalConsumables.rubberSheet.qty || 1})`,
+      calcQtyRate(medicalConsumables.rubberSheet),
+    );
+    consRows += renderRow(
+      `Oxygen (Qty: ${medicalConsumables.oxygen.qty || 1})`,
+      calcQtyRate(medicalConsumables.oxygen),
+    );
+    consRows += renderRow(
+      `Nebulizer (Qty: ${medicalConsumables.nebulizer.qty || 1})`,
+      calcQtyRate(medicalConsumables.nebulizer),
+    );
+    elderRows += renderSection("10. MEDICAL CONSUMABLES", consRows);
+
+    // Late Fees
+    let feesRows = "";
+    feesRows += renderRow("Previous Pending", {
+      price: billingSummary.previousPending,
+      subsidy: 0,
+    });
+    feesRows += renderRow("Late Fee", {
+      price: billingSummary.lateFee,
+      subsidy: 0,
+    });
+    feesRows += renderRow("Late Material Fee", {
+      price: billingSummary.lateMaterialFee,
+      subsidy: 0,
+    });
+    elderRows += renderSection("FEES & BALANCES", feesRows);
+
+    // HOME CARE ROWS (unchanged logic)
+    let homeRows = "";
+    if (billType === "HOME_CARE") {
+      const renderHomeGroup = (keys: string[], title: string) => {
+        let grpRows = "";
+        keys.forEach((key) => {
+          const price =
+            parseFloat(
+              String(homeFields[key]?.rs || "0").replace(/[^0-9.]/g, ""),
+            ) || 0;
+          if (price > 0) {
+            grpRows += renderRow(
+              `${key} ${homeFields[key].qty ? "(Qty: " + homeFields[key].qty + ")" : ""}`,
+              { price, subsidy: 0 },
+            );
+          }
         });
-        medRows += renderRow('Uro Bag', medical.uroBag.price)
-        medRows += renderRow('Catheter', medical.catheter.price)
-        medRows += renderRow('Lab Tests', medical.labTest.price)
-        elderRows += renderSection('MEDICAL PRODUCTS', medRows)
+        return renderSection(title, grpRows);
+      };
 
-        // FOOD
-        let foodRows = '';
-        foodRows += renderRow('Milk', food.milk)
-        foodRows += renderRow('Juice', food.juice)
-        foodRows += renderRow('Snacks', food.snacks)
-        foodRows += renderRow('Herbal Drinks', food.herbalDrinks)
-        elderRows += renderSection('FOOD CONSUMERS', foodRows)
+      homeRows += renderHomeGroup(
+        [
+          "Monthly Membership",
+          "Half-Yearly Membership",
+          "Annual Membership",
+          "Silver Membership",
+          "Gold Membership",
+          "Platinum Membership",
+        ],
+        "A. MEMBERSHIP",
+      );
+      homeRows += renderHomeGroup(
+        [
+          "Home Nursing",
+          "Caregiver",
+          "Doctor Visit",
+          "Physiotherapy",
+          "Occupational Therapy",
+          "Speech Therapy",
+          "Counseling",
+          "Yoga",
+          "Palliative Care",
+          "Dementia Care",
+          "Alzheimer's Care",
+        ],
+        "B. HOME CARE SERVICES",
+      );
+      homeRows += renderHomeGroup(
+        [
+          "Lab Tests",
+          "Medicine Delivery",
+          "Transport",
+          "Ambulance",
+          "Beauty Service",
+          "Legal Service",
+          "Pooja Service",
+          "Tours & Travels",
+          "Rendering Service",
+          "Essentials Service",
+        ],
+        "C. HOME SUPPORT SERVICES",
+      );
+    }
 
-        // CONSUMABLES
-        let consRows = '';
-        consRows += renderRow('New Dress', consumables.newDress)
-        consRows += renderRow('Towel', consumables.towel)
-        consRows += renderRow('Bedsheets', consumables.bedsheets)
-        consRows += renderRow('Bedspread', consumables.bedspread)
-        consRows += renderRow('New Dress Stitching', consumables.newDressStitching)
-        consRows += renderRow('Old Dress Stitching', consumables.oldDressStitching)
-        consRows += renderRow('All Out', consumables.allOut)
-        consRows += renderRow('TV', consumables.tv)
-        consRows += renderRow('Breakage', consumables.breakage)
-        consRows += renderRow('Cleaning', consumables.cleaning)
-        consRows += renderRow('Winding Up Charging', consumables.windingUp)
-        consRows += renderRow('Beauty Services', consumables.beauty)
-        consRows += renderRow('Monthly Essentials', consumables.monthlyEssentials)
-        consRows += renderRow('Cylinder', consumables.cylinder)
-        elderRows += renderSection('CONSUMABLES & SERVICES', consRows)
-
-        // HOME CARE ROWS
-        let homeRows = '';
-        if (billType === 'HOME_CARE') {
-            Object.keys(homeFields).forEach((key) => {
-                if (key !== 'UNCF Subsidy') {
-                    if (isValid(homeFields[key])) {
-                        homeRows += renderRow(`${key} ${homeFields[key].qty ? '(Qty: ' + homeFields[key].qty + ')' : ''}`, homeFields[key])
-                    }
-                }
-            })
-        }
-
-        const invoiceTableHtml = `
+    const invoiceTableHtml = `
             <table class="invoice-table">
                 <thead>
                     <tr>
                         <th style="text-align: left;">Description</th>
-                        <th style="text-align: right; width: 100px;">Actual Amount</th>
+                        <th style="text-align: right; width: 100px;">Amount</th>
                         <th style="text-align: right; width: 100px;">UNCF Subsidy</th>
-                        <th style="text-align: right; width: 100px;">Payable Amount</th>
+                        <th style="text-align: right; width: 100px;">Net Amount</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${billType === 'ELDER_CARE' ? elderRows : homeRows}
+                    ${billType === "ELDER_CARE" ? elderRows : homeRows}
                 </tbody>
             </table>
-        `
+        `;
 
-        let paymentInfoHtml = ''
-        // Payment info is collected for the backend only, not shown on the bill.
+    let paymentInfoHtml = "";
+    // Payment info is collected for the backend only, not shown on the bill.
 
-        return `<!doctype html>
+    const dispatchHtml = `
+            <div class="mt-4" style="border: 1px solid #dbe5ef; border-radius: 6px; padding: 14px; background: #fafcff; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 10px; color: #334155; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;">Materials to be Sent Before 5th of Every Month</h3>
+                <table class="patient-table">
+                    <tbody>
+                        <tr><td>Diapers</td><td>${htmlEscape(materialDispatch.diapers.qty || "0")} Nos</td></tr>
+                        <tr><td>Gloves</td><td>${htmlEscape(materialDispatch.gloves.qty || "0")} Nos</td></tr>
+                        <tr><td>Mask</td><td>${htmlEscape(materialDispatch.mask.qty || "0")} Nos</td></tr>
+                        <tr><td>Under Pad</td><td>${htmlEscape(materialDispatch.underPad.qty || "0")} Nos</td></tr>
+                        <tr><td>Rubber Sheet</td><td>${htmlEscape(materialDispatch.rubberSheet.qty || "0")} Nos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+    return `<!doctype html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -451,6 +909,11 @@ export function PatientManualBilling() {
         .title h2 { margin: 0; font-size: 16px; color: #0f766e; }
         .badge { display: inline-block; margin-top: 8px; border-radius: 999px; padding: 5px 12px; background: #ecfdf5; color: #047857; font-weight: 800; text-transform: uppercase; font-size: 10px; }
         
+        .profile-table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; border: 1px solid #dbe5ef; }
+        .profile-table td { padding: 8px; border: 1px solid #dbe5ef; font-size: 11px; }
+        .profile-table td:nth-child(odd) { font-weight: bold; background: #f8fafc; color: #334155; width: 25%; }
+        .profile-table td:nth-child(even) { width: 25%; }
+
         .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
         .box { border: 1px solid #dbe5ef; border-radius: 6px; padding: 14px; background: #fafcff; }
         .box h3 { margin: 0 0 10px; color: #334155; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
@@ -465,7 +928,7 @@ export function PatientManualBilling() {
         .invoice-table th { background: #f8fafc; font-weight: bold; color: #334155; border-bottom: 2px solid #94a3b8; }
         .invoice-table tr.section-header td { background: #f1f5f9; font-weight: bold; color: #0f766e; text-transform: uppercase; letter-spacing: .05em; text-align: left; }
         
-        .totals-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .totals-table { width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 24px; }
         .totals-table td { padding: 6px 12px; border: 1px solid #dbe5ef; font-size: 12px; }
         .totals-table tr.grand-total td { background: #ecfdf5; font-weight: bold; color: #065f46; border-color: #059669; font-size: 14px; }
         
@@ -498,21 +961,21 @@ export function PatientManualBilling() {
                 </div>
             </div>
             <div class="title">
-                <h2>${billType === 'ELDER_CARE' ? 'Elder Care Patient Service Bill' : 'Home Care Patient Service Bill'}</h2>
+                <h2>${billType === "ELDER_CARE" ? "Elder Care Patient Service Bill" : "Home Care Patient Service Bill"}</h2>
             </div>
         </div>
 
         <div class="panel">
             <div class="box">
-                <h3>Patient Details</h3>
+                <h3>Elder Details</h3>
                 <table class="patient-table">
                     <tbody>
-                        ${patientName ? `<tr><td>Patient Name</td><td>${htmlEscape(patientName)}</td></tr>` : ''}
-                        ${patientAge ? `<tr><td>Age</td><td>${htmlEscape(patientAge)}</td></tr>` : ''}
-                        ${patientSex ? `<tr><td>Sex</td><td>${htmlEscape(patientSex)}</td></tr>` : ''}
-                        ${patientDob ? `<tr><td>DOB</td><td>${htmlEscape(patientDob)}</td></tr>` : ''}
-                        ${patientId ? `<tr><td>Patient ID</td><td>${htmlEscape(patientId)}</td></tr>` : ''}
-                        <tr><td>Service Type</td><td>${htmlEscape(billType.replace('_', ' '))}</td></tr>
+                        ${patientName ? `<tr><td>Patient Name</td><td>${htmlEscape(patientName)}</td></tr>` : ""}
+                        ${patientAge ? `<tr><td>Age</td><td>${htmlEscape(patientAge)}</td></tr>` : ""}
+                        ${patientSex ? `<tr><td>Sex</td><td>${htmlEscape(patientSex)}</td></tr>` : ""}
+                        ${patientDob ? `<tr><td>DOB</td><td>${htmlEscape(patientDob)}</td></tr>` : ""}
+                        ${patientId ? `<tr><td>Patient ID</td><td>${htmlEscape(patientId)}</td></tr>` : ""}
+                        <tr><td>Service Type</td><td>${htmlEscape(billType.replace("_", " "))}</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -520,28 +983,21 @@ export function PatientManualBilling() {
                 <h3>Guardian Details</h3>
                 <table class="patient-table">
                     <tbody>
-                        ${billId ? `<tr><td>Bill ID</td><td>${htmlEscape(billId)}</td></tr>` : ''}
+                        ${billId ? `<tr><td>Bill ID</td><td>${htmlEscape(billId)}</td></tr>` : ""}
                         <tr><td>Bill Date</td><td>${htmlEscape(generatedAt.toLocaleDateString())}</td></tr>
-                        ${guardianName ? `<tr><td>Guardian Name</td><td>${htmlEscape(guardianName)}</td></tr>` : ''}
-                        ${guardianContact ? `<tr><td>Contact Number</td><td>${htmlEscape(guardianContact)}</td></tr>` : ''}
-                        ${guardianAddress ? `<tr><td>Address</td><td>${htmlEscape(guardianAddress)}</td></tr>` : ''}
+                        ${guardianName ? `<tr><td>Guardian Name</td><td>${htmlEscape(guardianName)}</td></tr>` : ""}
+                        ${guardianContact ? `<tr><td>Contact Number</td><td>${htmlEscape(guardianContact)}</td></tr>` : ""}
+                        ${guardianAddress ? `<tr><td>Address</td><td>${htmlEscape(guardianAddress)}</td></tr>` : ""}
                         <tr><td>Billing Month</td><td>${htmlEscape(currentMonthName)}</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-
-
         ${invoiceTableHtml}
 
         <table class="totals-table">
             <tbody>
-                ${isValid(totals.lateFee) ? `<tr><td><strong>Late Fee Amount</strong></td><td class="text-right">Rs ${htmlEscape(totals.lateFee)}</td></tr>` : ''}
-                ${isValid(totals.lateMaterialFee) ? `<tr><td><strong>Late Materials Fee</strong></td><td class="text-right">Rs ${htmlEscape(totals.lateMaterialFee)}</td></tr>` : ''}
-                ${isValid(totals.totalReversibleItems) ? `<tr><td><strong>Total Reversible Items</strong></td><td class="text-right">Rs ${htmlEscape(totals.totalReversibleItems)}</td></tr>` : ''}
-                ${isValid(totals.uncfSubsidiaryItems) ? `<tr><td colspan="2"><strong>UNCF Subsidiary Items:</strong> ${htmlEscape(totals.uncfSubsidiaryItems)}</td></tr>` : ''}
-                
                 <tr>
                     <td><strong>Gross Total Amount</strong></td>
                     <td class="text-right"><strong>Rs ${htmlEscape(invoiceMoney(totalsCalculated.grossTotal))}</strong></td>
@@ -556,6 +1012,8 @@ export function PatientManualBilling() {
                 </tr>
             </tbody>
         </table>
+
+        ${dispatchHtml}
 
         ${paymentInfoHtml}
 
@@ -593,401 +1051,1819 @@ export function PatientManualBilling() {
     </div>
     <script>window.onload = () => { window.print(); }</script>
 </body>
-</html>`
+</html>`;
+  };
+
+  const openPreview = () => {
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.write(generateHtml());
+      win.document.close();
+    }
+  };
+
+  const openWhatsApp = async () => {
+    if (!guardianContact) {
+      alert("Please enter a Guardian Contact number before sending.");
+      return;
     }
 
-    const openPreview = () => {
-        const win = window.open('', '_blank')
-        if (win) {
-            win.document.write(generateHtml())
-            win.document.close()
-        }
+    setIsSending(true);
+    try {
+      const message = [
+        `Dear ${guardianName || "Family"},`,
+        "",
+        `Please find the ${billType === "ELDER_CARE" ? "Elder Care" : "Home Care"} bill for ${patientName || "the patient"} for ${billingMonthYear || "this month"}.`,
+        "",
+        `Amount Due: ${invoiceMoney(totalPayable)}`,
+        "",
+        `*(Please see the attached PDF invoice for the detailed breakdown)*`,
+        "",
+        "Regards,",
+        "Universal Elder Care",
+      ].join("\n");
+
+      // Create temporary container for PDF generation
+      const element = document.createElement("div");
+      element.innerHTML = generateHtml();
+
+      // html2pdf options
+      const opt: any = {
+        margin: 16,
+        filename: "Patient_Bill.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+
+      // Generate blob
+      const pdfBlob = await html2pdf().set(opt).from(element).output("blob");
+
+      // Download PDF automatically
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Patient_Bill.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      // Open WhatsApp Web with text
+      const target = guardianContact
+        ? `https://wa.me/${guardianContact.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`
+        : `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(target, "_blank", "noopener,noreferrer");
+    } catch (error: any) {
+      console.error("PDF generation error:", error);
+      alert("Failed to generate PDF. " + error.message);
+    } finally {
+      setIsSending(false);
     }
+  };
 
-    const openWhatsApp = async () => {
-        if (!guardianContact) {
-            alert('Please enter a Guardian Contact number before sending.');
-            return;
-        }
+  return (
+    <div className="flex h-full flex-col">
+      <PageHeader
+        title="Manual Billing Generator"
+        subtitle="Generate instant PDF invoices with dynamic structures."
+        breadcrumbs={[{ label: "Finance" }, { label: "Manual Billing" }]}
+      />
 
-        setIsSending(true);
-        try {
-            const message = [
-                `Dear ${guardianName || 'Family'},`,
-                '',
-                `Please find the ${billType === 'ELDER_CARE' ? 'Elder Care' : 'Home Care'} bill for ${patientName || 'the patient'} for ${billingMonthYear || 'this month'}.`,
-                '',
-                `Amount Due: ${invoiceMoney(totalPayable)}`,
-                '',
-                `*(Please see the attached PDF invoice for the detailed breakdown)*`,
-                '',
-                'Regards,',
-                'Universal Elder Care'
-            ].join('\n');
-
-            // Create temporary container for PDF generation
-            const element = document.createElement('div');
-            element.innerHTML = generateHtml();
-
-            // html2pdf options
-            const opt: any = {
-                margin: 16,
-                filename: 'Patient_Bill.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Generate blob
-            const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
-
-            // Download PDF automatically
-            const url = window.URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Patient_Bill.pdf';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-
-            // Open WhatsApp Web with text
-            const target = guardianContact ? `https://wa.me/${guardianContact.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}` : `https://wa.me/?text=${encodeURIComponent(message)}`;
-            window.open(target, '_blank', 'noopener,noreferrer');
-
-        } catch (error: any) {
-            console.error('PDF generation error:', error);
-            alert('Failed to generate PDF. ' + error.message);
-        } finally {
-            setIsSending(false);
-        }
-    }
-
-    const ShiftOptions = ['Partial', 'Full', 'Day', 'Night', 'Full time']
-
-    return (
-        <div className="flex h-full flex-col">
-            <PageHeader title="Manual Billing Generator" subtitle="Generate instant PDF invoices with dynamic structures." breadcrumbs={[{ label: 'Finance' }, { label: 'Manual Billing' }]} />
-
-            <div className="flex-1 overflow-auto bg-slate-50 p-6">
-                <div className="mx-auto max-w-6xl space-y-6">
-
-                    {/* Mode Toggle */}
-                    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                        <div className="flex gap-4 border-b border-slate-200 pb-4">
-                            <button
-                                onClick={() => setBillType('ELDER_CARE')}
-                                className={`rounded-lg px-4 py-2 font-bold ${billType === 'ELDER_CARE' ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-                            >
-                                Elder Care Bill
-                            </button>
-                            <button
-                                onClick={() => setBillType('HOME_CARE')}
-                                className={`rounded-lg px-4 py-2 font-bold ${billType === 'HOME_CARE' ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'}`}
-                            >
-                                Home Care Bill
-                            </button>
-                        </div>
-
-                        {/* Patient & Guardian Info */}
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2">Patient Details</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="col-span-2"><Field label="Patient Name (with Initials)" value={patientName} onChange={setPatientName} /></div>
-                                    <Field label="Age" placeholder="e.g. 75" value={patientAge} onChange={setPatientAge} />
-                                    <Select label="Sex" value={patientSex} onChange={setPatientSex} options={['Male', 'Female', 'Other']} />
-                                    <Field label="DOB" placeholder="DD-MM-YYYY" value={patientDob} onChange={setPatientDob} />
-                                    <Field label="Patient ID" value={patientId} onChange={setPatientId} />
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2">Guardian Details & Bill Info</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Field label="Guardian Name" value={guardianName} onChange={setGuardianName} />
-                                    <Field label="Guardian Contact" value={guardianContact} onChange={setGuardianContact} />
-                                    <div className="col-span-2"><Field label="Guardian Address" value={guardianAddress} onChange={setGuardianAddress} /></div>
-                                    <Field label="Bill ID" value={billId} onChange={setBillId} />
-                                    <Field label="Billing Month & Year" placeholder="August - 2026" value={billingMonthYear} onChange={setBillingMonthYear} />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 border-t pt-6">
-                            <Field label="UPI ID for Payment QR" value={upiId} onChange={setUpiId} placeholder="universaleldercare@upi" />
-                        </div>
-                    </div>
-
-                    {billType === 'ELDER_CARE' && (
-                        <div className="space-y-6">
-                            {/* Core Items */}
-                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Core Items & Services</h3>
-                                <div className="grid grid-cols-4 gap-4">
-                                    <Select label="Room Sharing" value={elderCore.roomSharing} onChange={(v: string) => setElderCore({ ...elderCore, roomSharing: v })} options={['Single', 'Two Sharing', 'Four Sharing']} />
-                                    <Select label="Bill Selection" value={elderCore.billSelection} onChange={(v: string) => setElderCore({ ...elderCore, billSelection: v })} options={['30 Days', 'Daily']} />
-                                    <SubsidyField label="Monthly Bed Charge" priceObj={elderCore.monthlyBedCharge} onChange={(v: any) => setElderCore({ ...elderCore, monthlyBedCharge: v })} />
-                                    
-                                    {/* Shifts */}
-                                    <div className="col-span-2 grid grid-cols-2 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Select label="Attender Shift" value={attender.shift} onChange={(v: string) => setAttender({ ...attender, shift: v })} options={ShiftOptions} />
-                                        <Field label="Attender Price" value={attender.price} onChange={(v: string) => setAttender({ ...attender, price: v })} />
-                                    </div>
-                                    <div className="col-span-2 grid grid-cols-2 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Select label="Outside Attender Shift" value={outsideAttender.shift} onChange={(v: string) => setOutsideAttender({ ...outsideAttender, shift: v })} options={ShiftOptions} />
-                                        <Field label="Outside Price" value={outsideAttender.price} onChange={(v: string) => setOutsideAttender({ ...outsideAttender, price: v })} />
-                                    </div>
-
-                                    <SubsidyField label="Laundry" priceObj={elderCore.laundry} onChange={(v: any) => setElderCore({ ...elderCore, laundry: v })} />
-                                    <SubsidyField label="Eb" priceObj={elderCore.eb} onChange={(v: any) => setElderCore({ ...elderCore, eb: v })} />
-                                    <SubsidyField label="Hospital Visit" priceObj={elderCore.hospitalVisit} onChange={(v: any) => setElderCore({ ...elderCore, hospitalVisit: v })} />
-                                    <SubsidyField label="Ambulance" priceObj={elderCore.ambulance} onChange={(v: any) => setElderCore({ ...elderCore, ambulance: v })} />
-                                    <SubsidyField label="Doctor Checkup" priceObj={elderCore.doctorCheckup} onChange={(v: any) => setElderCore({ ...elderCore, doctorCheckup: v })} />
-                                    <SubsidyField label="Physiotherapy" priceObj={elderCore.physiotherapy} onChange={(v: any) => setElderCore({ ...elderCore, physiotherapy: v })} />
-                                    <SubsidyField label="Counseling" priceObj={elderCore.counseling} onChange={(v: any) => setElderCore({ ...elderCore, counseling: v })} />
-                                    <SubsidyField label="Occupational Therapy" priceObj={elderCore.occupational} onChange={(v: any) => setElderCore({ ...elderCore, occupational: v })} />
-                                    <SubsidyField label="Speech Therapy" priceObj={elderCore.speech} onChange={(v: any) => setElderCore({ ...elderCore, speech: v })} />
-                                    <SubsidyField label="Nursing" priceObj={elderCore.nursing} onChange={(v: any) => setElderCore({ ...elderCore, nursing: v })} />
-                                    <SubsidyField label="Caregiver Day" priceObj={elderCore.caregiverDay} onChange={(v: any) => setElderCore({ ...elderCore, caregiverDay: v })} />
-                                    <SubsidyField label="Caregiver Night" priceObj={elderCore.caregiverNight} onChange={(v: any) => setElderCore({ ...elderCore, caregiverNight: v })} />
-                                    <SubsidyField label="Dressing" priceObj={elderCore.dressing} onChange={(v: any) => setElderCore({ ...elderCore, dressing: v })} />
-                                    <SubsidyField label="First Aid" priceObj={elderCore.firstAid} onChange={(v: any) => setElderCore({ ...elderCore, firstAid: v })} />
-                                    <SubsidyField label="Special Care" priceObj={elderCore.specialCare} onChange={(v: any) => setElderCore({ ...elderCore, specialCare: v })} />
-                                    <SubsidyField label="Gas" priceObj={elderCore.gas} onChange={(v: any) => setElderCore({ ...elderCore, gas: v })} />
-                                </div>
-                            </div>
-
-                            {/* Medical Products */}
-                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Medical Products</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="grid grid-cols-2 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <SubsidyField label="Medicines Count (Rs)" priceObj={medical.medicines.count} onChange={(v: any) => setMedical({ ...medical, medicines: { ...medical.medicines, count: v } })} />
-                                        <Field label="Base (+100rs)" value={medical.medicines.baseAmount} onChange={(v: string) => setMedical({ ...medical, medicines: { ...medical.medicines, baseAmount: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="Diapers (Qty)" value={medical.diapers.qty} onChange={(v: string) => setMedical({ ...medical, diapers: { ...medical.diapers, qty: v } })} />
-                                        <Field label="Rate (70)" value={medical.diapers.rate} onChange={(v: string) => setMedical({ ...medical, diapers: { ...medical.diapers, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.diapers.disposal} onChange={(v: string) => setMedical({ ...medical, diapers: { ...medical.diapers, disposal: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="Gloves (Qty)" value={medical.gloves.qty} onChange={(v: string) => setMedical({ ...medical, gloves: { ...medical.gloves, qty: v } })} />
-                                        <Field label="Rate (75)" value={medical.gloves.rate} onChange={(v: string) => setMedical({ ...medical, gloves: { ...medical.gloves, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.gloves.disposal} onChange={(v: string) => setMedical({ ...medical, gloves: { ...medical.gloves, disposal: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="Mask (Qty)" value={medical.mask.qty} onChange={(v: string) => setMedical({ ...medical, mask: { ...medical.mask, qty: v } })} />
-                                        <Field label="Rate (4)" value={medical.mask.rate} onChange={(v: string) => setMedical({ ...medical, mask: { ...medical.mask, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.mask.disposal} onChange={(v: string) => setMedical({ ...medical, mask: { ...medical.mask, disposal: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="Underpad (Qty)" value={medical.underpad.qty} onChange={(v: string) => setMedical({ ...medical, underpad: { ...medical.underpad, qty: v } })} />
-                                        <Field label="Rate (60)" value={medical.underpad.rate} onChange={(v: string) => setMedical({ ...medical, underpad: { ...medical.underpad, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.underpad.disposal} onChange={(v: string) => setMedical({ ...medical, underpad: { ...medical.underpad, disposal: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="RubberSheet (m)" value={medical.rubbersheet.qty} onChange={(v: string) => setMedical({ ...medical, rubbersheet: { ...medical.rubbersheet, qty: v } })} />
-                                        <Field label="Rate (700)" value={medical.rubbersheet.rate} onChange={(v: string) => setMedical({ ...medical, rubbersheet: { ...medical.rubbersheet, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.rubbersheet.disposal} onChange={(v: string) => setMedical({ ...medical, rubbersheet: { ...medical.rubbersheet, disposal: v } })} />
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-slate-50">
-                                        <Field label="Readymade" value={medical.readymade.qty} onChange={(v: string) => setMedical({ ...medical, readymade: { ...medical.readymade, qty: v } })} />
-                                        <Field label="Rate (1500)" value={medical.readymade.rate} onChange={(v: string) => setMedical({ ...medical, readymade: { ...medical.readymade, rate: v } })} />
-                                        <Field label="Disposal Chg" value={medical.readymade.disposal} onChange={(v: string) => setMedical({ ...medical, readymade: { ...medical.readymade, disposal: v } })} />
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <Field label="Uro Bag Price" value={medical.uroBag.price} onChange={(v: string) => setMedical({ ...medical, uroBag: { ...medical.uroBag, price: v } })} />
-                                        <Field label="Catheter Price" value={medical.catheter.price} onChange={(v: string) => setMedical({ ...medical, catheter: { ...medical.catheter, price: v } })} />
-                                        <Field label="Lab Test Price" value={medical.labTest.price} onChange={(v: string) => setMedical({ ...medical, labTest: { ...medical.labTest, price: v } })} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Food & Consumables */}
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                    <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Food Consumers</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <SubsidyField label="Milk" priceObj={food.milk} onChange={(v: any) => setFood({ ...food, milk: v })} />
-                                        <SubsidyField label="Juice" priceObj={food.juice} onChange={(v: any) => setFood({ ...food, juice: v })} />
-                                        <SubsidyField label="Snacks" priceObj={food.snacks} onChange={(v: any) => setFood({ ...food, snacks: v })} />
-                                        <SubsidyField label="Herbal Drinks" priceObj={food.herbalDrinks} onChange={(v: any) => setFood({ ...food, herbalDrinks: v })} />
-                                    </div>
-                                </div>
-                                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                    <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Consumables & Services</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <SubsidyField label="New Dress" priceObj={consumables.newDress} onChange={(v: any) => setConsumables({ ...consumables, newDress: v })} />
-                                        <SubsidyField label="Towel" priceObj={consumables.towel} onChange={(v: any) => setConsumables({ ...consumables, towel: v })} />
-                                        <SubsidyField label="Bedsheets" priceObj={consumables.bedsheets} onChange={(v: any) => setConsumables({ ...consumables, bedsheets: v })} />
-                                        <SubsidyField label="Bedspread" priceObj={consumables.bedspread} onChange={(v: any) => setConsumables({ ...consumables, bedspread: v })} />
-                                        <SubsidyField label="New Stitching" priceObj={consumables.newDressStitching} onChange={(v: any) => setConsumables({ ...consumables, newDressStitching: v })} />
-                                        <SubsidyField label="Old Stitching" priceObj={consumables.oldDressStitching} onChange={(v: any) => setConsumables({ ...consumables, oldDressStitching: v })} />
-                                        <SubsidyField label="All Out" priceObj={consumables.allOut} onChange={(v: any) => setConsumables({ ...consumables, allOut: v })} />
-                                        <SubsidyField label="TV" priceObj={consumables.tv} onChange={(v: any) => setConsumables({ ...consumables, tv: v })} />
-                                        <SubsidyField label="Breakage" priceObj={consumables.breakage} onChange={(v: any) => setConsumables({ ...consumables, breakage: v })} />
-                                        <SubsidyField label="Cleaning" priceObj={consumables.cleaning} onChange={(v: any) => setConsumables({ ...consumables, cleaning: v })} />
-                                        <SubsidyField label="Winding Up" priceObj={consumables.windingUp} onChange={(v: any) => setConsumables({ ...consumables, windingUp: v })} />
-                                        <SubsidyField label="Beauty Services" priceObj={consumables.beauty} onChange={(v: any) => setConsumables({ ...consumables, beauty: v })} />
-                                        <SubsidyField label="Monthly Essentials" priceObj={consumables.monthlyEssentials} onChange={(v: any) => setConsumables({ ...consumables, monthlyEssentials: v })} />
-                                        <SubsidyField label="Cylinder" priceObj={consumables.cylinder} onChange={(v: any) => setConsumables({ ...consumables, cylinder: v })} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Totals & Payment Info */}
-                            
-                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Balance Summary (Carried Forward)</h3>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <SubsidyField label="Balance Amount" priceObj={balances.amount} onChange={(v: any) => setBalances({ ...balances, amount: v })} />
-                                    <SubsidyField label="Monthly Essentials Bal." priceObj={balances.monthlyEssentials} onChange={(v: any) => setBalances({ ...balances, monthlyEssentials: v })} />
-                                    <SubsidyField label="Diapers Bal. (Rs/No)" priceObj={balances.diapers} onChange={(v: any) => setBalances({ ...balances, diapers: v })} />
-                                    <SubsidyField label="Gloves Bal. (Rs/No)" priceObj={balances.gloves} onChange={(v: any) => setBalances({ ...balances, gloves: v })} />
-                                    <SubsidyField label="Mask Bal. (Rs/No)" priceObj={balances.mask} onChange={(v: any) => setBalances({ ...balances, mask: v })} />
-                                    <SubsidyField label="Under Pad Bal. (Rs/No)" priceObj={balances.underpad} onChange={(v: any) => setBalances({ ...balances, underpad: v })} />
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Previous Payable Amount</h3>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <SubsidyField label="Prev. Pending Payable Amt" priceObj={additionalCharges.previousPendingPayable} onChange={(v: any) => setAdditionalCharges({ ...additionalCharges, previousPendingPayable: v })} />
-                                    
-                                    <Select label="Inc. Upcoming Bed Chg?" value={additionalCharges.upcomingBedCharge.include} onChange={(v: string) => setAdditionalCharges({ ...additionalCharges, upcomingBedCharge: { ...additionalCharges.upcomingBedCharge, include: v } })} options={['NO', 'YES']} />
-                                    {additionalCharges.upcomingBedCharge.include === 'YES' && (
-                                        <SubsidyField label="Upcoming Bed Charge" priceObj={additionalCharges.upcomingBedCharge.amount} onChange={(v: any) => setAdditionalCharges({ ...additionalCharges, upcomingBedCharge: { ...additionalCharges.upcomingBedCharge, amount: v } })} />
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">Payment & Fees</h3>
-                                <div className="grid grid-cols-4 gap-4">
-                                    <Field label="Late Fee Amount" value={totals.lateFee} onChange={(v: string) => setTotals({ ...totals, lateFee: v })} />
-                                    <Field label="Late Materials Fee" value={totals.lateMaterialFee} onChange={(v: string) => setTotals({ ...totals, lateMaterialFee: v })} />
-                                    <Field label="UNCF Subsidy Amount" value={totals.uncfSubsidyAmount} onChange={(v: string) => setTotals({ ...totals, uncfSubsidyAmount: v })} />
-                                    <Field label="UNCF Subsidiary Items" value={totals.uncfSubsidiaryItems} onChange={(v: string) => setTotals({ ...totals, uncfSubsidiaryItems: v })} />
-                                    <Field label="Total Reversible Items" value={totals.totalReversibleItems} onChange={(v: string) => setTotals({ ...totals, totalReversibleItems: v })} />
-                                    <div className="col-span-3"></div>
-
-                                    <Field label="Payment Done Date" type="date" value={paymentInfo.doneDate} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, doneDate: v })} />
-                                    <Field label="Material Received Date" type="date" value={paymentInfo.receivedDate} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, receivedDate: v })} />
-                                    <Select label="Payment Mode" value={paymentInfo.mode} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, mode: v })} options={['Cash', 'UPI', 'Card']} />
-                                    <Select label="Receiving Mode" value={paymentInfo.receivingMode} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, receivingMode: v })} options={['Courier', 'Direct']} />
-                                    <Field label="Bank Name" value={paymentInfo.bankName} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, bankName: v })} />
-                                    <Field label="Gpay Phone Number" value={paymentInfo.gpay} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, gpay: v })} />
-                                    <Field label="Balance Amount" value={paymentInfo.balanceAmount} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, balanceAmount: v })} />
-                                    <Field label="Balance Item" value={paymentInfo.balanceItem} onChange={(v: string) => setPaymentInfo({ ...paymentInfo, balanceItem: v })} />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {billType === 'HOME_CARE' && (
-                        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                            <h2 className="mb-6 text-lg font-bold text-slate-800">Home Care Line Items</h2>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                {Object.keys(homeFields).map((key) => {
-                                    const hasQty = homeFields[key].qty !== undefined
-                                    return (
-                                        <div key={key} className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-                                            <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">{key}</label>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Amount (Rs)"
-                                                    value={homeFields[key].rs}
-                                                    onChange={(e) => {
-                                                        setHomeFields(prev => ({
-                                                            ...prev,
-                                                            [key]: { ...prev[key], rs: e.target.value }
-                                                        }))
-                                                    }}
-                                                    className="h-10 w-full rounded-md border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
-                                                />
-                                                {hasQty && (
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Qty (No)"
-                                                        value={homeFields[key].qty}
-                                                        onChange={(e) => {
-                                                            setHomeFields(prev => ({
-                                                                ...prev,
-                                                                [key]: { ...prev[key], qty: e.target.value }
-                                                            }))
-                                                        }}
-                                                        className="h-10 w-24 rounded-md border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
-                                                    />
-                                                )}
-                                                <input
-                                                    type="number"
-                                                    placeholder="Subsidy (₹)"
-                                                    value={homeFields[key].subsidy || ''}
-                                                    onChange={(e) => {
-                                                        setHomeFields(prev => ({
-                                                            ...prev,
-                                                            [key]: { ...prev[key], subsidy: e.target.value }
-                                                        }))
-                                                    }}
-                                                    className="h-10 w-32 rounded-md border border-orange-200 bg-orange-50 px-3 text-sm font-semibold text-orange-700 outline-none focus:border-orange-500 placeholder:text-orange-300"
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                </div>
+      <div className="flex-1 overflow-auto bg-slate-50 p-6">
+        <div className="mx-auto max-w-6xl space-y-6">
+          {/* Mode Toggle */}
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex gap-4 border-b border-slate-200 pb-4">
+              <button
+                onClick={() => setBillType("ELDER_CARE")}
+                className={`rounded-lg px-4 py-2 font-bold ${billType === "ELDER_CARE" ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600"}`}
+              >
+                Elder Care Bill
+              </button>
+              <button
+                onClick={() => setBillType("HOME_CARE")}
+                className={`rounded-lg px-4 py-2 font-bold ${billType === "HOME_CARE" ? "bg-primary-600 text-white" : "bg-slate-100 text-slate-600"}`}
+              >
+                Home Care Bill
+              </button>
             </div>
 
-            {/* Action Bar */}
-            <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] z-10">
-                <div className="flex items-center gap-6">
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Gross Amount</div>
-                        <div className="text-xl font-bold text-slate-900">{invoiceMoney(totalAmount)}</div>
-                    </div>
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-slate-500">UNCF Subsidy</div>
-                        <div className="text-xl font-bold text-red-600">- {invoiceMoney(subsidy)}</div>
-                    </div>
-                    <div className="border-l border-slate-200 pl-6">
-                        <div className="text-xs font-bold uppercase tracking-wider text-primary-600">Total Payable</div>
-                        <div className="text-2xl font-black text-primary-700">{invoiceMoney(totalPayable)}</div>
-                    </div>
+            {/* Patient & Guardian Info */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2">
+                  Elder Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <Field
+                      label="Elder Name (with Initials)"
+                      value={patientName}
+                      onChange={setPatientName}
+                    />
+                  </div>
+                  <Field
+                    label="Elder Age"
+                    placeholder="e.g. 75"
+                    value={patientAge}
+                    onChange={setPatientAge}
+                  />
+                  <Select
+                    label="Elder Sex"
+                    value={patientSex}
+                    onChange={setPatientSex}
+                    options={["Male", "Female", "Other"]}
+                  />
+                  <Field
+                    label="DOB"
+                    placeholder="DD-MM-YYYY"
+                    value={patientDob}
+                    onChange={setPatientDob}
+                  />
+                  <Field
+                    label="Elder ID"
+                    value={patientId}
+                    onChange={setPatientId}
+                  />
+                  <Select
+                    label="Membership Plan"
+                    value={membershipPlan}
+                    onChange={setMembershipPlan}
+                    options={["Monthly", "Half-Yearly", "Annual"]}
+                  />
+                  <Select
+                    label="Membership Category"
+                    value={membershipCategory}
+                    onChange={setMembershipCategory}
+                    options={["Silver", "Gold", "Platinum"]}
+                  />
                 </div>
+              </div>
+              <div className="space-y-4">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2">
+                  Guardian Details & Bill Info
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field
+                    label="Guardian Name"
+                    value={guardianName}
+                    onChange={setGuardianName}
+                  />
+                  <Field
+                    label="Guardian Contact"
+                    value={guardianContact}
+                    onChange={setGuardianContact}
+                  />
+                  <div className="col-span-2">
+                    <Field
+                      label="Guardian Address"
+                      value={guardianAddress}
+                      onChange={setGuardianAddress}
+                    />
+                  </div>
+                  <Field label="Bill ID" value={billId} onChange={setBillId} />
+                  <Field
+                    label="Billing Month & Year"
+                    placeholder="August - 2026"
+                    value={billingMonthYear}
+                    onChange={setBillingMonthYear}
+                  />
+                  <Select
+                    label="Billing Frequency"
+                    value={billingFrequency}
+                    onChange={setBillingFrequency}
+                    options={["Monthly", "Daily"]}
+                  />
+                  {billingFrequency === "Daily" && (
+                    <Field
+                      label="Number of Days"
+                      type="number"
+                      value={billingDays}
+                      onChange={setBillingDays}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={openPreview}
-                        className="flex h-11 items-center gap-2 rounded-lg bg-slate-100 px-5 text-sm font-bold text-slate-700 hover:bg-slate-200"
+            <div className="mt-6 border-t pt-6">
+              <Field
+                label="UPI ID for Payment QR"
+                value={upiId}
+                onChange={setUpiId}
+                placeholder="universaleldercare@upi"
+              />
+            </div>
+          </div>
+
+          {billType === "ELDER_CARE" && (
+            <div className="space-y-6">
+              {/* 1. Care Staff Services */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  1. Care Staff Services
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <div className="mb-2">
+                      <Select
+                        label="Care Giver Shift"
+                        value={careStaff.careGiver.shift}
+                        onChange={(v: any) =>
+                          setCareStaff({
+                            ...careStaff,
+                            careGiver: { ...careStaff.careGiver, shift: v },
+                          })
+                        }
+                        options={["Day", "Night", "24/7"]}
+                      />
+                    </div>
+                    <SubsidyField
+                      label="Care Giver"
+                      priceObj={careStaff.careGiver}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          careGiver: { ...careStaff.careGiver, ...v },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <div className="mb-2">
+                      <Select
+                        label="Nursing Care Shift"
+                        value={careStaff.nursingCare.shift}
+                        onChange={(v: any) =>
+                          setCareStaff({
+                            ...careStaff,
+                            nursingCare: { ...careStaff.nursingCare, shift: v },
+                          })
+                        }
+                        options={["Day", "Night", "24/7"]}
+                      />
+                    </div>
+                    <SubsidyField
+                      label="Nursing Care"
+                      priceObj={careStaff.nursingCare}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          nursingCare: { ...careStaff.nursingCare, ...v },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <div className="mb-2">
+                      <Select
+                        label="Special Care Shift"
+                        value={careStaff.specialCare.shift}
+                        onChange={(v: any) =>
+                          setCareStaff({
+                            ...careStaff,
+                            specialCare: { ...careStaff.specialCare, shift: v },
+                          })
+                        }
+                        options={["Day", "Night", "24/7"]}
+                      />
+                    </div>
+                    <SubsidyField
+                      label="Special Care"
+                      priceObj={careStaff.specialCare}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          specialCare: { ...careStaff.specialCare, ...v },
+                        })
+                      }
+                    />
+                  </div>
+                  <SubsidyField
+                    label="Palliative Care"
+                    priceObj={careStaff.palliativeCare}
+                    onChange={(v: any) =>
+                      setCareStaff({ ...careStaff, palliativeCare: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Dementia Care"
+                    priceObj={careStaff.dementiaCare}
+                    onChange={(v: any) =>
+                      setCareStaff({ ...careStaff, dementiaCare: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Alzheimer's Care"
+                    priceObj={careStaff.alzheimersCare}
+                    onChange={(v: any) =>
+                      setCareStaff({ ...careStaff, alzheimersCare: v })
+                    }
+                  />
+
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <Field
+                      label="Dressing (Qty)"
+                      value={careStaff.dressing.qty}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          dressing: { ...careStaff.dressing, qty: v },
+                        })
+                      }
+                    />
+                    <SubsidyField
+                      label="Dressing (Rate)"
+                      priceObj={careStaff.dressing}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          dressing: { ...careStaff.dressing, ...v },
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <Field
+                      label="First Aid (Qty)"
+                      value={careStaff.firstAid.qty}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          firstAid: { ...careStaff.firstAid, qty: v },
+                        })
+                      }
+                    />
+                    <SubsidyField
+                      label="First Aid (Rate)"
+                      priceObj={careStaff.firstAid}
+                      onChange={(v: any) =>
+                        setCareStaff({
+                          ...careStaff,
+                          firstAid: { ...careStaff.firstAid, ...v },
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Therapy & Consultation */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  2. Therapy & Consultation
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <SubsidyField
+                    label="Doctor Visit"
+                    priceObj={therapy.doctorVisit}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, doctorVisit: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Physiotherapy"
+                    priceObj={therapy.physiotherapy}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, physiotherapy: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Occupational Therapy"
+                    priceObj={therapy.occupationalTherapy}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, occupationalTherapy: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Speech Therapy"
+                    priceObj={therapy.speechTherapy}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, speechTherapy: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Geriatric Counseling"
+                    priceObj={therapy.geriatricCounseling}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, geriatricCounseling: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Psychiatric Counseling"
+                    priceObj={therapy.psychiatricCounseling}
+                    onChange={(v: any) =>
+                      setTherapy({ ...therapy, psychiatricCounseling: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Yoga"
+                    priceObj={therapy.yoga}
+                    onChange={(v: any) => setTherapy({ ...therapy, yoga: v })}
+                  />
+                </div>
+              </div>
+
+              {/* 3. Medical Support */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  3. Medical Support
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-center border-b pb-2 mb-2">
+                      <h4 className="font-bold text-slate-600 text-xs">
+                        Medicines
+                      </h4>
+                      <button
+                        className="text-xs text-primary-600 font-bold"
+                        onClick={() =>
+                          setMedicalSupport({
+                            ...medicalSupport,
+                            medicines: [
+                              ...medicalSupport.medicines,
+                              {
+                                id: Date.now(),
+                                name: "",
+                                qty: "",
+                                rate: "",
+                                subsidy: "",
+                              },
+                            ],
+                          })
+                        }
+                      >
+                        + Add Medicine
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {medicalSupport.medicines.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="grid grid-cols-5 gap-2 border p-2 bg-slate-50 rounded"
+                        >
+                          <div className="col-span-2">
+                            <Field
+                              label="Name"
+                              value={item.name}
+                              onChange={(v: any) => {
+                                const newArr = [...medicalSupport.medicines];
+                                newArr[idx].name = v;
+                                setMedicalSupport({
+                                  ...medicalSupport,
+                                  medicines: newArr,
+                                });
+                              }}
+                            />
+                          </div>
+                          <Field
+                            label="Qty"
+                            value={item.qty}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.medicines];
+                              newArr[idx].qty = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                medicines: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Rate"
+                            value={item.rate}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.medicines];
+                              newArr[idx].rate = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                medicines: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Subsidy"
+                            value={item.subsidy}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.medicines];
+                              newArr[idx].subsidy = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                medicines: newArr,
+                              });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center border-b pb-2 mb-2 mt-4">
+                      <h4 className="font-bold text-slate-600 text-xs">
+                        Lab Tests
+                      </h4>
+                      <button
+                        className="text-xs text-primary-600 font-bold"
+                        onClick={() =>
+                          setMedicalSupport({
+                            ...medicalSupport,
+                            labTests: [
+                              ...medicalSupport.labTests,
+                              {
+                                id: Date.now(),
+                                name: "",
+                                qty: "",
+                                rate: "",
+                                subsidy: "",
+                              },
+                            ],
+                          })
+                        }
+                      >
+                        + Add Lab Test
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {medicalSupport.labTests.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="grid grid-cols-5 gap-2 border p-2 bg-slate-50 rounded"
+                        >
+                          <div className="col-span-2">
+                            <Field
+                              label="Name"
+                              value={item.name}
+                              onChange={(v: any) => {
+                                const newArr = [...medicalSupport.labTests];
+                                newArr[idx].name = v;
+                                setMedicalSupport({
+                                  ...medicalSupport,
+                                  labTests: newArr,
+                                });
+                              }}
+                            />
+                          </div>
+                          <Field
+                            label="Qty"
+                            value={item.qty}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.labTests];
+                              newArr[idx].qty = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                labTests: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Rate"
+                            value={item.rate}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.labTests];
+                              newArr[idx].rate = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                labTests: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Subsidy"
+                            value={item.subsidy}
+                            onChange={(v: any) => {
+                              const newArr = [...medicalSupport.labTests];
+                              newArr[idx].subsidy = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                labTests: newArr,
+                              });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <SubsidyField
+                      label="ICU at Home"
+                      priceObj={medicalSupport.icuAtHome}
+                      onChange={(v: any) =>
+                        setMedicalSupport({ ...medicalSupport, icuAtHome: v })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <div className="flex justify-between items-center border-b pb-2 mb-2 mt-4">
+                      <h4 className="font-bold text-slate-600 text-xs">
+                        Surgical Equipment Rental
+                      </h4>
+                      <button
+                        className="text-xs text-primary-600 font-bold"
+                        onClick={() =>
+                          setMedicalSupport({
+                            ...medicalSupport,
+                            surgicalEquipment: [
+                              ...medicalSupport.surgicalEquipment,
+                              {
+                                id: Date.now(),
+                                name: "",
+                                qty: "",
+                                type: "",
+                                rate: "",
+                                subsidy: "",
+                              },
+                            ],
+                          })
+                        }
+                      >
+                        + Add Equipment
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {medicalSupport.surgicalEquipment.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="grid grid-cols-5 gap-2 border p-2 bg-slate-50 rounded"
+                        >
+                          <div className="col-span-2">
+                            <Field
+                              label="Name"
+                              value={item.name}
+                              onChange={(v: any) => {
+                                const newArr = [
+                                  ...medicalSupport.surgicalEquipment,
+                                ];
+                                newArr[idx].name = v;
+                                setMedicalSupport({
+                                  ...medicalSupport,
+                                  surgicalEquipment: newArr,
+                                });
+                              }}
+                            />
+                          </div>
+                          <Field
+                            label="Qty"
+                            value={item.qty}
+                            onChange={(v: any) => {
+                              const newArr = [
+                                ...medicalSupport.surgicalEquipment,
+                              ];
+                              newArr[idx].qty = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                surgicalEquipment: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Rate"
+                            value={item.rate}
+                            onChange={(v: any) => {
+                              const newArr = [
+                                ...medicalSupport.surgicalEquipment,
+                              ];
+                              newArr[idx].rate = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                surgicalEquipment: newArr,
+                              });
+                            }}
+                          />
+                          <Field
+                            label="Subsidy"
+                            value={item.subsidy}
+                            onChange={(v: any) => {
+                              const newArr = [
+                                ...medicalSupport.surgicalEquipment,
+                              ];
+                              newArr[idx].subsidy = v;
+                              setMedicalSupport({
+                                ...medicalSupport,
+                                surgicalEquipment: newArr,
+                              });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. Transportation */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  4. Transportation
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <SubsidyField
+                    label="Ambulance"
+                    priceObj={transportation.ambulance}
+                    onChange={(v: any) =>
+                      setTransportation({ ...transportation, ambulance: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Taxi"
+                    priceObj={transportation.taxi}
+                    onChange={(v: any) =>
+                      setTransportation({ ...transportation, taxi: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Auto"
+                    priceObj={transportation.auto}
+                    onChange={(v: any) =>
+                      setTransportation({ ...transportation, auto: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Senior Friendly Cab"
+                    priceObj={transportation.seniorCab}
+                    onChange={(v: any) =>
+                      setTransportation({ ...transportation, seniorCab: v })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 5. Personal & Lifestyle */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  5. Personal & Lifestyle
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <SubsidyField
+                    label="Beauty Service"
+                    priceObj={lifestyle.beauty}
+                    onChange={(v: any) =>
+                      setLifestyle({ ...lifestyle, beauty: v })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 6. Accommodation */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  6. Accommodation
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <SubsidyField
+                    label="Bed Charges"
+                    priceObj={accommodation.bedCharges}
+                    onChange={(v: any) =>
+                      setAccommodation({ ...accommodation, bedCharges: v })
+                    }
+                  />
+                  <div className="col-span-1 border p-2 bg-slate-50 rounded">
+                    <div className="mb-2">
+                      <Select
+                        label="Upcoming Bed Charge?"
+                        value={accommodation.upcomingBedCharge.enable}
+                        onChange={(v: any) =>
+                          setAccommodation({
+                            ...accommodation,
+                            upcomingBedCharge: {
+                              ...accommodation.upcomingBedCharge,
+                              enable: v,
+                            },
+                          })
+                        }
+                        options={["NO", "YES"]}
+                      />
+                    </div>
+                    {accommodation.upcomingBedCharge.enable === "YES" && (
+                      <SubsidyField
+                        label="Amount"
+                        priceObj={accommodation.upcomingBedCharge}
+                        onChange={(v: any) =>
+                          setAccommodation({
+                            ...accommodation,
+                            upcomingBedCharge: {
+                              ...accommodation.upcomingBedCharge,
+                              ...v,
+                            },
+                          })
+                        }
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 7. Laundry & Utility */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  7. Laundry & Utility
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-4 border p-4 bg-slate-50 rounded mt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="font-bold text-slate-600 text-xs">
+                        Laundry Service
+                      </h4>
+                      <button
+                        className="text-xs text-primary-600 font-bold"
+                        onClick={() =>
+                          setUtility({
+                            ...utility,
+                            laundry: [
+                              ...utility.laundry,
+                              {
+                                id: Date.now(),
+                                type: "",
+                                qty: "",
+                                rate: "",
+                                subsidy: "",
+                              },
+                            ],
+                          })
+                        }
+                      >
+                        + Add Item
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {utility.laundry.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="grid grid-cols-4 gap-2 border p-2 bg-white rounded"
+                        >
+                          <Select
+                            label="Type"
+                            value={item.type}
+                            onChange={(v: any) => {
+                              const newArr = [...utility.laundry];
+                              newArr[idx].type = v;
+                              if (
+                                v === "Shirt" ||
+                                v === "Trouser" ||
+                                v === "Towel" ||
+                                v === "Gown" ||
+                                v === "Night Dress" ||
+                                v === "Petticoat / Inskirt"
+                              )
+                                newArr[idx].rate = "10";
+                              if (
+                                v === "Urine-Soiled Garment" ||
+                                v === "Bedsheet / Bedspread"
+                              )
+                                newArr[idx].rate = "20";
+                              if (v === "Urine-Soiled Bedsheet")
+                                newArr[idx].rate = "30";
+                              setUtility({ ...utility, laundry: newArr });
+                            }}
+                            options={[
+                              "Shirt",
+                              "Trouser",
+                              "Towel",
+                              "Gown",
+                              "Night Dress",
+                              "Petticoat / Inskirt",
+                              "Urine-Soiled Garment",
+                              "Bedsheet / Bedspread",
+                              "Urine-Soiled Bedsheet",
+                            ]}
+                          />
+                          <Field
+                            label="Qty"
+                            value={item.qty}
+                            onChange={(v: any) => {
+                              const newArr = [...utility.laundry];
+                              newArr[idx].qty = v;
+                              setUtility({ ...utility, laundry: newArr });
+                            }}
+                          />
+                          <Field
+                            label="Rate"
+                            value={item.rate}
+                            onChange={(v: any) => {
+                              const newArr = [...utility.laundry];
+                              newArr[idx].rate = v;
+                              setUtility({ ...utility, laundry: newArr });
+                            }}
+                          />
+                          <Field
+                            label="Subsidy"
+                            value={item.subsidy}
+                            onChange={(v: any) => {
+                              const newArr = [...utility.laundry];
+                              newArr[idx].subsidy = v;
+                              setUtility({ ...utility, laundry: newArr });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <SubsidyField
+                    label="Electricity"
+                    priceObj={utility.electricity}
+                    onChange={(v: any) =>
+                      setUtility({ ...utility, electricity: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Cleaning"
+                    priceObj={utility.cleaning}
+                    onChange={(v: any) =>
+                      setUtility({ ...utility, cleaning: v })
+                    }
+                  />
+                  <SubsidyField
+                    label="Winding-Up Cleaning"
+                    priceObj={utility.windingUpCleaning}
+                    onChange={(v: any) =>
+                      setUtility({ ...utility, windingUpCleaning: v })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 8. Food & Nutrition */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  8. Food & Nutrition
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="col-span-2 grid grid-cols-4 gap-2 border p-2 bg-slate-50 rounded">
+                    <div className="col-span-4 font-bold text-xs">Milk</div>
+                    <Field
+                      label="Qty"
+                      value={food.milk.qty}
+                      onChange={(v: any) =>
+                        setFood({ ...food, milk: { ...food.milk, qty: v } })
+                      }
+                    />
+                    <Field
+                      label="Rate"
+                      value={food.milk.rate}
+                      onChange={(v: any) =>
+                        setFood({ ...food, milk: { ...food.milk, rate: v } })
+                      }
+                    />
+
+                    <Field
+                      label="Subsidy"
+                      value={food.milk.subsidy}
+                      onChange={(v: any) =>
+                        setFood({ ...food, milk: { ...food.milk, subsidy: v } })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 9. Linen */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  9. Linen
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries(linen).map(([key, item]) => (
+                    <div
+                      key={key}
+                      className="grid grid-cols-4 gap-2 border p-2 rounded-lg bg-slate-50"
                     >
-                        <FileText className="h-4 w-4" />
-                        Generate PDF
-                    </button>
-                    <button
-                        onClick={openWhatsApp}
-                        disabled={isSending}
-                        className={`flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-bold text-white ${isSending ? 'bg-slate-400 cursor-not-allowed' : 'bg-[#25D366] hover:bg-[#1DA851]'}`}
+                      <div className="col-span-4 font-bold text-xs capitalize">
+                        {key.replace(/([A-Z])/g, " $1")}
+                      </div>
+                      <Field
+                        label="Qty"
+                        value={item.qty}
+                        onChange={(v: any) =>
+                          setLinen({ ...linen, [key]: { ...item, qty: v } })
+                        }
+                      />
+                      <Field
+                        label="Rate"
+                        value={item.rate}
+                        onChange={(v: any) =>
+                          setLinen({ ...linen, [key]: { ...item, rate: v } })
+                        }
+                      />
+
+                      <Field
+                        label="Subsidy"
+                        value={item.subsidy}
+                        onChange={(v: any) =>
+                          setLinen({ ...linen, [key]: { ...item, subsidy: v } })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 10. Medical Consumables */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  10. Medical Consumables
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries(medicalConsumables).map(([key, item]) => (
+                    <div
+                      key={key}
+                      className="grid grid-cols-4 gap-2 border p-2 rounded-lg bg-slate-50"
                     >
-                        {isSending ? (
-                            <span className="flex items-center gap-2">
-                                <svg className="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Sending...
+                      <div className="col-span-4 font-bold text-xs capitalize">
+                        {key.replace(/([A-Z])/g, " $1")}
+                      </div>
+                      <Field
+                        label="Qty"
+                        value={item.qty}
+                        onChange={(v: any) =>
+                          setMedicalConsumables({
+                            ...medicalConsumables,
+                            [key]: { ...item, qty: v },
+                          })
+                        }
+                      />
+                      <Field
+                        label="Rate"
+                        value={item.rate}
+                        onChange={(v: any) =>
+                          setMedicalConsumables({
+                            ...medicalConsumables,
+                            [key]: { ...item, rate: v },
+                          })
+                        }
+                      />
+
+                      <Field
+                        label="Subsidy"
+                        value={item.subsidy}
+                        onChange={(v: any) =>
+                          setMedicalConsumables({
+                            ...medicalConsumables,
+                            [key]: { ...item, subsidy: v },
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 14. Billing Summary (Fees) */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  Fees & Previous Balances
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  <Field
+                    label="Previous Pending"
+                    value={billingSummary.previousPending}
+                    onChange={(v: any) =>
+                      setBillingSummary({
+                        ...billingSummary,
+                        previousPending: v,
+                      })
+                    }
+                  />
+                  <Field
+                    label="Late Fee"
+                    value={billingSummary.lateFee}
+                    onChange={(v: any) =>
+                      setBillingSummary({ ...billingSummary, lateFee: v })
+                    }
+                  />
+                  <Field
+                    label="Late Material Fee"
+                    value={billingSummary.lateMaterialFee}
+                    onChange={(v: any) =>
+                      setBillingSummary({
+                        ...billingSummary,
+                        lateMaterialFee: v,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 11 & 12. Internal Tracking: Monthly Essentials & Material Receipt */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/30">
+                <h3 className="font-bold text-indigo-800 uppercase text-xs tracking-wider border-b border-indigo-200 pb-2 mb-4">
+                  Internal Tracking (Not in PDF)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="font-bold text-slate-600 mb-2">
+                      Monthly Essentials Status
+                    </h4>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 border rounded p-2">
+                      {Object.entries(monthlyEssentials)
+                        .filter(([key]) => key !== "availPackage")
+                        .map(([key, item]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="flex items-center justify-between border-b pb-1"
+                          >
+                            <span className="capitalize text-xs">
+                              {key.replace(/([A-Z])/g, " $1")}
                             </span>
-                        ) : (
-                            <><Smartphone className="h-4 w-4" /> Send via WhatsApp</>
-                        )}
-                    </button>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                className="border w-16 text-xs p-1"
+                                placeholder="Qty"
+                                value={item?.qty || ""}
+                                onChange={(e) =>
+                                  setMonthlyEssentials({
+                                    ...monthlyEssentials,
+                                    [key]: { ...item, qty: e.target.value },
+                                  })
+                                }
+                              />
+                              <select
+                                className="border text-xs p-1"
+                                value={item?.status || "Pending"}
+                                onChange={(e) =>
+                                  setMonthlyEssentials({
+                                    ...monthlyEssentials,
+                                    [key]: { ...item, status: e.target.value },
+                                  })
+                                }
+                              >
+                                <option>Pending</option>
+                                <option>Sent</option>
+                              </select>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-600 mb-2">
+                      Material Receipt
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <Field
+                        label="Received Date"
+                        value={materialReceipt.receivedDate}
+                        onChange={(v: any) =>
+                          setMaterialReceipt({
+                            ...materialReceipt,
+                            receivedDate: v,
+                          })
+                        }
+                      />
+                      <Select
+                        label="Received Mode"
+                        value={materialReceipt.receivedMode}
+                        onChange={(v: any) =>
+                          setMaterialReceipt({
+                            ...materialReceipt,
+                            receivedMode: v,
+                          })
+                        }
+                        options={["Self", "Courier", "Online"]}
+                      />
+                    </div>
+                    <div className="space-y-2 border rounded p-2">
+                      {[
+                        "diapers",
+                        "gloves",
+                        "mask",
+                        "underPad",
+                        "rubberSheet",
+                        "medicine",
+                      ].map((key) => (
+                        <div
+                          key={key}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="capitalize text-xs">
+                            {key.replace(/([A-Z])/g, " $1")} Received
+                          </span>
+                          <input
+                            type="text"
+                            className="border w-24 text-xs p-1"
+                            placeholder="Qty"
+                            value={(materialReceipt as any)[key].qty}
+                            onChange={(e) =>
+                              setMaterialReceipt({
+                                ...materialReceipt,
+                                [key]: { qty: e.target.value },
+                              })
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* 15. Material Dispatch (Shows on PDF) */}
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  Materials to be Sent Before 5th
+                </h3>
+                <div className="grid grid-cols-5 gap-4">
+                  <Field
+                    label="Diapers (Qty)"
+                    value={materialDispatch.diapers.qty}
+                    onChange={(v: any) =>
+                      setMaterialDispatch({
+                        ...materialDispatch,
+                        diapers: { qty: v },
+                      })
+                    }
+                  />
+                  <Field
+                    label="Gloves (Qty)"
+                    value={materialDispatch.gloves.qty}
+                    onChange={(v: any) =>
+                      setMaterialDispatch({
+                        ...materialDispatch,
+                        gloves: { qty: v },
+                      })
+                    }
+                  />
+                  <Field
+                    label="Mask (Qty)"
+                    value={materialDispatch.mask.qty}
+                    onChange={(v: any) =>
+                      setMaterialDispatch({
+                        ...materialDispatch,
+                        mask: { qty: v },
+                      })
+                    }
+                  />
+                  <Field
+                    label="Under Pad (Qty)"
+                    value={materialDispatch.underPad.qty}
+                    onChange={(v: any) =>
+                      setMaterialDispatch({
+                        ...materialDispatch,
+                        underPad: { qty: v },
+                      })
+                    }
+                  />
+                  <Field
+                    label="Rubber Sheet (Qty)"
+                    value={materialDispatch.rubberSheet.qty}
+                    onChange={(v: any) =>
+                      setMaterialDispatch({
+                        ...materialDispatch,
+                        rubberSheet: { qty: v },
+                      })
+                    }
+                  />
+                </div>
+              </div>
             </div>
+          )}
+
+          {billType === "HOME_CARE" && (
+            <div className="space-y-6">
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  A. Membership
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    "Monthly Membership",
+                    "Half-Yearly Membership",
+                    "Annual Membership",
+                    "Silver Membership",
+                    "Gold Membership",
+                    "Platinum Membership",
+                  ].map((k) => (
+                    <SubsidyField
+                      key={k}
+                      label={k}
+                      priceObj={homeFields[k]}
+                      onChange={(v: any) =>
+                        setHomeFields({ ...homeFields, [k]: v })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  B. Home Care Services
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    "Home Nursing",
+                    "Caregiver",
+                    "Doctor Visit",
+                    "Physiotherapy",
+                    "Occupational Therapy",
+                    "Speech Therapy",
+                    "Counseling",
+                    "Yoga",
+                    "Palliative Care",
+                    "Dementia Care",
+                    "Alzheimer's Care",
+                  ].map((k) => (
+                    <div key={k} className="border p-2 bg-slate-50 rounded">
+                      <div className="mb-2">
+                        <Field
+                          label={k + " (Qty)"}
+                          value={homeFields[k].qty}
+                          onChange={(v: any) =>
+                            setHomeFields({
+                              ...homeFields,
+                              [k]: { ...homeFields[k], qty: v },
+                            })
+                          }
+                        />
+                      </div>
+                      <SubsidyField
+                        label="Price"
+                        priceObj={homeFields[k]}
+                        onChange={(v: any) =>
+                          setHomeFields({
+                            ...homeFields,
+                            [k]: {
+                              ...homeFields[k],
+                              price: v.price,
+                              subsidy: v.subsidy,
+                              rs: v.price,
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-wider border-b pb-2 mb-4">
+                  C. Home Support Services
+                </h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    "Lab Tests",
+                    "Medicine Delivery",
+                    "Transport",
+                    "Ambulance",
+                    "Beauty Service",
+                    "Legal Service",
+                    "Pooja Service",
+                    "Tours & Travels",
+                    "Rendering Service",
+                    "Essentials Service",
+                  ].map((k) => (
+                    <SubsidyField
+                      key={k}
+                      label={k}
+                      priceObj={homeFields[k]}
+                      onChange={(v: any) =>
+                        setHomeFields({
+                          ...homeFields,
+                          [k]: {
+                            ...homeFields[k],
+                            price: v.price,
+                            subsidy: v.subsidy,
+                            rs: v.price,
+                          },
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 space-y-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/30">
+              <h3 className="font-bold text-indigo-800 uppercase text-xs tracking-wider border-b border-indigo-200 pb-2 mb-4">
+                Balance Summary (Internal Carried Forward)
+              </h3>
+              <div className="grid grid-cols-4 gap-4">
+                <Field
+                  label="Balance Amount"
+                  value={balanceSummary.balanceAmount}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, balanceAmount: v })
+                  }
+                />
+                <Field
+                  label="Monthly Essentials Bal."
+                  value={balanceSummary.monthlyEssentials}
+                  onChange={(v: string) =>
+                    setBalanceSummary({
+                      ...balanceSummary,
+                      monthlyEssentials: v,
+                    })
+                  }
+                />
+                <Field
+                  label="Diapers Bal."
+                  value={balanceSummary.diapers}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, diapers: v })
+                  }
+                />
+                <Field
+                  label="Gloves Bal."
+                  value={balanceSummary.gloves}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, gloves: v })
+                  }
+                />
+                <Field
+                  label="Mask Bal."
+                  value={balanceSummary.mask}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, mask: v })
+                  }
+                />
+                <Field
+                  label="Under Pad Bal."
+                  value={balanceSummary.underPad}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, underPad: v })
+                  }
+                />
+                <Field
+                  label="Rubber Sheet Bal."
+                  value={balanceSummary.rubberSheet}
+                  onChange={(v: string) =>
+                    setBalanceSummary({ ...balanceSummary, rubberSheet: v })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/30">
+              <h3 className="font-bold text-indigo-800 uppercase text-xs tracking-wider border-b border-indigo-200 pb-2 mb-4">
+                Payment Details (Internal)
+              </h3>
+              <div className="grid grid-cols-4 gap-4">
+                <Field
+                  label="Payment Date"
+                  type="date"
+                  value={billingSummary.paymentDate}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, paymentDate: v })
+                  }
+                />
+                <Select
+                  label="Payment Mode"
+                  value={billingSummary.paymentMode}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, paymentMode: v })
+                  }
+                  options={["Cash", "UPI", "Bank Transfer", "Cheque"]}
+                />
+                <Field
+                  label="UPI App"
+                  value={billingSummary.upiApp}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, upiApp: v })
+                  }
+                />
+                <Field
+                  label="Paid Amount"
+                  value={billingSummary.paidAmount}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, paidAmount: v })
+                  }
+                />
+                <Field
+                  label="Transaction ID"
+                  value={billingSummary.transactionId}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, transactionId: v })
+                  }
+                />
+                <Field
+                  label="Bank Name"
+                  value={billingSummary.bankName}
+                  onChange={(v: string) =>
+                    setBillingSummary({ ...billingSummary, bankName: v })
+                  }
+                />
+                <div className="col-span-2">
+                  <Field
+                    label="Remarks"
+                    value={billingSummary.remarks}
+                    onChange={(v: string) =>
+                      setBillingSummary({ ...billingSummary, remarks: v })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm border-l-4 border-l-indigo-500 bg-indigo-50/30">
+              <h3 className="font-bold text-indigo-800 uppercase text-xs tracking-wider border-b border-indigo-200 pb-2 mb-4">
+                Problem Resolution & Feedback (Internal)
+              </h3>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="font-bold text-slate-600 text-xs">
+                    Problem Resolution
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field
+                      label="Reported By"
+                      value={problemResolution.reportedBy}
+                      onChange={(v: string) =>
+                        setProblemResolution({
+                          ...problemResolution,
+                          reportedBy: v,
+                        })
+                      }
+                    />
+                    <Field
+                      label="Category"
+                      value={problemResolution.category}
+                      onChange={(v: string) =>
+                        setProblemResolution({
+                          ...problemResolution,
+                          category: v,
+                        })
+                      }
+                    />
+                    <div className="col-span-2">
+                      <Field
+                        label="Details"
+                        value={problemResolution.details}
+                        onChange={(v: string) =>
+                          setProblemResolution({
+                            ...problemResolution,
+                            details: v,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Field
+                        label="Resolution"
+                        value={problemResolution.resolution}
+                        onChange={(v: string) =>
+                          setProblemResolution({
+                            ...problemResolution,
+                            resolution: v,
+                          })
+                        }
+                      />
+                    </div>
+                    <Field
+                      label="Resolution Date"
+                      type="date"
+                      value={problemResolution.resolutionDate}
+                      onChange={(v: string) =>
+                        setProblemResolution({
+                          ...problemResolution,
+                          resolutionDate: v,
+                        })
+                      }
+                    />
+                    <Select
+                      label="Status"
+                      value={problemResolution.status}
+                      onChange={(v: string) =>
+                        setProblemResolution({
+                          ...problemResolution,
+                          status: v,
+                        })
+                      }
+                      options={["Open", "In Progress", "Resolved"]}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-bold text-slate-600 text-xs">Feedback</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      label="Rating"
+                      value={feedback.rating}
+                      onChange={(v: string) =>
+                        setFeedback({ ...feedback, rating: v })
+                      }
+                      options={["Excellent", "Good", "Average", "Poor"]}
+                    />
+                    <div className="col-span-2">
+                      <Field
+                        label="Feedback"
+                        value={feedback.feedback}
+                        onChange={(v: string) =>
+                          setFeedback({ ...feedback, feedback: v })
+                        }
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Field
+                        label="Complaint"
+                        value={feedback.complaint}
+                        onChange={(v: string) =>
+                          setFeedback({ ...feedback, complaint: v })
+                        }
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Field
+                        label="Follow-up Required?"
+                        value={feedback.followUp}
+                        onChange={(v: string) =>
+                          setFeedback({ ...feedback, followUp: v })
+                        }
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Field
+                        label="Remarks"
+                        value={feedback.remarks}
+                        onChange={(v: string) =>
+                          setFeedback({ ...feedback, remarks: v })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm border-l-4 border-l-amber-500 bg-amber-50/30">
+              <h3 className="font-bold text-amber-800 uppercase text-xs tracking-wider border-b border-amber-200 pb-2 mb-4">
+                Payment Instructions Configuration
+              </h3>
+              <div className="grid grid-cols-4 gap-4">
+                <Field
+                  label="UPI ID"
+                  value={paymentInstructions.upiId}
+                  onChange={(v: string) =>
+                    setPaymentInstructions({ ...paymentInstructions, upiId: v })
+                  }
+                />
+                <Field
+                  label="Account Name"
+                  value={paymentInstructions.accountName}
+                  onChange={(v: string) =>
+                    setPaymentInstructions({
+                      ...paymentInstructions,
+                      accountName: v,
+                    })
+                  }
+                />
+                <Field
+                  label="Account Number"
+                  value={paymentInstructions.accountNumber}
+                  onChange={(v: string) =>
+                    setPaymentInstructions({
+                      ...paymentInstructions,
+                      accountNumber: v,
+                    })
+                  }
+                />
+                <Field
+                  label="IFSC Code"
+                  value={paymentInstructions.ifsc}
+                  onChange={(v: string) =>
+                    setPaymentInstructions({ ...paymentInstructions, ifsc: v })
+                  }
+                />
+                <Field
+                  label="Bank Name"
+                  value={paymentInstructions.bankName}
+                  onChange={(v: string) =>
+                    setPaymentInstructions({
+                      ...paymentInstructions,
+                      bankName: v,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
         </div>
-    )
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] z-10">
+        <div className="flex items-center gap-6">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Gross Amount
+            </div>
+            <div className="text-xl font-bold text-slate-900">
+              {invoiceMoney(totalAmount)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              UNCF Subsidy
+            </div>
+            <div className="text-xl font-bold text-red-600">
+              - {invoiceMoney(subsidy)}
+            </div>
+          </div>
+          <div className="border-l border-slate-200 pl-6">
+            <div className="text-xs font-bold uppercase tracking-wider text-primary-600">
+              Total Payable
+            </div>
+            <div className="text-2xl font-black text-primary-700">
+              {invoiceMoney(totalPayable)}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setPreviewHtml(generateHtml());
+              setShowPreview(true);
+            }}
+            className="flex h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Preview Bill
+          </button>
+          <button
+            onClick={openPreview}
+            className="flex h-11 items-center gap-2 rounded-lg bg-slate-100 px-5 text-sm font-bold text-slate-700 hover:bg-slate-200"
+          >
+            <FileText className="h-4 w-4" />
+            Generate PDF
+          </button>
+          <button
+            onClick={openWhatsApp}
+            disabled={isSending}
+            className={`flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-bold text-white ${isSending ? "bg-slate-400 cursor-not-allowed" : "bg-[#25D366] hover:bg-[#1DA851]"}`}
+          >
+            {isSending ? (
+              <span className="flex items-center gap-2">
+                <svg
+                  className="h-4 w-4 animate-spin text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Sending...
+              </span>
+            ) : (
+              <>
+                <Smartphone className="h-4 w-4" /> Send via WhatsApp
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="flex h-[90vh] w-[900px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-lg font-bold text-slate-800">Bill Preview</h2>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="rounded p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto bg-slate-100 p-8">
+              <div
+                className="mx-auto min-h-full max-w-[800px] bg-white p-8 shadow-sm"
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              ></div>
+            </div>
+            <div className="border-t p-4 text-right bg-slate-50">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="rounded-lg bg-slate-800 px-6 py-2 text-sm font-bold text-white hover:bg-slate-700"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
