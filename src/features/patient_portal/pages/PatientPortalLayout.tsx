@@ -1,6 +1,6 @@
-import React from 'react';
+// import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, Activity, User } from 'lucide-react';
+import { LogOut, Activity } from 'lucide-react';
 import { PatientPortalService } from '../services';
 
 const PatientPortalLayout = () => {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Activity, Pill, Utensils, ReceiptText, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Activity, Pill, Utensils, ReceiptText } from 'lucide-react';
 import { PatientPortalService } from '../services';
 import type { VitalSign, Medication, Nutrition, Invoice } from '../types';
 

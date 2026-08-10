@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../components/PageHeader';
-import { Plus, Users, UserCheck, Briefcase, FileText, CheckCircle, Table, Download, LayoutGrid } from 'lucide-react';
+import { Plus, Users, Briefcase, FileText, CheckCircle, Table, Download, LayoutGrid } from 'lucide-react';
 import { api } from '../../../lib/axios';
 import { format } from 'date-fns';
 
@@ -15,7 +15,7 @@ const STAGES = [
 export function CandidatePipeline() {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'pipeline' | 'sheet'>('pipeline');
   
@@ -385,7 +385,7 @@ HR Department`;
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((c, i) => {
+                {candidates.map((c) => {
                   const d = c.details || {};
                   return (
                     <tr key={c.id} className="border-b dark:border-white/5 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors whitespace-nowrap bg-white dark:bg-transparent">
