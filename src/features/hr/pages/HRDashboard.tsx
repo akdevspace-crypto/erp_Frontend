@@ -21,7 +21,8 @@ const hrActions = [
     { title: 'Staff Management', description: 'Add, edit, and manage real staff records.', href: '/hr/staff', icon: Users },
     { title: 'Staff Privileges', description: 'Control staff menu and module access.', href: '/hr/staff-privilege', icon: UserCog },
     { title: 'Attendance', description: 'View staff check-in and attendance logs.', href: '/hr/attendance', icon: CalendarCheck },
-    { title: 'Payroll', description: 'Salary preview and payroll processing.', href: '/hr/payroll', icon: CreditCard }
+    { title: 'Payroll', description: 'Salary preview and payroll processing.', href: '/hr/payroll', icon: CreditCard },
+    { title: 'Recruitment', description: 'Manage candidate pipeline and job placements.', href: '/hr/recruitment', icon: Users }
 ]
 
 export function HRDashboard() {

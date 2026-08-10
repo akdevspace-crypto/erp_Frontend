@@ -4,6 +4,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { useToast } from '../../../components/Toast'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { hrService } from '../services/hr'
+import { useStaff } from '../hooks/useHR'
 import { useUnits } from '../../master/hooks/useUnit'
 
 function CustomSwitch({ checked, onChange, onText = 'View Access Only', offText = 'View Access Only' }: { checked: boolean, onChange: () => void, onText?: string, offText?: string }) {
@@ -95,10 +96,7 @@ export function StaffMenuPrivilege() {
     const { toast } = useToast()
     const queryClient = useQueryClient()
 
-    const { data: staffData } = useQuery({
-        queryKey: ['staff'],
-        queryFn: hrService.getStaff
-    })
+    const { data: staffData = [], isLoading } = useStaff({ includeFormer: true, scope: 'all' })
 
     const { data: unitsList = [] } = useUnits()
 
@@ -162,8 +160,12 @@ export function StaffMenuPrivilege() {
         }
     }
 
-    if (!staff) {
+    if (isLoading) {
         return <div className="p-8 text-center text-gray-500">Loading Staff Details...</div>
+    }
+
+    if (!staff) {
+        return <div className="p-8 text-center text-red-500">Staff not found or access denied.</div>
     }
 
     return (

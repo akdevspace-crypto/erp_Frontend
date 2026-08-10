@@ -37,7 +37,7 @@ type PrivilegeFormInput = z.input<typeof privilegeFormSchema>
 type PrivilegeFormValues = z.output<typeof privilegeFormSchema>
 
 export function StaffPrivilege() {
-    const { data: staffData = [] } = useStaff({ includeFormer: true })
+    const { data: staffData = [] } = useStaff({ includeFormer: true, scope: 'all' })
     const { data: roleList = [] } = useRoles()
     const { data: units = [] } = useUnits()
     const queryClient = useQueryClient()
@@ -60,11 +60,12 @@ export function StaffPrivilege() {
         defaultValues: { staffId: '', unitId: '', email: '', password: '', roleId: '', isActive: true }
     })
     const selectedStaffId = watch('staffId')
-
-    const filteredData = staffData.filter(s =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.empId.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const filteredData = searchQuery.trim()
+        ? staffData.filter(s =>
+            (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (s.empId || '').toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : staffData
 
     const approvalRoleOptions = useMemo(() => {
         const fallbackRoles = [
@@ -222,7 +223,7 @@ export function StaffPrivilege() {
 
             <div className="bg-white dark:bg-black p-4 rounded-lg border border-gray-200 dark:border-white/10 shadow-sm flex items-center justify-between">
                 <div>
-                    <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100">List of Staffs having Login Privilege</h3>
+                    <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100">List of Staffs having Login Privilege (Total: {staffData.length})</h3>
                 </div>
                 <div className="flex gap-3">
                     <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">Enable Live Monitoring</button>
