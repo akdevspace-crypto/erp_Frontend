@@ -1,4 +1,4 @@
-import { Sun, Moon, LayoutDashboard, Users, Calendar, HeartPulse, LogOut, Settings, HelpCircle, Database, Briefcase, FileBox, IndianRupee, Activity, ClipboardList, ClipboardCheck, Headset, Receipt, CreditCard, PenTool, User, Bell, MessageSquare, PhoneCall, FileText, HandHelping, MapPin, Building2, Network, Badge, Bed, TrendingUp, TrendingDown, Wallet, Landmark, UserCog, GraduationCap, Clock, DoorOpen, ListChecks, Pill, Ambulance, Radio, FilePenLine, FolderArchive } from 'lucide-react'
+import { Sun, Moon, LayoutDashboard, Users, Calendar, HeartPulse, LogOut, Settings, HelpCircle, Database, Briefcase, FileBox, IndianRupee, Activity, ClipboardList, ClipboardCheck, Headset, Receipt, CreditCard, PenTool, User, Bell, MessageSquare, PhoneCall, FileText, HandHelping, MapPin, Building2, Network, Badge, Bed, TrendingUp, TrendingDown, Wallet, Landmark, UserCog, GraduationCap, Clock, DoorOpen, ListChecks, Pill, Ambulance, Radio, FilePenLine, FolderArchive, FolderKanban, PiggyBank, Megaphone, HeartHandshake, FileBarChart, AlertTriangle, Stethoscope } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useAuthStore } from '../store/authStore'
@@ -6,7 +6,7 @@ import { canAccessPath } from '../lib/access'
 
 type MenuLink = { name: string, icon: any, href: string }
 
-const roleDashboardOwners: Record<string, string> = {
+const roleDashboardOwners: Record<string, string | string[]> = {
     '/master/dashboard': 'master data manager',
     '/finance/dashboard': 'finance manager',
     '/hr/manager-dashboard': 'hr manager',
@@ -20,7 +20,8 @@ const roleDashboardOwners: Record<string, string> = {
     '/inventory/elder-dashboard': 'elder inventory manager',
     '/task-log/dashboard': 'task log coordinator',
     '/finance/elder-dashboard': 'elder finance manager',
-    '/healthcare/patient-care-dashboard': 'patient care manager',
+    '/module/patient-care': ['patient_care_manager', 'caregiver'],
+    '/module/nursing-care': ['nursing_manager', 'nurse'],
     '/healthcare/medical-monitor-dashboard': 'medical monitor coordinator',
     '/allocation/dashboard': 'care allocation manager',
     '/inventory/medical-dashboard': 'medical inventory manager',
@@ -50,7 +51,9 @@ const getNormalizedRole = (role: unknown) => {
 }
 
 const getRoleDashboardLink = (role: string) => {
-    const entry = Object.entries(roleDashboardOwners).find(([, ownerRole]) => ownerRole === role)
+    const entry = Object.entries(roleDashboardOwners).find(([, ownerRole]) => 
+        Array.isArray(ownerRole) ? ownerRole.includes(role) : ownerRole === role
+    )
     if (!entry) return null
 
     const [href] = entry
@@ -196,7 +199,25 @@ const omnichannelMenus: MenuLink[] = [
 ]
 
 const securityCommandMenus: MenuLink[] = [
-    { name: 'Security', icon: DoorOpen, href: '/module/ueo-security' }
+    { name: 'Security', icon: DoorOpen, href: '/module/ueo-security' },
+    { name: 'Visitor Management', icon: Users, href: '/visitor-module' }
+]
+
+const patientCareMenus: MenuLink[] = [
+    { name: 'Patient Care Dashboard', icon: LayoutDashboard, href: '/module/patient-care' },
+    { name: 'Patient Overview', icon: Stethoscope, href: '/patient-care/dashboard' },
+    { name: 'Daily Living (ADL)', icon: HeartHandshake, href: '/patient-care/adl' },
+    { name: 'Nutrition & Diet', icon: ClipboardList, href: '/patient-care/nutrition-diet' },
+    { name: 'Incident Reports', icon: AlertTriangle, href: '/patient-care/incidents' }
+]
+
+const nursingCareMenus: MenuLink[] = [
+    { name: 'Nursing Dashboard', icon: LayoutDashboard, href: '/module/nursing-care' },
+    { name: 'Medication Schedule', icon: Pill, href: '/nursing-care/medication-schedule' },
+    { name: 'Medicine Issue Log', icon: FileText, href: '/nursing-care/medicine-issue-log' },
+    { name: 'Medicine Requests', icon: MessageSquare, href: '/nursing-care/medicine-requests' },
+    { name: 'Vitals Monitoring', icon: HeartPulse, href: '/nursing-care/vitals' },
+    { name: 'Critical Patients', icon: Activity, href: '/nursing-care/critical-patients' }
 ]
 
 export const subMenus: Record<string, MenuLink[]> = {
@@ -212,7 +233,14 @@ export const subMenus: Record<string, MenuLink[]> = {
         ...adminFileMenus
     ],
     'UNCF': [
-        { name: 'Foundation Command Center', icon: HandHelping, href: '/uncf/dashboard' }
+        { name: 'Foundation Command Center', icon: HandHelping, href: '/uncf/dashboard' },
+        { name: 'Projects', icon: FolderKanban, href: '/uncf/projects' },
+        { name: 'Funding', icon: PiggyBank, href: '/uncf/funding' },
+        { name: 'Outreach', icon: Megaphone, href: '/uncf/outreach' },
+        { name: 'People', icon: Users, href: '/uncf/people' },
+        { name: 'Donations', icon: HeartHandshake, href: '/uncf/donations' },
+        { name: 'Reports', icon: FileBarChart, href: '/uncf/reports' },
+        { name: 'Admin', icon: Settings, href: '/uncf/admin' }
     ],
     'Super Admin': superAdminMenus,
     'Master': masterMenus,
@@ -264,7 +292,10 @@ export const subMenus: Record<string, MenuLink[]> = {
     'Enquiry Desk': enquiryMenus,
     'Customer Relations': customerCareMenus,
     'Omnichannel': omnichannelMenus,
-    'Security': securityCommandMenus
+    'Security': securityCommandMenus,
+    
+    'Patient Care': patientCareMenus,
+    'Nursing Care': nursingCareMenus
 }
 
 export function Sidebar({ activeMenu }: { activeMenu: string }) {
@@ -273,22 +304,27 @@ export function Sidebar({ activeMenu }: { activeMenu: string }) {
     const user = useAuthStore((state) => state.user)
     const logout = useAuthStore((state) => state.logout)
     const normalizedRole = getNormalizedRole(user?.role)
-    const isStaffSelfService = Boolean(user?.staffId)
     const isClientPortal = ['family member', 'client', 'client family member'].includes(normalizedRole)
     const canShowLink = (link: MenuLink) => {
         const ownerRole = roleDashboardOwners[link.href]
         if (link.href === '/task-user/dashboard' && user?.staffId) return canAccessPath(user, link.href)
-        if (ownerRole && ownerRole !== normalizedRole) return false
+        if (ownerRole) {
+            if (Array.isArray(ownerRole)) {
+                if (!ownerRole.includes(normalizedRole)) return false
+            } else {
+                if (ownerRole !== normalizedRole) return false
+            }
+        }
         return canAccessPath(user, link.href)
     }
 
     const homeLinks = subMenus['Home'].filter(canShowLink)
     const uncfLinks = subMenus['UNCF'].filter(canShowLink)
     const fallbackLinks = homeLinks.length > 0 ? homeLinks : uncfLinks
-    const currentLinks = (isStaffSelfService ? profileMenus : isClientPortal ? clientPortalMenus : (subMenus[activeMenu] || [])).filter(canShowLink)
+    const currentLinks = (isClientPortal ? clientPortalMenus : (subMenus[activeMenu] || [])).filter(canShowLink)
     const baseVisibleLinks = currentLinks.length > 0 ? currentLinks : fallbackLinks
     const roleDashboardLink = getRoleDashboardLink(normalizedRole)
-    const combinedLinks = roleDashboardLink && !isStaffSelfService && canShowLink(roleDashboardLink) && !baseVisibleLinks.some((link) => link.href === roleDashboardLink.href)
+    const combinedLinks = roleDashboardLink && canShowLink(roleDashboardLink) && !baseVisibleLinks.some((link) => link.href === roleDashboardLink.href)
         ? [roleDashboardLink, ...baseVisibleLinks]
         : baseVisibleLinks
     const visibleLinks = Array.from(new Map(combinedLinks.map((link) => [link.href, link])).values())

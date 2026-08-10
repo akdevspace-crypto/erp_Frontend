@@ -62,10 +62,7 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
         'omnichannel coordinator': [{ name: 'UEO', items: ['UEO'] }]
     }
     const menuGroups = useMemo(() => (
-        isStaffSelfService ? [
-            { name: 'Home', items: ['Home'] },
-            { name: 'Profile', items: ['Profile'] }
-        ] : isClientPortal ? [
+        isClientPortal ? [
             { name: 'Client Portal', items: ['Client Portal'] }
         ] : roleScopedMenuGroups[normalizedRole] || [
             { name: 'Home', items: ['Home'] },
@@ -75,7 +72,7 @@ export function Navbar({ activeMenu, setActiveMenu }: { activeMenu: string, setA
             { name: 'UA', items: ['UA'] },
             { name: 'UEO', items: ['UEO'] }
         ]
-    ), [isClientPortal, isStaffSelfService, normalizedRole])
+    ), [isClientPortal, normalizedRole])
     const accessibleUnits = useMemo(
         () => hasAllAccess(user) ? units : units.filter((unit) => hasUnitAccess(user, unit.id)),
         [units, user]
