@@ -92,6 +92,19 @@ export function SecurityDashboard() {
                 ))}
             </div>
 
+            <div className="grid gap-3 md:grid-cols-3">
+                {[
+                    { label: 'Visitor Register', href: '/security/visitor-management' },
+                    { label: 'Vehicle Register', href: '/security/vehicle-register' },
+                    { label: 'Staff Register', href: '/security/staff-register' }
+                ].map((item) => (
+                    <Link key={item.href} to={item.href} className="rounded-2xl border border-slate-100 bg-white p-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-primary-50 hover:text-primary-700">
+                        <ClipboardList className="mb-3 h-5 w-5 text-primary-600" />
+                        {item.label}
+                    </Link>
+                ))}
+            </div>
+
             <section className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -118,6 +131,7 @@ export function SecurityDashboard() {
                     </div>
                 </div>
                 <DataTable
+                    fullHeight={false}
                     data={queueRows}
                     columns={columns}
                     keyExtractor={(entry) => entry.id}
@@ -131,18 +145,6 @@ export function SecurityDashboard() {
                 />
             </section>
 
-            <div className="grid gap-3 md:grid-cols-3">
-                {[
-                    { label: 'Visitor Register', href: '/security/visitor-management' },
-                    { label: 'Vehicle Register', href: '/security/vehicle-register' },
-                    { label: 'Staff Register', href: '/security/staff-register' }
-                ].map((item) => (
-                    <Link key={item.href} to={item.href} className="rounded-2xl border border-slate-100 bg-white p-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-primary-50 hover:text-primary-700">
-                        <ClipboardList className="mb-3 h-5 w-5 text-primary-600" />
-                        {item.label}
-                    </Link>
-                ))}
-            </div>
         </div>
     )
 }
