@@ -4,7 +4,6 @@ import { PageHeader } from '../../../components/PageHeader'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { Modal } from '../../../components/Modal'
-import { useAuthStore } from '../../../store/authStore'
 import { useInvoices } from '../../accounts/hooks/useAccounts'
 import {
     useCreatePatientDailyCost,
@@ -17,7 +16,14 @@ import {
 } from '../hooks/usePatientBilling'
 import type { MedicineCatalogItem, PatientDailyCost, PatientService } from '../services/patientBilling'
 
-const today = () => new Date().toISOString().split('T')[0]
+const getLocalYMD = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+const today = () => getLocalYMD(new Date())
 const patientCostTabs = [
     { key: 'daily', label: 'Daily Sheets' },
     { key: 'lifecycle', label: 'Invoice Lifecycle' },
@@ -28,11 +34,11 @@ type PatientCostTab = typeof patientCostTabs[number]['key']
 
 const monthStart = () => {
     const date = new Date()
-    return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]
+    return getLocalYMD(new Date(date.getFullYear(), date.getMonth(), 1))
 }
 const monthEnd = () => {
     const date = new Date()
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
+    return getLocalYMD(new Date(date.getFullYear(), date.getMonth() + 1, 0))
 }
 
 const categoryByService: Record<string, string[]> = {
@@ -63,7 +69,7 @@ const dateKey = (value?: string | null) => {
     if (!value) return ''
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) return ''
-    return date.toISOString().split('T')[0]
+    return getLocalYMD(date)
 }
 
 const formatSource = (value?: string | null) => {
@@ -204,7 +210,6 @@ const monthlySourceTags = (entry: PatientDailyCost) => {
 }
 
 export function PatientDailyCost() {
-    const currentUser = useAuthStore((state) => state.user)
     const { data: services = [], isLoading: servicesLoading } = usePatientBillingServices()
     const { data: entries = [], isLoading: entriesLoading } = usePatientDailyCosts()
     const { data: medicineCatalog = [] } = useMedicineCatalog()
@@ -387,21 +392,27 @@ export function PatientDailyCost() {
     }, [periodFrom, periodTo, visibleEntries])
 
     const monthlyInvoiceGroups = useMemo<MonthlyInvoiceGroup[]>(() => {
-        const periodRows = visibleEntries.filter((entry) => {
+        console.log('DEBUG: visibleEntries length:', visibleEntries?.length)
+        console.log('DEBUG: periodFrom:', periodFrom, 'periodTo:', periodTo, 'sourceFilter:', sourceFilter)
+        
+        const periodRows = (visibleEntries as any).filter((entry: any) => {
             const cost = dateKey(entry.costDate)
-            const matchesPeriod = cost >= periodFrom && cost <= periodTo
+            const isPendingCompletion = entry.metadata?.billType === 'ENQUIRY_COMPLETION' && !entry.invoiceRefNo && String(entry.status || '').toUpperCase() === 'DRAFT'
+            const hasSearchQuery = search.trim().length > 0;
+            const matchesPeriod = hasSearchQuery || isPendingCompletion || (cost >= periodFrom && cost <= periodTo)
             const matchesSource = sourceFilter === 'ALL' || monthlySourceTags(entry).includes(sourceFilter)
             return matchesPeriod && matchesSource
         })
+        console.log('DEBUG: periodRows length:', periodRows?.length)
         const grouped = new Map<string, PatientDailyCost[]>()
 
-        periodRows.forEach((entry) => {
+        periodRows.forEach((entry: any) => {
             const key = entry.allocationId
             if (!grouped.has(key)) grouped.set(key, [])
             grouped.get(key)?.push(entry)
         })
 
-        return Array.from(grouped.entries())
+        const mapped = Array.from(grouped.entries())
             .map(([id, groupEntries]) => {
                 const sortedEntries = [...groupEntries].sort((a, b) => (
                     dateKey(a.costDate).localeCompare(dateKey(b.costDate)) || String(a.description).localeCompare(String(b.description))
@@ -409,6 +420,7 @@ export function PatientDailyCost() {
                 const first = sortedEntries[0]
                 const draftEntries = sortedEntries.filter((entry) => isDraftLedgerStatus(entry.status) && !entry.invoiceRefNo)
                 const sourceTypes = [...new Set(sortedEntries.map((entry) => formatSource(entry.sourceType)).filter(Boolean))]
+                
                 const sourceSummary = Array.from(sortedEntries.reduce((map, entry) => {
                     const source = formatSource(entry.sourceType)
                     const current = map.get(source) || { name: source, entries: 0, draftEntries: 0, amount: 0, draftAmount: 0 }
@@ -423,6 +435,7 @@ export function PatientDailyCost() {
                     map.set(source, current)
                     return map
                 }, new Map<string, { name: string; entries: number; draftEntries: number; amount: number; draftAmount: number }>()).values())
+                
                 const invoicedCount = sortedEntries.filter((entry) => entry.invoiceRefNo || String(entry.status).toUpperCase() === 'INVOICED').length
 
                 return {
@@ -431,7 +444,7 @@ export function PatientDailyCost() {
                     clientName: first.clientName,
                     allocationId: first.allocationId,
                     serviceType: first.serviceType,
-                    sourceLabel: sourceTypes.length === 1 ? sourceTypes[0] : `${sourceTypes.length} Sources`,
+                    sourceLabel: sourceTypes.length === 1 ? sourceTypes[0] : (sourceTypes.length ? `${sourceTypes.length} Sources` : 'No Activity'),
                     sourceSummary,
                     periodFrom: dateKey(sortedEntries[0].costDate),
                     periodTo: dateKey(sortedEntries[sortedEntries.length - 1].costDate),
@@ -446,7 +459,9 @@ export function PatientDailyCost() {
                             : 'Partially invoiced'
                 }
             })
-            .sort((a, b) => b.periodTo.localeCompare(a.periodTo) || a.patientName.localeCompare(b.patientName))
+            
+        const list = mapped.filter((item) => item !== null) as any as MonthlyInvoiceGroup[]
+        return list.sort((a, b) => b.periodTo.localeCompare(a.periodTo) || a.patientName.localeCompare(b.patientName))
     }, [periodFrom, periodTo, sourceFilter, visibleEntries])
 
     const invoiceLifecycleRows = useMemo(() => {
@@ -579,9 +594,6 @@ export function PatientDailyCost() {
         const patientName = metadata.patientName || receiptService?.patientName || '-'
         const clientName = metadata.clientName || receiptInvoice.clientName || receiptService?.clientName || '-'
         const serviceType = String(metadata.serviceType || receiptService?.serviceLabel || '-').replace(/_/g, ' ')
-        const billingFrom = metadata.billingPeriodFrom || periodFrom
-        const billingTo = metadata.billingPeriodTo || periodTo
-        const status = String(metadata.invoiceWorkflowStatus || receiptInvoice.status || 'Generated').replace(/_/g, ' ')
         const generatedAt = new Date()
         const upi = metadata.upiId || upiId
         const accountHolder = 'Universal Elder Care'
@@ -590,7 +602,6 @@ export function PatientDailyCost() {
         const upiUri = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(accountHolder)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(receiptInvoice.refNo || 'Monthly Patient Invoice')}`
         const qrSrc = qrImageUrl || `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`
         const logoSrc = `${window.location.origin}/logo-uec.png`
-        const generatedBy = currentUser?.name || currentUser?.email || 'System'
 
         const getSum = (regex: RegExp) => {
             const sum = receiptEntries.filter((e) => regex.test(`${e.category} ${e.description}`)).reduce((s, e) => s + Number(e.amount || 0), 0)
@@ -605,262 +616,353 @@ export function PatientDailyCost() {
         const totalPayable = Number(receiptInvoice.amount || 0) - Number(uncfSubsidy)
         
         const currentMonthName = generatedAt.toLocaleString('default', { month: 'long' })
-        const currentYear = generatedAt.getFullYear()
+
+        const renderRow = (desc: string, amount: number | string | undefined, subsidy: number = 0) => {
+            const price = Number(amount) || 0;
+            if (price <= 0) return '';
+            const sub = Number(subsidy) || 0;
+            const payable = price - sub;
+            return `
+                <tr>
+                    <td>${htmlEscape(desc)}</td>
+                    <td class="text-right">Rs ${invoiceMoney(price)}</td>
+                    <td class="text-right">Rs ${invoiceMoney(sub)}</td>
+                    <td class="text-right">Rs ${invoiceMoney(payable)}</td>
+                </tr>
+            `;
+        };
+
+        const renderSection = (title: string, rowsHtml: string) => {
+            if (!rowsHtml.trim()) return '';
+            return `
+                <tr class="section-header">
+                    <td colspan="4">${htmlEscape(title)}</td>
+                </tr>
+                ${rowsHtml}
+            `;
+        };
+
+        const billType = (serviceType === 'HOME CARE' || serviceType === 'HOME_CARE') ? 'HOME_CARE' : 'ELDER_CARE';
+
+        let elderRows = "";
+        
+        let careRows = "";
+        careRows += renderRow("Care Service Charges", getSum(/care service|service bill/i));
+        careRows += renderRow("Care Giver", getSum(/care giver/i));
+        careRows += renderRow("Nursing Care", getSum(/nursing/i));
+        careRows += renderRow("Special Care", getSum(/special/i));
+        careRows += renderRow("Palliative Care", getSum(/palliative/i));
+        careRows += renderRow("Dementia Care", getSum(/dementia/i));
+        careRows += renderRow("Alzheimer's Care", getSum(/alzheimer/i));
+        careRows += renderRow(`Dressing (Qty: ${getQty(/dressing/i) || 1})`, getSum(/dressing/i));
+        careRows += renderRow(`First Aid (Qty: ${getQty(/first aid/i) || 1})`, getSum(/first aid/i));
+        elderRows += renderSection("CARE STAFF SERVICES", careRows);
+
+        let therapyRows = "";
+        therapyRows += renderRow("Doctor Visit", getSum(/doctor/i));
+        therapyRows += renderRow("Physiotherapy", getSum(/physio/i));
+        therapyRows += renderRow("Occupational Therapy", getSum(/occupational/i));
+        therapyRows += renderRow("Speech Therapy", getSum(/speech/i));
+        therapyRows += renderRow("Geriatric Counseling", getSum(/geriatric/i));
+        therapyRows += renderRow("Psychiatric Counseling", getSum(/psychiatric|counsel/i));
+        therapyRows += renderRow("Yoga", getSum(/yoga/i));
+        elderRows += renderSection("THERAPY & CONSULTATION", therapyRows);
+
+        let medRows = "";
+        medRows += renderRow("Medicine", getSum(/medicine/i));
+        medRows += renderRow("Lab Test", getSum(/lab|test/i));
+        medRows += renderRow("ICU at Home", getSum(/icu/i));
+        medRows += renderRow("Surgical Eq / Rental", getSum(/surgical|equipment|rental/i));
+        elderRows += renderSection("MEDICAL SUPPORT", medRows);
+
+        let transportRows = "";
+        transportRows += renderRow("Ambulance", getSum(/ambulance/i));
+        transportRows += renderRow("Taxi", getSum(/taxi/i));
+        transportRows += renderRow("Auto", getSum(/auto/i));
+        transportRows += renderRow("Senior Friendly Cab", getSum(/senior cab|cab/i));
+        elderRows += renderSection("TRANSPORTATION", transportRows);
+
+        let lifeRows = "";
+        lifeRows += renderRow("Beauty Service", getSum(/beauty|haircut/i));
+        elderRows += renderSection("PERSONAL & LIFESTYLE SERVICES", lifeRows);
+
+        let accRows = "";
+        accRows += renderRow("Bed Charges", getSum(/bed charge|accommodation|rent/i));
+        accRows += renderRow("Upcoming Month Bed Charge", getSum(/upcoming/i));
+        elderRows += renderSection("ACCOMMODATION", accRows);
+
+        let utilRows = "";
+        utilRows += renderRow("Laundry", getSum(/laundry/i));
+        utilRows += renderRow("Electricity", getSum(/eb|electricity/i));
+        utilRows += renderRow("Cleaning", getSum(/cleaning/i));
+        utilRows += renderRow("Winding-up Cleaning", getSum(/winding/i));
+        elderRows += renderSection("LAUNDRY & UTILITY", utilRows);
+
+        let foodRows = "";
+        foodRows += renderRow("Milk", getSum(/milk/i));
+        elderRows += renderSection("FOOD & NUTRITION", foodRows);
+
+        let linenRows = "";
+        linenRows += renderRow("New Dress", getSum(/dress/i));
+        linenRows += renderRow("New Towel", getSum(/towel/i));
+        linenRows += renderRow("New Bedspread", getSum(/bedspread/i));
+        linenRows += renderRow("New Blanket", getSum(/blanket/i));
+        linenRows += renderRow("New Pillow Cover", getSum(/pillow/i));
+        linenRows += renderRow("New Airbed", getSum(/airbed/i));
+        linenRows += renderRow("Stitching", getSum(/stitching/i));
+        elderRows += renderSection("LINEN & PERSONAL ITEMS", linenRows);
+
+        let consRows = "";
+        consRows += renderRow(`Diapers (Qty: ${getQty(/diaper/i) || 1})`, getSum(/diaper/i));
+        consRows += renderRow(`Gloves (Qty: ${getQty(/glove/i) || 1})`, getSum(/glove/i));
+        consRows += renderRow(`Mask (Qty: ${getQty(/mask/i) || 1})`, getSum(/mask/i));
+        consRows += renderRow(`Under Pad (Qty: ${getQty(/under pad|underpad/i) || 1})`, getSum(/under pad|underpad/i));
+        consRows += renderRow(`Bed Wipes (Qty: ${getQty(/bed wipe/i) || 1})`, getSum(/bed wipe/i));
+        consRows += renderRow(`Catheter (Qty: ${getQty(/catheter/i) || 1})`, getSum(/catheter/i));
+        consRows += renderRow(`Uro Bag (Qty: ${getQty(/uro bag/i) || 1})`, getSum(/uro bag/i));
+        consRows += renderRow(`Rubber Sheet (Qty: ${getQty(/rubber sheet/i) || 1})`, getSum(/rubber sheet/i));
+        consRows += renderRow(`Oxygen (Qty: ${getQty(/oxygen|o2/i) || 1})`, getSum(/oxygen|o2/i));
+        consRows += renderRow(`Nebulizer (Qty: ${getQty(/nebulizer/i) || 1})`, getSum(/nebulizer/i));
+        elderRows += renderSection("MEDICAL CONSUMABLES", consRows);
+
+        let feesRows = "";
+        feesRows += renderRow("Previous Pending", getSum(/pending|previous/i));
+        feesRows += renderRow("Late Fee", getSum(/late fee/i));
+        feesRows += renderRow("Late Material Fee", getSum(/late material/i));
+        feesRows += renderRow("Balance Amount", getSum(/balance amount/i));
+        feesRows += renderRow("Monthly Essentials Balance", getSum(/monthly essential/i));
+        feesRows += renderRow("Consumables", getSum(/consumable/i));
+        feesRows += renderRow("Other Charges", getSum(/other/i));
+        elderRows += renderSection("FEES & BALANCES", feesRows);
+
+        let homeRows = "";
+        let homeMem = "";
+        homeMem += renderRow("Monthly Membership", getSum(/monthly mem/i));
+        homeMem += renderRow("Half-Yearly Membership", getSum(/half-yearly/i));
+        homeMem += renderRow("Annual Membership", getSum(/annual/i));
+        homeMem += renderRow("Silver Membership", getSum(/silver/i));
+        homeMem += renderRow("Gold Membership", getSum(/gold/i));
+        homeMem += renderRow("Platinum Membership", getSum(/platinum/i));
+        homeRows += renderSection("A. MEMBERSHIP", homeMem);
+
+        let homeCare = "";
+        homeCare += renderRow("Care Service Charges", getSum(/care service|service bill/i));
+        homeCare += renderRow("Home Nursing", getSum(/nursing/i));
+        homeCare += renderRow("Caregiver", getSum(/caregiver|care giver/i));
+        homeCare += renderRow("Doctor Visit", getSum(/doctor/i));
+        homeCare += renderRow("Physiotherapy", getSum(/physio/i));
+        homeCare += renderRow("Occupational Therapy", getSum(/occupational/i));
+        homeCare += renderRow("Speech Therapy", getSum(/speech/i));
+        homeCare += renderRow("Counseling", getSum(/counseling/i));
+        homeCare += renderRow("Yoga", getSum(/yoga/i));
+        homeCare += renderRow("Palliative Care", getSum(/palliative/i));
+        homeCare += renderRow("Dementia Care", getSum(/dementia/i));
+        homeCare += renderRow("Alzheimer's Care", getSum(/alzheimer/i));
+        homeRows += renderSection("B. HOME CARE SERVICES", homeCare);
+
+        let homeSupport = "";
+        homeSupport += renderRow("Lab Tests", getSum(/lab/i));
+        homeSupport += renderRow("Medicine Delivery", getSum(/medicine/i));
+        homeSupport += renderRow("Transport", getSum(/transport/i));
+        homeSupport += renderRow("Ambulance", getSum(/ambulance/i));
+        homeSupport += renderRow("Beauty Service", getSum(/beauty/i));
+        homeSupport += renderRow("Legal Service", getSum(/legal/i));
+        homeSupport += renderRow("Pooja Service", getSum(/pooja/i));
+        homeSupport += renderRow("Tours & Travels", getSum(/tour/i));
+        homeSupport += renderRow("Rendering Service", getSum(/rendering/i));
+        homeSupport += renderRow("Essentials Service", getSum(/essential/i));
+        homeSupport += renderRow("Equipment / Rental", getSum(/equipment|rental/i));
+        homeSupport += renderRow("Consumables", getSum(/consumable/i));
+        homeSupport += renderRow("Other Charges", getSum(/other/i));
+        homeRows += renderSection("C. HOME SUPPORT SERVICES", homeSupport);
+
+        const invoiceTableHtml = `
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Description</th>
+                        <th style="text-align: right; width: 100px;">Amount</th>
+                        <th style="text-align: right; width: 100px;">UNCF Subsidy</th>
+                        <th style="text-align: right; width: 100px;">Net Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${billType === "ELDER_CARE" ? elderRows : homeRows}
+                </tbody>
+            </table>
+        `;
+
+        const dispatchHtml = `
+            <div class="mt-4" style="border: 1px solid #dbe5ef; border-radius: 6px; padding: 14px; background: #fafcff; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 10px; color: #334155; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;">Materials to be Sent Before 5th of Every Month</h3>
+                <table class="patient-table">
+                    <tbody>
+                        <tr><td>Diapers</td><td>0 Nos</td></tr>
+                        <tr><td>Gloves</td><td>0 Nos</td></tr>
+                        <tr><td>Mask</td><td>0 Nos</td></tr>
+                        <tr><td>Under Pad</td><td>0 Nos</td></tr>
+                        <tr><td>Rubber Sheet</td><td>0 Nos</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
 
         const html = `<!doctype html>
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>${htmlEscape(receiptInvoice.refNo || 'Monthly Patient Invoice')}</title>
+    <title>Patient Service Bill - ${htmlEscape(patientName)}</title>
     <style>
         @page { size: A4; margin: 16mm; }
         * { box-sizing: border-box; }
-        body { margin: 0; background: #f1f5f9; color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+        body { margin: 0; background: #fff; color: #172033; font-family: "Times New Roman", Times, serif; font-size: 11px; }
         .sheet { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; padding: 22px; }
+        
         .header { display: grid; grid-template-columns: 1fr auto; gap: 20px; border-bottom: 2px solid #0f766e; padding-bottom: 16px; }
         .brand { display: flex; gap: 14px; align-items: center; }
         .logo { width: 58px; height: 58px; object-fit: contain; }
-        h1 { margin: 0; font-size: 20px; color: #0f2f3f; }
+        h1 { margin: 0; font-size: 18px; color: #0f2f3f; }
         .muted { color: #64748b; line-height: 1.45; }
         .title { text-align: right; }
-        .title h2 { margin: 0; font-size: 18px; color: #0f766e; }
+        .title h2 { margin: 0; font-size: 16px; color: #0f766e; }
         .badge { display: inline-block; margin-top: 8px; border-radius: 999px; padding: 5px 12px; background: #ecfdf5; color: #047857; font-weight: 800; text-transform: uppercase; font-size: 10px; }
+        
+        .profile-table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; border: 1px solid #dbe5ef; }
+        .profile-table td { padding: 8px; border: 1px solid #dbe5ef; font-size: 11px; }
+        .profile-table td:nth-child(odd) { font-weight: bold; background: #f8fafc; color: #334155; width: 25%; }
+        .profile-table td:nth-child(even) { width: 25%; }
+
         .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
-        .box { border: 1px solid #dbe5ef; border-radius: 12px; padding: 14px; background: #fbfdff; }
-        .box h3, .section h3 { margin: 0 0 10px; color: #334155; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
-        .kv { display: grid; grid-template-columns: 140px 1fr; gap: 7px; margin: 6px 0; }
-        .kv span:first-child { color: #64748b; font-weight: 700; }
-        .kv span:last-child { font-weight: 800; color: #111827; }
-        .section { margin-top: 18px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f1f5f9; color: #475569; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
-        th, td { border: 1px solid #dbe5ef; padding: 8px; vertical-align: top; }
-        td { color: #1f2937; }
-        .num { text-align: right; white-space: nowrap; }
-        .strong { font-weight: 800; }
-        .total-row td { background: #ecfdf5; color: #065f46; font-weight: 900; }
+        .box { border: 1px solid #dbe5ef; border-radius: 6px; padding: 14px; background: #fafcff; }
+        .box h3 { margin: 0 0 10px; color: #334155; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+        
+        .patient-table { width: 100%; border-collapse: collapse; }
+        .patient-table td { padding: 4px 0; font-size: 11px; }
+        .patient-table td:first-child { width: 110px; color: #64748b; font-weight: bold; }
+        .patient-table td:last-child { font-weight: bold; color: #111827; }
+
+        .invoice-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+        .invoice-table th, .invoice-table td { padding: 8px 12px; border: 1px solid #dbe5ef; font-size: 11px; }
+        .invoice-table th { background: #f8fafc; font-weight: bold; color: #334155; border-bottom: 2px solid #94a3b8; }
+        .invoice-table tr.section-header td { background: #f1f5f9; font-weight: bold; color: #0f766e; text-transform: uppercase; letter-spacing: .05em; text-align: left; }
+        
+        .totals-table { width: 100%; border-collapse: collapse; margin-top: 16px; margin-bottom: 24px; }
+        .totals-table td { padding: 6px 12px; border: 1px solid #dbe5ef; font-size: 12px; }
+        .totals-table tr.grand-total td { background: #ecfdf5; font-weight: bold; color: #065f46; border-color: #059669; font-size: 14px; }
+        
+        .payment-table { width: 100%; border-collapse: collapse; }
+        .payment-table td { padding: 6px 12px; border: 1px solid #dbe5ef; font-size: 11px; background: #fafcff; }
+
         .payment-total { display: grid; grid-template-columns: 1fr 220px; gap: 18px; align-items: stretch; margin-top: 18px; }
-        .total-card { border-radius: 14px; background: #064e3b; color: #fff; padding: 18px; display: flex; flex-direction: column; justify-content: center; }
-        .total-card p { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .85; }
-        .total-card strong { display: block; margin-top: 8px; font-size: 30px; }
-        .qr { text-align: center; border: 1px solid #dbe5ef; border-radius: 14px; padding: 12px; }
-        .qr img { width: 150px; height: 150px; object-fit: contain; }
-        .footer { display: grid; grid-template-columns: 1fr 220px; gap: 18px; margin-top: 24px; border-top: 1px solid #dbe5ef; padding-top: 16px; }
+        .qr { text-align: center; border: 1px solid #dbe5ef; border-radius: 6px; padding: 12px; }
+        .qr img { width: 180px; height: 180px; object-fit: contain; }
+        
+        .footer { display: grid; grid-template-columns: 1fr 220px; gap: 18px; margin-top: 24px; border-top: 1px solid #dbe5ef; padding-top: 16px; font-size: 10px; }
         .signature { height: 72px; border-bottom: 1px solid #94a3b8; display: flex; align-items: end; justify-content: center; color: #64748b; font-weight: 700; }
-        .empty { text-align: center; color: #64748b; }
-        @media print { body { background: #fff; } .sheet { width: auto; min-height: auto; padding: 0; } .no-print { display: none; } }
-        .custom-layout { font-size: 13px; line-height: 1.6; color: #111827; margin-top: 20px; }
-        .custom-layout .text-center { text-align: center; }
-        .custom-layout .bold { font-weight: bold; }
-        .custom-layout .italic { font-style: italic; }
-        .custom-layout .mt-2 { margin-top: 8px; }
-        .custom-layout .mt-4 { margin-top: 16px; }
-        .custom-layout .mb-4 { margin-bottom: 16px; }
-        .custom-layout .flex-between { display: flex; justify-content: space-between; }
-        .custom-layout .list-item { margin-left: 20px; }
-        .custom-layout .materials-list { margin-left: 20px; font-weight: bold; }
-        .custom-layout .box-info { background: #f8fafc; padding: 12px; border-left: 4px solid #0f766e; margin: 16px 0; }
-        .custom-layout .tamil-text { font-size: 11px; margin-top: 4px; color: #b91c1c; font-weight: bold; }
+        
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+        .italic { font-style: italic; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-4 { margin-bottom: 16px; }
     </style>
 </head>
 <body>
     <div class="sheet">
-        <div class="header">
+        <div class="header" style="grid-template-columns: auto 1fr; align-items: center;">
             <div class="brand">
                 <div style="display: flex; flex-direction: column; align-items: center;">
-                    <img class="logo" src="${htmlEscape(logoSrc)}" />
-                    <strong style="font-size: 10px; margin-top: 4px; color: #64748b;">(A Unit Of UNCF)</strong>
-                </div>
-                <div>
-                    <h1>Universal Elder Care</h1>
-                    <div class="muted">
-                        #12/12, Wooden House, Saraswati Nagar, Perumal Nagar,<br/>Kovaipudur, Tamil Nadu, India 641042<br/>
-                        Email: universaleldercare2010@gmail.com<br/>
-                        Contact: 0422 260 5077 / +91 78715 31066
-                    </div>
+                    <img class="logo" style="width: 200px; height: auto;" src="${htmlEscape(logoSrc)}" />
+                    <strong style="font-size: 13px; margin-top: 8px; color: #64748b;">(A Unit Of UNCF)</strong>
                 </div>
             </div>
             <div class="title">
-                <h2>Patient Service Bill</h2>
-                <div class="badge">${htmlEscape(status)}</div>
+                <h2>${billType === "ELDER_CARE" ? "Elder Care Patient Service Bill" : "Home Care Patient Service Bill"}</h2>
             </div>
         </div>
 
         <div class="panel">
             <div class="box">
-                <h3>Patient Details</h3>
-                <div class="kv"><span>Patient Name</span><span>${htmlEscape(patientName)}</span></div>
-                <div class="kv"><span>Age / Sex</span><span>- / -</span></div>
-                <div class="kv"><span>DOB</span><span>-</span></div>
-                <div class="kv"><span>Patient ID</span><span>${htmlEscape(receiptService?.patientId || metadata.patientId || '-')}</span></div>
-                <div class="kv"><span>Service Type</span><span>${htmlEscape(serviceType)}</span></div>
+                <h3>Elder Details</h3>
+                <table class="patient-table">
+                    <tbody>
+                        <tr><td>Patient Name</td><td>${htmlEscape(patientName)}</td></tr>
+                        <tr><td>Age</td><td>-</td></tr>
+                        <tr><td>Sex</td><td>-</td></tr>
+                        <tr><td>DOB</td><td>-</td></tr>
+                        <tr><td>Patient ID</td><td>${htmlEscape(receiptService?.patientId || metadata.patientId || '-')}</td></tr>
+                        <tr><td>Service Type</td><td>${htmlEscape(serviceType)}</td></tr>
+                    </tbody>
+                </table>
             </div>
             <div class="box">
                 <h3>Guardian Details</h3>
-                <div class="kv"><span>Bill ID</span><span>${htmlEscape(receiptInvoice.refNo || '-')}</span></div>
-                <div class="kv"><span>Bill Date</span><span>${htmlEscape(formatDate(receiptInvoice.date || generatedAt.toISOString()))}</span></div>
-                <div class="kv"><span>Guardian Name</span><span>${htmlEscape(clientName)}</span></div>
-                <div class="kv"><span>Contact Number</span><span>${htmlEscape(receiptService?.familyContact || '-')}</span></div>
-                <div class="kv"><span>Address</span><span>-</span></div>
-                <div class="kv"><span>Billing Period</span><span>${htmlEscape(`${formatDate(billingFrom)} to ${formatDate(billingTo)}`)}</span></div>
+                <table class="patient-table">
+                    <tbody>
+                        <tr><td>Bill ID</td><td>${htmlEscape(receiptInvoice.refNo || '-')}</td></tr>
+                        <tr><td>Bill Date</td><td>${htmlEscape(formatDate(receiptInvoice.date || generatedAt.toISOString()))}</td></tr>
+                        <tr><td>Guardian Name</td><td>${htmlEscape(clientName)}</td></tr>
+                        <tr><td>Contact Number</td><td>${htmlEscape(receiptService?.familyContact || '-')}</td></tr>
+                        <tr><td>Address</td><td>-</td></tr>
+                        <tr><td>Billing Month</td><td>${htmlEscape(currentMonthName)}</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-            </div>
+        ${invoiceTableHtml}
+
+        <table class="totals-table">
+            <tbody>
+                <tr>
+                    <td><strong>Gross Total Amount</strong></td>
+                    <td class="text-right"><strong>Rs ${htmlEscape(invoiceMoney(receiptInvoice.amount))}</strong></td>
+                </tr>
+                <tr>
+                    <td style="color: #ea580c;"><strong>UNCF Subsidy Amount</strong></td>
+                    <td class="text-right" style="color: #ea580c;"><strong>- Rs ${htmlEscape(invoiceMoney(uncfSubsidy))}</strong></td>
+                </tr>
+                <tr class="grand-total">
+                    <td>Total Payable Amount</td>
+                    <td class="text-right">Rs ${htmlEscape(invoiceMoney(totalPayable))}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        ${dispatchHtml}
+
+        <div class="mt-4" style="font-size: 14px; line-height: 1.5;">
+            <div class="bold italic" style="font-size: 16px;">Feedbacks and issues:</div>
+            <div class="mt-1">Please write letter (post or direct letter to UEC) and mail <span class="bold">universaleldercare2010@gmail.com</span>.<br/>Please follow up with us, within one or two weeks issues or queries are cleared.</div>
+            <div class="mt-2 mb-2 italic" style="font-size: 14px">It will be kind enough if we receive the payments within "5th of every month", it will be supportive to get the materials.<br/>After 7th of every month, late payment will be collected.</div>
+            
+            <div class="bold mt-3" style="color: #b91c1c; font-size: 14px;">IF PAYMENT RECEIPT HAVEN'T SENT TO THE SAME NUMBER, IT WON'T BE ACCOUNTABLE.<br/>THE AMOUNT WILL BE ADDED IN NEXT MONTH BILL.</div>
+            <div class="bold mt-1" style="color: #b91c1c; font-size: 14px;">பணம் செலுத்தும் ரசீது இந்த எண்ணுக்கு அனுப்பப்படாவிட்டால், அது கணக்கிடப்படாது,<br/>அடுத்த மாத கணக்கில் தொகை சேர்க்கப்படும்.</div>
         </div>
 
-        <div class="custom-layout">
-            <div class="text-center mb-4">
-                <h2 style="margin: 0; font-size: 18px; font-weight: 900;">UNIVERSAL ELDER CARE</h2>
-                <div class="italic">(A Unit UNCF)</div>
-                <div class="bold italic" style="text-transform: capitalize;">${htmlEscape(currentMonthName)} - ${currentYear}</div>
-            </div>
-
-            <div class="bold mb-4">
-                NAME : ${htmlEscape(patientName)}
-            </div>
-
-            <div class="mb-4">
-                Monthly bed charge - ${htmlEscape(getSum(/bed charge|accommodation|rent/i))}
-            </div>
-
-            <div class="bold">BALANCE</div>
-            <div class="list-item">a) Amount - ${htmlEscape(getSum(/balance/i))}</div>
-            <div class="list-item">b) Monthly essential - ${htmlEscape(getSum(/monthly essential/i))}</div>
-            <div class="list-item">c) Diapers - Rs ${htmlEscape(getSum(/diaper/i))} / No ${htmlEscape(getQty(/diaper/i))}</div>
-            <div class="list-item">d) Gloves - Rs ${htmlEscape(getSum(/glove/i))} / No ${htmlEscape(getQty(/glove/i))}</div>
-            <div class="list-item">e) Mask - Rs ${htmlEscape(getSum(/mask/i))} / No ${htmlEscape(getQty(/mask/i))}</div>
-            <div class="list-item">f) Under pad - Rs ${htmlEscape(getSum(/under pad|underpad/i))} / No ${htmlEscape(getQty(/under pad|underpad/i))}</div>
-            <div class="list-item mb-4">g) Monthly essential - ${htmlEscape(getSum(/monthly essential/i))}</div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div>Laundry - ${htmlEscape(getSum(/laundry/i) || '1800')}</div>
-                <div>Eb - ${htmlEscape(getSum(/eb|electricity/i) || '700')}</div>
-                <div>Hospital vist - ${htmlEscape(getSum(/hospital/i))}</div>
-                <div>Amblunce or transport - ${htmlEscape(getSum(/ambulance|transport/i))}</div>
-                <div>Doctor check up - ${htmlEscape(getSum(/doctor/i) || '500')}</div>
-                <div>Physiotherapy - ${htmlEscape(getSum(/physio/i))} (session) usually per session charge is 700rs but we have opted for monthly package.</div>
-                <div>Psychiatric counseling - ${htmlEscape(getSum(/psychiatric|counseling/i))}</div>
-                <div>Nursing - ${htmlEscape(getSum(/nursing/i))}</div>
-                <div>Attender(outside) - ${htmlEscape(getSum(/attender/i))}</div>
-                <div>Care giver day - ${htmlEscape(getSum(/care giver day|day care/i))}</div>
-                <div>Care given night - ${htmlEscape(getSum(/care given night|night care/i))}</div>
-                <div>Dressing - ${htmlEscape(getSum(/dressing/i))}</div>
-                <div>First aid - ${htmlEscape(getSum(/first aid/i))}</div>
-                <div>Special care - ${htmlEscape(getSum(/special care/i))}</div>
-                <div>Medicine - ${htmlEscape(getSum(/medicine/i) || '00Rs')}</div>
-                <div>Diapers - Rs ${htmlEscape(getSum(/diaper/i))} / No ${htmlEscape(getQty(/diaper/i))}</div>
-                <div>Gloves - Rs ${htmlEscape(getSum(/glove/i))} / No ${htmlEscape(getQty(/glove/i))}</div>
-                <div>Mask - Rs ${htmlEscape(getSum(/mask/i))} / No ${htmlEscape(getQty(/mask/i))}</div>
-                <div>Underpad - Rs ${htmlEscape(getSum(/under pad|underpad/i))} / No ${htmlEscape(getQty(/under pad|underpad/i))}</div>
-                <div>Bedwipes - Rs ${htmlEscape(getSum(/bedwipe|bed wipe/i))} / No ${htmlEscape(getQty(/bedwipe|bed wipe/i))}</div>
-                <div>CATHETER - ${htmlEscape(getSum(/catheter/i))}</div>
-                <div>Uro Bag - ${htmlEscape(getSum(/uro bag/i))}</div>
-                <div>Rubber sheet - ${htmlEscape(getSum(/rubber sheet/i))}</div>
-                <div>O² - ${htmlEscape(getSum(/o2|oxygen/i))}</div>
-                <div>NEBULIZER - ${htmlEscape(getSum(/nebulizer/i))}</div>
-                <div>Lab - ${htmlEscape(getSum(/lab|test/i) || '300')}</div>
-                <div>MILK - ${htmlEscape(getSum(/milk/i) || '500')}</div>
-                <div>Juice prepration - ${htmlEscape(getSum(/juice/i))}</div>
-                <div>Extra snacks - ${htmlEscape(getSum(/snack/i) || '300Rs')}</div>
-                <div>HERBAL DRINKS - ${htmlEscape(getSum(/herbal/i) || '200')}</div>
-                <div>NewDress - ${htmlEscape(getSum(/dress/i))}</div>
-                <div>NewTowel - ${htmlEscape(getSum(/towel/i))}</div>
-                <div>NewBedspread - ${htmlEscape(getSum(/bedspread/i))}</div>
-                <div>NewBlanket - ${htmlEscape(getSum(/blanket/i))}</div>
-                <div>NewPillow cover - ${htmlEscape(getSum(/pillow/i))}</div>
-                <div>Stitching - ${htmlEscape(getSum(/stitching/i))}</div>
-                <div>Tv&Allout - ${htmlEscape(getSum(/tv|allout/i) || '300')}</div>
-                <div>Cleaning - ${htmlEscape(getSum(/cleaning/i))}</div>
-                <div>Breakage - ${htmlEscape(getSum(/breakage/i))}</div>
-                <div>Airbed new - ${htmlEscape(getSum(/airbed/i))}</div>
-                <div>Beauty service (haircut /saving/nail trimming ) - ${htmlEscape(getSum(/beauty|haircut|trimming/i) || '600rs')}</div>
-                <div>Gas - ${htmlEscape(getSum(/gas/i) || '1000')}</div>
-            </div>
-
-            <div class="mt-4 mb-4">
-                <div class="bold">MONTHLY ESSENTIALS - 1000rs or should send before 5th of every month.</div>
-                <div>1) Toothpaste(or) tooth powder & Toothbrush</div>
-                <div>2) Bathing soap 2no</div>
-                <div>3) Talcum powder 100gm</div>
-                <div>4) Viboothi (sacred Ash)</div>
-                <div>5) Coconut oil 200ml</div>
-                <div>6) Washing powder 1kg</div>
-                <div>7) Fabric freshener 500ml</div>
-                <div>8) Detol 1000ml</div>
-                <div>9) sanitisor 500ml</div>
-            </div>
-
-            <div>LATE FEE - ${htmlEscape(getSum(/late fee/i))}</div>
-            <div class="mb-4">Complains - </div>
-
-            <div class="bold mt-4 mb-4" style="font-size: 14px; background: #ecfdf5; padding: 10px; border-radius: 8px; border: 1px solid #059669; color: #065f46;">
-                Total. ${htmlEscape(invoiceMoney(receiptInvoice.amount))} - Uncf subsidy ${htmlEscape(uncfSubsidy)} /- ( Bed charge ,Laundry , Eb ,Caregiver , ) = total payable = ${htmlEscape(totalPayable)}/-
-            </div>
-
-            <div class="box-info">
-                <div class="bold">Total materials should be given 5th of every month ,if not penalty will be added .</div>
-                <div class="materials-list">
-                    <div>Diaper - ${htmlEscape(getQty(/diaper/i))} No</div>
-                    <div>Gloves - ${htmlEscape(getQty(/glove/i))} No</div>
-                    <div>Mask - ${htmlEscape(getQty(/mask/i))} No</div>
-                    <div>UnderPad - ${htmlEscape(getQty(/under pad|underpad/i))} No</div>
-                    <div>Rubber sheet - ${htmlEscape(getQty(/rubber sheet/i))} No</div>
-                    <div>Medicine - </div>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <div class="bold italic">Feedbacks and issues :</div>
-                <div>Please write letter (post or direct letter to UEC) and mail <span class="bold">universaleldercare2010@gmail.com</span>.</div>
-                <div>please follow up with us .within one or two week issues or queries are cleared.</div>
-            </div>
-
-            <div class="mt-4 bold text-center">
-                It will be kind enough if we receive the payments within "5th of every month " it will be Supportive to get the materials.<br/>
-                After 10th of every month late payment will be collected.
-            </div>
-
-            <div class="payment-total" style="grid-template-columns: 1fr auto;">
-                <div class="box">
-                    <h3>payment facilities</h3>
-                    <div class="bold">Net banking or UPI Google pay, Phone pe</div>
-                    <br/>
-                    <div class="bold italic">After payment kindly send</div>
-                    <ol style="margin: 4px 0; padding-left: 20px;">
-                        <li>transfer id</li>
-                        <li>screenshot of payment</li>
-                        <li>transferred date</li>
-                        <li>transferred amount</li>
-                    </ol>
-                    <div class="bold mt-2" style="color: #b91c1c;">
-                        IF PAYMENT RECEIPT HAVEN'T SENT TO THE SAME NUMBER , IT WONT BE ACCOUNTABLE , THE AMOUNT WILL BE ADDED IN NEXT MONTH BILL.<br/>
-                        <span class="tamil-text">பணம் செலுத்தும் ரசீது இந்த எண்ணுக்கு அனுப்பப்படாவிட்டால், அது கணக்கிடப்படாது, அடுத்த மாத கணக்கில் தொகை சேர்க்கப்படும்.</span>
-                    </div>
-                </div>
-                <div class="qr" style="width: 180px;">
-                    <img src="${htmlEscape(qrSrc)}" style="width: 150px; height: 150px;" />
-                    <div class="muted">UPI QR Code</div>
-                    <div class="bold" style="font-size: 10px; margin-top: 4px;">${htmlEscape(upi)}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="total-card">
-            <p>Total Amount Due</p>
-            <strong>${htmlEscape(invoiceMoney(receiptInvoice.amount))}</strong>
-        </div>
-
-        <div class="footer">
+        <div class="payment-total">
             <div>
-                <div class="kv"><span>Generated By</span><span>${htmlEscape(generatedBy)}</span></div>
-                <div class="kv"><span>Generated Date</span><span>${htmlEscape(formatDate(generatedAt.toISOString()))}</span></div>
-                <p class="muted">Thank you for choosing Universal Elder Care.</p>
-                <p class="muted">For billing queries, please contact our accounts department.</p>
+                <div class="bold">Payment facilities:</div>
+                <div>Net banking or <span class="bold">UPI Google pay, PhonePe</span></div>
+                <div class="bold mt-2">After payment kindly send:</div>
+                <div style="margin-left: 12px;">
+                    1) transfer id<br/>
+                    2) screenshot of payment<br/>
+                    3) transferred date<br/>
+                    4) transferred amount
+                </div>
             </div>
-            <div>
-                <div class="signature">Authorized Signature</div>
+            <div class="qr">
+                <img src="${htmlEscape(qrSrc)}" />
+                <div class="bold mt-2">UPI QR Code</div>
+                <div style="font-size: 10px; color: #64748b;">${htmlEscape(upi)}</div>
             </div>
+        </div>
+
+        <div class="footer" style="display: block; text-align: center; margin-top: 40px; color: #64748b; font-size: 12px; font-style: italic; border-top: 1px solid #dbe5ef; padding-top: 16px;">
+            This is a system generated bill.
         </div>
     </div>
     <script>
@@ -1368,71 +1470,87 @@ export function PatientDailyCost() {
             )}
 
             {activeTab === 'monthly' && (
-                <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                    <div className="mb-5 flex flex-col gap-2">
-                        <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">Monthly Billing Groups</p>
-                        <h2 className="text-base font-extrabold text-slate-900">Select patient/month groups for monthly invoice</h2>
-                    </div>
-                    <div className="mb-5 grid min-w-0 items-end gap-4 lg:grid-cols-2 2xl:grid-cols-[minmax(220px,0.85fr)_minmax(190px,240px)_minmax(150px,185px)_minmax(150px,185px)_minmax(165px,205px)_minmax(185px,230px)]">
-                        <label className="block min-w-0">
-                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Search</span>
-                            <input
-                                value={search}
-                                onChange={(event) => setSearch(event.target.value)}
-                                placeholder="Patient, cost, invoice..."
-                                className="mt-1 h-11 w-full min-w-0 rounded-xl border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500"
-                            />
-                        </label>
-                        <label className="block min-w-0">
-                            <span className="text-xs font-extrabold uppercase tracking-wide text-slate-500">Bill Source</span>
-                            <select
-                                value={sourceFilter}
-                                onChange={(event) => setSourceFilter(event.target.value)}
-                                className="mt-1 h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-primary-500"
-                            >
-                                {monthlySourceOptions.map((source) => (
-                                    <option key={source} value={source}>
-                                        {source === 'ALL' ? 'All Sources' : source}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                        <Field label="Period From" type="date" value={periodFrom} onChange={setPeriodFrom} />
-                        <Field label="Period To" type="date" value={periodTo} onChange={setPeriodTo} />
-                        <div className="min-w-0">
-                            <span className="invisible block text-xs font-extrabold uppercase tracking-wide">Action</span>
-                            <button
-                                type="button"
-                                onClick={downloadMonthlySummaryPdf}
-                                disabled={!monthlyInvoiceGroups.length}
-                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
-                            >
-                                <Download className="h-4 w-4" />
-                                Download Month
-                            </button>
+                <div className="flex min-w-0 flex-col gap-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div className="border-b border-slate-100 bg-slate-50/50 p-4">
+                        <div className="flex flex-wrap items-end justify-between gap-4">
+                            <div className="flex flex-1 flex-wrap items-end gap-3">
+                                <label className="block w-[240px] max-w-full">
+                                    <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Search Patient</span>
+                                    <input
+                                        value={search}
+                                        onChange={(event) => setSearch(event.target.value)}
+                                        placeholder="Patient, cost, invoice..."
+                                        className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
+                                    />
+                                </label>
+                                <label className="block w-[200px] max-w-full">
+                                    <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Bill Source</span>
+                                    <select
+                                        value={sourceFilter}
+                                        onChange={(event) => setSourceFilter(event.target.value)}
+                                        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold outline-none focus:border-primary-500"
+                                    >
+                                        {monthlySourceOptions.map((source) => (
+                                            <option key={source} value={source}>
+                                                {source === 'ALL' ? 'All Sources' : source}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <div className="flex items-end gap-2">
+                                    <label className="block w-[140px]">
+                                        <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Period From</span>
+                                        <input
+                                            type="date"
+                                            value={periodFrom}
+                                            onChange={(e) => setPeriodFrom(e.target.value)}
+                                            className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
+                                        />
+                                    </label>
+                                    <label className="block w-[140px]">
+                                        <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Period To</span>
+                                        <input
+                                            type="date"
+                                            value={periodTo}
+                                            onChange={(e) => setPeriodTo(e.target.value)}
+                                            className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={downloadMonthlySummaryPdf}
+                                    disabled={!monthlyInvoiceGroups.length}
+                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                                >
+                                    <Download className="h-4 w-4" />
+                                    Download Month
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={createInvoice}
+                                    disabled={!periodLedgerEntries.length || totals.selected <= 0 || generateInvoice.isPending}
+                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
+                                >
+                                    <FileText className="h-4 w-4" />
+                                    {selectedInvoiceEntry ? `Generate For ${selectedInvoiceEntry.patientName.split(' ')[0]}` : 'Select Rows First'}
+                                </button>
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                            <span className="invisible block text-xs font-extrabold uppercase tracking-wide">Action</span>
-                            <button
-                                type="button"
-                                onClick={createInvoice}
-                                disabled={!periodLedgerEntries.length || totals.selected <= 0 || generateInvoice.isPending}
-                                className="mt-1 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-extrabold text-white shadow-sm hover:bg-emerald-800 disabled:opacity-50"
-                            >
-                                <FileText className="h-4 w-4" />
-                                {selectedInvoiceEntry ? `Generate For ${selectedInvoiceEntry.patientName}` : 'Select Rows First'}
-                            </button>
-                        </div>
+
+                        {periodLedgerEntries.length > 0 && (
+                            <div className="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-2.5 text-[13px] font-semibold text-slate-600 sm:justify-between">
+                                <span>Selected patient: <span className="font-extrabold text-slate-900">{billingPatientLabel}</span></span>
+                                <span>Selected ledger rows: <span className="font-extrabold text-slate-900">{periodLedgerEntries.length}</span></span>
+                                <span>Selected invoice total: <span className="font-extrabold text-emerald-700">{formatMoney(totals.selected)}</span></span>
+                                <span className="text-xs font-medium text-slate-500">Status flow: Draft &gt; Generated &gt; Sent &gt; Paid</span>
+                            </div>
+                        )}
                     </div>
 
-                    <div className="mb-5 grid gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs font-bold text-slate-600 lg:grid-cols-2 2xl:grid-cols-4">
-                        <span>Selected patient: {billingPatientLabel}</span>
-                        <span>Selected ledger rows: {periodLedgerEntries.length}</span>
-                        <span>Selected invoice total: {formatMoney(totals.selected)}</span>
-                        <span>Status flow: Draft &gt; Generated &gt; Sent &gt; Paid</span>
-                    </div>
-
-                    <div className="min-h-[460px] min-w-0 overflow-hidden rounded-3xl border border-slate-100">
+                    <div className="min-h-[460px] min-w-0">
                         <DataTable
                             data={monthlyInvoiceGroups}
                             columns={monthlyGroupColumns}

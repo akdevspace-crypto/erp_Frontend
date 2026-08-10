@@ -1,37 +1,56 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '../../../components/Toast'
+import { useAuthStore } from '../../../store/authStore'
 import { patientBillingService } from '../services/patientBilling'
 
 const errorMessage = (error: any, fallback: string) =>
     error?.response?.data?.message || fallback
 
-export const usePatientBillingServices = () => useQuery({
-    queryKey: ['patient-billing-services'],
-    queryFn: patientBillingService.getServices,
-    staleTime: 120_000,
-    retry: 1
-})
+const useActiveUnitQueryKey = () => useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
 
-export const usePatientDailyCosts = () => useQuery({
-    queryKey: ['patient-daily-costs'],
-    queryFn: patientBillingService.getEntries,
-    staleTime: 30_000,
-    retry: 1
-})
+export const usePatientBillingServices = () => {
+    const activeUnitId = useActiveUnitQueryKey()
 
-export const useCaregiverRevenueSheets = (month?: string) => useQuery({
-    queryKey: ['caregiver-revenue-sheets', month || 'all'],
-    queryFn: () => patientBillingService.getCaregiverRevenueSheets(month),
-    staleTime: 30_000,
-    retry: 1
-})
+    return useQuery({
+        queryKey: ['patient-billing-services', activeUnitId],
+        queryFn: patientBillingService.getServices,
+        staleTime: 120_000,
+        retry: 1
+    })
+}
 
-export const useMedicineCatalog = () => useQuery({
-    queryKey: ['patient-billing-medicine-catalog'],
-    queryFn: patientBillingService.getMedicineCatalog,
-    staleTime: 120_000,
-    retry: 1
-})
+export const usePatientDailyCosts = () => {
+    const activeUnitId = useActiveUnitQueryKey()
+
+    return useQuery({
+        queryKey: ['patient-daily-costs', activeUnitId],
+        queryFn: patientBillingService.getEntries,
+        staleTime: 30_000,
+        retry: 1
+    })
+}
+
+export const useCaregiverRevenueSheets = (month?: string) => {
+    const activeUnitId = useActiveUnitQueryKey()
+
+    return useQuery({
+        queryKey: ['caregiver-revenue-sheets', activeUnitId, month || 'all'],
+        queryFn: () => patientBillingService.getCaregiverRevenueSheets(month),
+        staleTime: 30_000,
+        retry: 1
+    })
+}
+
+export const useMedicineCatalog = () => {
+    const activeUnitId = useActiveUnitQueryKey()
+
+    return useQuery({
+        queryKey: ['patient-billing-medicine-catalog', activeUnitId],
+        queryFn: patientBillingService.getMedicineCatalog,
+        staleTime: 120_000,
+        retry: 1
+    })
+}
 
 export const useCreatePatientDailyCost = () => {
     const queryClient = useQueryClient()

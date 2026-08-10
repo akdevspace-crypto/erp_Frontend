@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { FileText, Smartphone } from "lucide-react";
+import { FileText, Smartphone, Save, Check, CheckCircle } from "lucide-react";
 import { PageHeader } from "../../../components/PageHeader";
-// api import removed
+import { api } from "../../../lib/axios";
 import html2pdf from "html2pdf.js";
 
 const Field = ({ label, value, onChange, placeholder, type = "text" }: any) => (
@@ -86,6 +86,8 @@ const invoiceMoney = (val: number | string | null | undefined) =>
 
 export function PatientManualBilling() {
   const [isSending, setIsSending] = useState(false);
+  const [generatedInvoiceId, setGeneratedInvoiceId] = useState<string | null>(null);
+  const [isMarkedSent, setIsMarkedSent] = useState(false);
   const [billType, setBillType] = useState<"ELDER_CARE" | "HOME_CARE">(
     "ELDER_CARE",
   );
@@ -96,9 +98,12 @@ export function PatientManualBilling() {
   const [patientSex, setPatientSex] = useState("");
   const [patientDob, setPatientDob] = useState("");
   const [patientId, setPatientId] = useState("");
+  const [contractStartDate, setContractStartDate] = useState("");
+  const [contractEndDate, setContractEndDate] = useState("");
 
   const [membershipPlan, setMembershipPlan] = useState("");
   const [membershipCategory, setMembershipCategory] = useState("");
+  const [bedSharing, setBedSharing] = useState("");
 
   const [billId, setBillId] = useState("");
   const [billingMonthYear, setBillingMonthYear] = useState("");
@@ -208,30 +213,21 @@ export function PatientManualBilling() {
   });
 
   useEffect(() => {
-    const getRate = (stayType: string, roomSharing: string) => {
-      if (stayType === "Short-Term Stay") {
-        if (roomSharing === "Single Sharing") return "3500";
-        if (roomSharing === "Double Sharing") return "2500";
-        if (roomSharing === "Four Sharing") return "1500";
-      } else if (stayType === "Long-Term Stay") {
-        if (roomSharing === "Single Sharing") return "45000";
-        if (roomSharing === "Double Sharing") return "35000";
-        if (roomSharing === "Four Sharing") return "25000";
-      }
+    const getRate = (sharing: string) => {
+      if (sharing === "Single Sharing") return "3500";
+      if (sharing === "Double Sharing") return "2500";
+      if (sharing === "Four Sharing") return "1500";
       return accommodation.bedCharges.rate || "";
     };
 
-    const newRate = getRate(
-      accommodation.bedCharges.stayType,
-      accommodation.bedCharges.roomSharing,
-    );
+    const newRate = getRate(bedSharing);
     if (newRate !== accommodation.bedCharges.rate) {
       setAccommodation((prev) => ({
         ...prev,
         bedCharges: { ...prev.bedCharges, rate: newRate },
       }));
     }
-  }, [accommodation.bedCharges.stayType, accommodation.bedCharges.roomSharing]);
+  }, [bedSharing]);
 
   // 7. Laundry & Utility
   const [utility, setUtility] = useState({
@@ -599,7 +595,7 @@ export function PatientManualBilling() {
       `First Aid (Qty: ${careStaff.firstAid.qty || 1})`,
       calcQtyRate(careStaff.firstAid),
     );
-    elderRows += renderSection("1. CARE STAFF SERVICES", careRows);
+    elderRows += renderSection("CARE STAFF SERVICES", careRows);
 
     // 2. Therapy
     let therapyRows = "";
@@ -619,7 +615,7 @@ export function PatientManualBilling() {
       calcFlat(therapy.psychiatricCounseling),
     );
     therapyRows += renderRow("Yoga", calcFlat(therapy.yoga));
-    elderRows += renderSection("2. THERAPY & CONSULTATION", therapyRows);
+    elderRows += renderSection("THERAPY & CONSULTATION", therapyRows);
 
     // 3. Medical Support
     let medRows = "";
@@ -645,7 +641,7 @@ export function PatientManualBilling() {
           calcQtyRate(s),
         )),
     );
-    elderRows += renderSection("3. MEDICAL SUPPORT", medRows);
+    elderRows += renderSection("MEDICAL SUPPORT", medRows);
 
     // 4. Transportation
     let transportRows = "";
@@ -656,12 +652,12 @@ export function PatientManualBilling() {
       "Senior Friendly Cab",
       calcFlat(transportation.seniorCab),
     );
-    elderRows += renderSection("4. TRANSPORTATION", transportRows);
+    elderRows += renderSection("TRANSPORTATION", transportRows);
 
     // 5. Lifestyle
     let lifeRows = "";
     lifeRows += renderRow("Beauty Service", calcFlat(lifestyle.beauty));
-    elderRows += renderSection("5. PERSONAL & LIFESTYLE SERVICES", lifeRows);
+    elderRows += renderSection("PERSONAL & LIFESTYLE SERVICES", lifeRows);
 
     // 6. Accommodation
     let accRows = "";
@@ -672,7 +668,7 @@ export function PatientManualBilling() {
         calcFlat(accommodation.upcomingBedCharge),
       );
     }
-    elderRows += renderSection("6. ACCOMMODATION", accRows);
+    elderRows += renderSection("ACCOMMODATION", accRows);
 
     // 7. Utility
     let utilRows = "";
@@ -689,7 +685,7 @@ export function PatientManualBilling() {
       "Winding-up Cleaning",
       calcFlat(utility.windingUpCleaning),
     );
-    elderRows += renderSection("7. LAUNDRY & UTILITY", utilRows);
+    elderRows += renderSection("LAUNDRY & UTILITY", utilRows);
 
     // 8. Food
     let foodRows = "";
@@ -697,7 +693,7 @@ export function PatientManualBilling() {
       `Milk (Qty: ${food.milk.qty || 1})`,
       calcQtyRate(food.milk),
     );
-    elderRows += renderSection("8. FOOD & NUTRITION", foodRows);
+    elderRows += renderSection("FOOD & NUTRITION", foodRows);
 
     // 9. Linen
     let linenRows = "";
@@ -729,7 +725,7 @@ export function PatientManualBilling() {
       `Stitching (Qty: ${linen.stitching.qty || 1})`,
       calcQtyRate(linen.stitching),
     );
-    elderRows += renderSection("9. LINEN & PERSONAL ITEMS", linenRows);
+    elderRows += renderSection("LINEN & PERSONAL ITEMS", linenRows);
 
     // 10. Consumables
     let consRows = "";
@@ -773,7 +769,7 @@ export function PatientManualBilling() {
       `Nebulizer (Qty: ${medicalConsumables.nebulizer.qty || 1})`,
       calcQtyRate(medicalConsumables.nebulizer),
     );
-    elderRows += renderSection("10. MEDICAL CONSUMABLES", consRows);
+    elderRows += renderSection("MEDICAL CONSUMABLES", consRows);
 
     // Late Fees
     let feesRows = "";
@@ -975,6 +971,7 @@ export function PatientManualBilling() {
                         ${patientSex ? `<tr><td>Sex</td><td>${htmlEscape(patientSex)}</td></tr>` : ""}
                         ${patientDob ? `<tr><td>DOB</td><td>${htmlEscape(patientDob)}</td></tr>` : ""}
                         ${patientId ? `<tr><td>Patient ID</td><td>${htmlEscape(patientId)}</td></tr>` : ""}
+                        ${bedSharing ? `<tr><td>Bed Sharing</td><td>${htmlEscape(bedSharing)}</td></tr>` : ""}
                         <tr><td>Service Type</td><td>${htmlEscape(billType.replace("_", " "))}</td></tr>
                     </tbody>
                 </table>
@@ -1046,6 +1043,8 @@ export function PatientManualBilling() {
         </div>
 
         <div class="footer" style="display: block; text-align: center; margin-top: 40px; color: #64748b; font-size: 12px; font-style: italic; border-top: 1px solid #dbe5ef; padding-top: 16px;">
+            <div style="font-weight: bold; margin-bottom: 4px; color: #334155;">Terms & Conditions</div>
+            <div style="margin-bottom: 12px; font-size: 10px;">Once generated and finalized, NO revisions or corrections are allowed.</div>
             This is a system generated bill.
         </div>
     </div>
@@ -1122,6 +1121,21 @@ export function PatientManualBilling() {
     }
   };
 
+  const markAsSent = async () => {
+    if (!generatedInvoiceId) return alert("Please click Final Print to generate and lock the bill first.");
+    setIsSending(true);
+    try {
+      await api.patch(`/uec/billing/${generatedInvoiceId}/mark-sent`);
+      setIsMarkedSent(true);
+      alert("Bill has been successfully marked as sent!");
+    } catch (err: any) {
+      console.error(err);
+      alert("Failed to mark as sent: " + (err.response?.data?.message || err.message));
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
       <PageHeader
@@ -1158,7 +1172,7 @@ export function PatientManualBilling() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
                     <Field
-                      label="Elder Name (with Initials)"
+                      label="Elder Name / Guest Name (with Initials)"
                       value={patientName}
                       onChange={setPatientName}
                     />
@@ -1186,6 +1200,18 @@ export function PatientManualBilling() {
                     value={patientId}
                     onChange={setPatientId}
                   />
+                  <Field
+                    label="Contract Start Date"
+                    type="date"
+                    value={contractStartDate}
+                    onChange={setContractStartDate}
+                  />
+                  <Field
+                    label="Contract End Date"
+                    type="date"
+                    value={contractEndDate}
+                    onChange={setContractEndDate}
+                  />
                   <Select
                     label="Membership Plan"
                     value={membershipPlan}
@@ -1197,6 +1223,12 @@ export function PatientManualBilling() {
                     value={membershipCategory}
                     onChange={setMembershipCategory}
                     options={["Silver", "Gold", "Platinum"]}
+                  />
+                  <Select
+                    label="Bed Sharing"
+                    value={bedSharing}
+                    onChange={setBedSharing}
+                    options={["Single Sharing", "Double Sharing", "Four Sharing"]}
                   />
                 </div>
               </div>
@@ -2783,7 +2815,69 @@ export function PatientManualBilling() {
             className="flex h-11 items-center gap-2 rounded-lg bg-slate-100 px-5 text-sm font-bold text-slate-700 hover:bg-slate-200"
           >
             <FileText className="h-4 w-4" />
-            Generate PDF
+            Preview Window
+          </button>
+          <button
+            onClick={async () => {
+              if (!patientName) return alert("Please enter Elder Name / Guest Name first.");
+              setIsSending(true);
+              try {
+                // 1. Save to Backend to Lock
+                const res = await api.post("/uec/billing/manual-generate", {
+                   patientId,
+                   patientName,
+                   contractStartDate,
+                   contractEndDate,
+                   totalAmount: totalPayable,
+                   billingMonthYear,
+                   careStaff,
+                   therapy,
+                   medicalSupport,
+                   transportation,
+                   lifestyle,
+                   accommodation,
+                   utility,
+                   food,
+                   linen,
+                   medicalConsumables
+                });
+
+                if (res.data?.data?.id) {
+                   setGeneratedInvoiceId(res.data.data.id);
+                }
+
+                // 2. Generate PDF dynamically
+                const element = document.createElement("div");
+                element.innerHTML = generateHtml();
+                const opt = {
+                    margin: 16,
+                    filename: `UEC_${patientName.replace(/\s+/g, "_")}_${new Date().getDate()}Aug.pdf`,
+                    image: { type: "jpeg", quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                };
+                const pdfBlob = await html2pdf().set(opt).from(element).output("blob");
+                const url = window.URL.createObjectURL(pdfBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = opt.filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                alert("Final bill saved and PDF generated. Revisions are no longer permitted.");
+              } catch (err: any) {
+                console.error(err);
+                alert("Failed to save and generate final bill: " + (err.response?.data?.message || err.message));
+              } finally {
+                setIsSending(false);
+              }
+            }}
+            disabled={isSending}
+            className={`flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-bold text-white ${isSending ? "bg-primary-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700"}`}
+          >
+            <Save className="h-4 w-4" />
+            Final Print (Lock & Download)
           </button>
           <button
             onClick={openWhatsApp}
@@ -2819,10 +2913,22 @@ export function PatientManualBilling() {
               </>
             )}
           </button>
+            {generatedInvoiceId && (
+              <button
+                onClick={markAsSent}
+                disabled={isMarkedSent || isSending}
+                className={`flex h-11 items-center gap-2 rounded-lg px-6 text-sm font-bold text-white ${
+                  isMarkedSent ? "bg-emerald-500" : "bg-slate-800 hover:bg-slate-900"
+                }`}
+              >
+                {isMarkedSent ? <CheckCircle className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                {isMarkedSent ? "Marked Sent" : "Mark Sent"}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Preview Modal */}
+        {/* Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="flex h-[90vh] w-[900px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
