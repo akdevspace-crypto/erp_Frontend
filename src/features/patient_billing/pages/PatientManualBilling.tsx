@@ -2852,9 +2852,9 @@ export function PatientManualBilling() {
                 const opt = {
                     margin: 16,
                     filename: `UEC_${patientName.replace(/\s+/g, "_")}_${new Date().getDate()}Aug.pdf`,
-                    image: { type: "jpeg", quality: 0.98 },
+                    image: { type: "jpeg" as const, quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                    jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
                 };
                 const pdfBlob = await html2pdf().set(opt).from(element).output("blob");
                 const url = window.URL.createObjectURL(pdfBlob);
