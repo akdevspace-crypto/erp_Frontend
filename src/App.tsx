@@ -136,7 +136,7 @@ const AdmissionForms = lazy(() => import('./features/crm/pages/AdmissionForms').
 // Healthcare New Modules
 const CriticalPatients = lazy(() => import('./features/healthcare/pages/CriticalPatients').then(m => ({ default: m.CriticalPatients })))
 const PatientDashboard = lazy(() => import('./features/healthcare/pages/PatientDashboard').then(m => ({ default: m.PatientDashboard })))
-const MedicationManagement = lazy(() => import('./features/healthcare/pages/MedicationManagement').then(m => ({ default: m.MedicationManagement })))
+// const MedicationManagement = lazy(() => import('./features/healthcare/pages/MedicationManagement').then(m => ({ default: m.MedicationManagement })))
 const MedicineRequests = lazy(() => import('./features/nursing_care/pages/MedicineRequests').then(m => ({ default: m.MedicineRequests })))
 const MedicineIssueLog = lazy(() => import('./features/nursing_care/pages/MedicineIssueLog').then(m => ({ default: m.MedicineIssueLog })))
 const MedicationSchedule = lazy(() => import('./features/nursing_care/pages/MedicationSchedule').then(m => ({ default: m.MedicationSchedule })))

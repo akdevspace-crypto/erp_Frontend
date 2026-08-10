@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, DoorOpen, FileText, HeartPulse, IndianRupee, Key, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserCog, UserPlus, Users, Pill } from 'lucide-react'
+import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, FileText, HeartPulse, IndianRupee, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserPlus, Users, Pill } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 
