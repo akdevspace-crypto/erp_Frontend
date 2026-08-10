@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, DoorOpen, FileText, HeartPulse, IndianRupee, Key, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserCog, UserPlus, Users } from 'lucide-react'
+import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, DoorOpen, FileText, HeartPulse, IndianRupee, Key, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserCog, UserPlus, Users, Pill } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 
@@ -18,6 +18,29 @@ type HubConfig = {
 }
 
 const hubs: Record<string, HubConfig> = {
+    'nursing-care': {
+        title: 'Nursing Care Dashboard',
+        subtitle: 'Clinical treatment, medication administration, monitoring and nursing documentation.',
+        breadcrumbs: [{ label: 'Nursing Care' }, { label: 'Dashboard' }],
+        items: [
+            { title: 'Critical Patients', description: 'Patients requiring urgent monitoring.', href: '/nursing-care/critical-patients', icon: HeartPulse },
+            { title: 'Vitals', description: 'Vital sign entry and tracking.', href: '/nursing-care/vitals', icon: Activity },
+            { title: 'Medication Schedule', description: 'Medicine distribution and schedule.', href: '/nursing-care/medication-schedule', icon: Pill },
+            { title: 'Medicine Issue Log', description: 'Log of medicines issued to patients.', href: '/nursing-care/medicine-issue-log', icon: ClipboardList },
+            { title: 'Medicine Requests', description: 'Medicine request queue for pharmacy.', href: '/nursing-care/medicine-requests', icon: MessageSquare }
+        ]
+    },
+    'patient-care': {
+        title: 'Patient Care Dashboard',
+        subtitle: 'Daily living support, resident comfort, hygiene and wellbeing.',
+        breadcrumbs: [{ label: 'Patient Care' }, { label: 'Dashboard' }],
+        items: [
+            { title: 'Patient Dashboard', description: 'Patient-level care overview.', href: '/patient-care/dashboard', icon: Stethoscope },
+            { title: 'ADL Daily Living', description: 'Activities of daily living monitoring.', href: '/patient-care/adl', icon: ClipboardCheck },
+            { title: 'Nutrition & Diet', description: 'Patient diet and nutrition control.', href: '/patient-care/nutrition-diet', icon: ClipboardList },
+            { title: 'Incident Reports', description: 'Log falls and behavioral incidents.', href: '/patient-care/incidents', icon: AlertTriangle }
+        ]
+    },
     'uec-inhouse-care': {
         title: 'In-House Care Command Center',
         subtitle: 'Resident revenue, vitals, ADL and in-house care workflows in one workspace.',
@@ -146,18 +169,12 @@ const hubs: Record<string, HubConfig> = {
         ]
     },
     'ueo-security': {
-        title: 'Security Command Center',
-        subtitle: 'Gate, visitor, staff, vehicle, entry log, report and OTP security workflows in one workspace.',
-        breadcrumbs: [{ label: 'UEO' }, { label: 'Security' }],
+        title: 'Visitor Command Center',
+        subtitle: 'Visitor registration, live analytics, and pass workflows in one workspace.',
+        breadcrumbs: [{ label: 'UEO' }, { label: 'Visitor Command Center' }],
         items: [
-            { title: 'Security Dashboard', description: 'Security overview and current access-control status.', href: '/security/dashboard', icon: DoorOpen },
-            { title: 'Gate Management', description: 'Gate entry handling and access movement control.', href: '/security/gate-management', icon: DoorOpen },
-            { title: 'Visitor Management', description: 'Visitor registration, verification and pass workflow.', href: '/security/visitor-management', icon: Users },
-            { title: 'Staff Register', description: 'Staff entry, verification and register records.', href: '/security/staff-register', icon: UserCog },
-            { title: 'Vehicle Register', description: 'Vehicle entry and movement register.', href: '/security/vehicle-register', icon: Truck },
-            { title: 'Entry Logs', description: 'Incoming and outgoing entry log records.', href: '/security/entry-logs', icon: ClipboardList },
-            { title: 'Security Reports', description: 'Security reports and operational review.', href: '/security/reports', icon: FileText },
-            { title: 'OTP Logs', description: 'OTP verification history and access audit trail.', href: '/security/otp-logs', icon: Key }
+            { title: 'Visitor Dashboard', description: 'Live overview, statistics, and entry analytics.', href: '/security/visitor-dashboard', icon: Activity },
+            { title: 'Visitor Management', description: 'Visitor registration, verification and pass workflow.', href: '/security/visitor-management', icon: Users }
         ]
     }
 }
@@ -171,20 +188,31 @@ export function ModuleCommandCenter() {
         <div className="flex min-h-full flex-col px-2 pb-6 sm:px-4 2xl:px-6">
             <PageHeader title={config.title} subtitle={config.subtitle} breadcrumbs={config.breadcrumbs} />
 
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {config.items.map(({ title, description, href, icon: Icon, status }) => (
                     <button
                         key={href}
                         type="button"
                         onClick={() => navigate(href)}
-                        className="min-h-[150px] rounded-xl border border-slate-100 bg-white p-4 text-left shadow-sm transition hover:border-primary-200 hover:shadow-md"
+                        className="group relative flex flex-col justify-between min-h-[170px] rounded-[1.25rem] border border-slate-200/70 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary-300 hover:shadow-xl hover:shadow-primary-500/10 overflow-hidden"
                     >
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
-                            <Icon className="h-5 w-5" />
-                        </span>
-                        <h2 className="mt-4 text-lg font-extrabold text-slate-950">{title}</h2>
-                        <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{description}</p>
-                        <p className="mt-3 text-xs font-extrabold uppercase tracking-[0.14em] text-primary-700">{status || 'Open workflow'}</p>
+                        {/* Decorative gradient blob */}
+                        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary-50/60 blur-3xl transition-all duration-500 group-hover:bg-primary-200/50 group-hover:scale-150"></div>
+                        
+                        <div className="relative z-10">
+                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50/80 text-primary-600 ring-1 ring-inset ring-primary-100/50 transition-all duration-300 group-hover:bg-primary-600 group-hover:text-white group-hover:ring-primary-600 group-hover:shadow-md group-hover:shadow-primary-500/30">
+                                <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                            </span>
+                            <h2 className="mt-5 text-[1.1rem] font-extrabold text-slate-800 transition-colors group-hover:text-primary-950">{title}</h2>
+                            <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-500">{description}</p>
+                        </div>
+                        
+                        <div className="relative z-10 mt-6 flex items-center text-[0.7rem] font-extrabold uppercase tracking-[0.15em] text-primary-600 transition-colors group-hover:text-primary-800">
+                            {status || 'Open workflow'}
+                            <svg className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </div>
                     </button>
                 ))}
             </section>

@@ -82,8 +82,8 @@ const ClientPortalAccess = lazy(() => import('./features/client_portal/pages/Cli
 const Revenue = lazy(() => import('./features/inhouse_care/pages/Revenue').then(m => ({ default: m.Revenue })))
 const ElderADL = lazy(() => import('./features/inhouse_care/pages/ElderADL').then(m => ({ default: m.ElderADL })))
 const EventCalendar = lazy(() => import('./features/inhouse_care/pages/EventCalendar').then(m => ({ default: m.EventCalendar })))
-const IncidentReports = lazy(() => import('./features/inhouse_care/pages/IncidentReports').then(m => ({ default: m.IncidentReports })))
-const Vitals = lazy(() => import('./features/inhouse_care/pages/Vitals').then(m => ({ default: m.Vitals })))
+const IncidentReports = lazy(() => import('./features/patient_care/pages/IncidentReports').then(m => ({ default: m.IncidentReports })))
+const Vitals = lazy(() => import('./features/nursing_care/pages/Vitals').then(m => ({ default: m.Vitals })))
 const Cashbox = lazy(() => import('./features/accounts/pages/Cashbox').then(m => ({ default: m.Cashbox })))
 const CashboxPending = lazy(() => import('./features/accounts/pages/CashboxPending').then(m => ({ default: m.CashboxPending })))
 const Income = lazy(() => import('./features/accounts/pages/Income').then(m => ({ default: m.Income })))
@@ -105,7 +105,8 @@ const LabourManagement = lazy(() => import('./features/hr/pages/LabourManagement
 const Attendance = lazy(() => import('./features/hr/pages/Attendance').then(m => ({ default: m.Attendance })))
 const Payroll = lazy(() => import('./features/hr/pages/Payroll').then(m => ({ default: m.Payroll })))
 const HRReports = lazy(() => import('./features/hr/pages/HRReports').then(m => ({ default: m.HRReports })))
-const JobEnquiry = lazy(() => import('./features/hr/pages/JobEnquiry').then(m => ({ default: m.JobEnquiry })))
+const CandidatePipeline = lazy(() => import('./features/hr/pages/CandidatePipeline').then(m => ({ default: m.CandidatePipeline })))
+const CandidateForm = lazy(() => import('./features/hr/pages/CandidateForm').then(m => ({ default: m.CandidateForm })))
 const HolidayMapping = lazy(() => import('./features/hr/pages/HolidayMapping').then(m => ({ default: m.HolidayMapping })))
 const Blogs = lazy(() => import('./features/cms/pages/Blogs').then(m => ({ default: m.Blogs })))
 const FAQPage = lazy(() => import('./features/cms/pages/FAQ').then(m => ({ default: m.FAQPage })))
@@ -136,11 +137,11 @@ const AdmissionForms = lazy(() => import('./features/crm/pages/AdmissionForms').
 const CriticalPatients = lazy(() => import('./features/healthcare/pages/CriticalPatients').then(m => ({ default: m.CriticalPatients })))
 const PatientDashboard = lazy(() => import('./features/healthcare/pages/PatientDashboard').then(m => ({ default: m.PatientDashboard })))
 const MedicationManagement = lazy(() => import('./features/healthcare/pages/MedicationManagement').then(m => ({ default: m.MedicationManagement })))
-const MedicineRequests = lazy(() => import('./features/healthcare/pages/MedicineRequests').then(m => ({ default: m.MedicineRequests })))
-const MedicineIssueLog = lazy(() => import('./features/healthcare/pages/MedicineIssueLog').then(m => ({ default: m.MedicineIssueLog })))
-const MedicationSchedule = lazy(() => import('./features/healthcare/pages/MedicationSchedule').then(m => ({ default: m.MedicationSchedule })))
-const NutritionDiet = lazy(() => import('./features/healthcare/pages/NutritionDiet').then(m => ({ default: m.NutritionDiet })))
-const ADL = lazy(() => import('./features/healthcare/pages/ADL').then(m => ({ default: m.ADLDailyLiving })))
+const MedicineRequests = lazy(() => import('./features/nursing_care/pages/MedicineRequests').then(m => ({ default: m.MedicineRequests })))
+const MedicineIssueLog = lazy(() => import('./features/nursing_care/pages/MedicineIssueLog').then(m => ({ default: m.MedicineIssueLog })))
+const MedicationSchedule = lazy(() => import('./features/nursing_care/pages/MedicationSchedule').then(m => ({ default: m.MedicationSchedule })))
+const NutritionDiet = lazy(() => import('./features/patient_care/pages/NutritionDiet').then(m => ({ default: m.NutritionDiet })))
+const ADL = lazy(() => import('./features/patient_care/pages/ADL').then(m => ({ default: m.ADLDailyLiving })))
 const MedicalMonitor = lazy(() => import('./features/medical/pages/MedicalMonitor').then(m => ({ default: m.MedicalMonitor })))
 
 // Operations New Modules
@@ -190,6 +191,18 @@ const AmbulanceMaintenance = lazy(() => import('./features/ambulance/pages/Ambul
 const AmbulanceBilling = lazy(() => import('./features/ambulance/pages/AmbulanceBilling').then(m => ({ default: m.AmbulanceBilling })))
 const EmergencyCallLogs = lazy(() => import('./features/ambulance/pages/EmergencyCallLogs').then(m => ({ default: m.EmergencyCallLogs })))
 
+// UNCF Donations
+const DonationList = lazy(() => import('./features/uncf_donations/pages/DonationList').then(m => ({ default: m.DonationList })))
+const DonationForm = lazy(() => import('./features/uncf_donations/pages/DonationForm').then(m => ({ default: m.DonationForm })))
+const NewVisitorManagement = lazy(() => import('./features/visitor/pages/VisitorManagement'))
+const VisitorDashboard = lazy(() => import('./features/visitor/pages/VisitorDashboard'))
+const VisitorSelfCheckIn = lazy(() => import('./features/visitor/pages/VisitorSelfCheckIn'))
+
+// Patient Portal
+const PatientPortalLogin = lazy(() => import('./features/patient_portal/pages/PatientPortalLogin'))
+const PatientPortalLayout = lazy(() => import('./features/patient_portal/pages/PatientPortalLayout'))
+const PortalPatientDashboard = lazy(() => import('./features/patient_portal/pages/PatientDashboard'))
+
 // App Routing
 function App() {
   return (
@@ -200,6 +213,14 @@ function App() {
             <Routes>
               {/* Public Route */}
               <Route path="/auth/login" element={<Login />} />
+              <Route path="/visitor-checkin" element={<Suspense fallback={<GlobalSpinner />}><VisitorSelfCheckIn /></Suspense>} />
+              
+              {/* Patient Portal Routes */}
+              <Route path="/patient-portal/login" element={<Suspense fallback={<GlobalSpinner />}><PatientPortalLogin /></Suspense>} />
+              <Route path="/patient-portal" element={<Suspense fallback={<GlobalSpinner />}><PatientPortalLayout /></Suspense>}>
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<PortalPatientDashboard />} />
+              </Route>
 
               {/* Protected Routes Wrapper */}
               <Route element={<ProtectedRoute />}>
@@ -215,9 +236,15 @@ function App() {
                   <Route path="reports/generate" element={
                     <Suspense fallback={<SkeletonLoader />}><ReportsDashboard /></Suspense>
                   } />
-                  <Route path=":org/dashboard" element={
-                    <Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>
-                  } />
+                    <Route path=":org/dashboard" element={
+                      <Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>
+                    } />
+                    <Route path=":org/projects" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
+                    <Route path=":org/funding" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
+                    <Route path=":org/outreach" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
+                    <Route path=":org/people" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
+                    <Route path=":org/reports" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
+                    <Route path=":org/admin" element={<Suspense fallback={<SkeletonLoader />}><OrganizationDashboard /></Suspense>} />
                   <Route path="module/:hub" element={
                     <Suspense fallback={<SkeletonLoader />}><ModuleCommandCenter /></Suspense>
                   } />
@@ -248,6 +275,8 @@ function App() {
                   <Route path="healthcare/patient-care-dashboard" element={<Suspense fallback={<SkeletonLoader />}><PatientCareManagerDashboard /></Suspense>} />
                   <Route path="allocation/dashboard" element={<Suspense fallback={<SkeletonLoader />}><CareAllocationManagerDashboard /></Suspense>} />
                   <Route path="inventory/medical-dashboard" element={<Navigate to="/inventory" replace />} />
+                  <Route path="uncf/donations" element={<Suspense fallback={<SkeletonLoader />}><DonationList /></Suspense>} />
+                  <Route path="uncf/donations/new" element={<Suspense fallback={<SkeletonLoader />}><DonationForm /></Suspense>} />
                   <Route path="ambulance/booking-dashboard" element={<Suspense fallback={<SkeletonLoader />}><AmbulanceBookingCoordinatorDashboard /></Suspense>} />
                   <Route path="ambulance/dispatch-dashboard" element={<Suspense fallback={<SkeletonLoader />}><DispatchManagerDashboard /></Suspense>} />
                   <Route path="ambulance/fleet-dashboard" element={<Suspense fallback={<SkeletonLoader />}><FleetManagerDashboard /></Suspense>} />
@@ -308,6 +337,7 @@ function App() {
                   <Route path="allocation/clinical-care" element={<Suspense fallback={<SkeletonLoader />}><ClinicalCare /></Suspense>} />
                   <Route path="allocation/inhouse-care" element={<Suspense fallback={<SkeletonLoader />}><AllocInHouseCare /></Suspense>} />
                   <Route path="allocation/others" element={<Suspense fallback={<SkeletonLoader />}><OthersAllocation /></Suspense>} />
+                  <Route path="visitor-module" element={<Suspense fallback={<SkeletonLoader />}><NewVisitorManagement /></Suspense>} />
 
                   {/* Business Desk */}
                   <Route path="business/welcome-call" element={<Suspense fallback={<SkeletonLoader />}><WelcomeCall /></Suspense>} />
@@ -356,7 +386,8 @@ function App() {
                   <Route path="hr/documents" element={<Suspense fallback={<SkeletonLoader />}><DocumentTracker /></Suspense>} />
                   <Route path="hr/training" element={<Suspense fallback={<SkeletonLoader />}><TrainingCompliance /></Suspense>} />
                   <Route path="hr/labour" element={<Suspense fallback={<SkeletonLoader />}><LabourManagement /></Suspense>} />
-                  <Route path="hr/recruitment" element={<Suspense fallback={<SkeletonLoader />}><JobEnquiry /></Suspense>} />
+                  <Route path="hr/recruitment" element={<Suspense fallback={<SkeletonLoader />}><CandidatePipeline /></Suspense>} />
+                  <Route path="hr/recruitment/:id" element={<Suspense fallback={<SkeletonLoader />}><CandidateForm /></Suspense>} />
                   <Route path="hr/attendance" element={<Suspense fallback={<SkeletonLoader />}><Attendance /></Suspense>} />
                   <Route path="hr/holiday" element={<Suspense fallback={<SkeletonLoader />}><HolidayMapping /></Suspense>} />
                   <Route path="hr/payroll" element={<Suspense fallback={<SkeletonLoader />}><Payroll /></Suspense>} />
@@ -388,15 +419,18 @@ function App() {
                   <Route path="crm/feedback" element={<Suspense fallback={<SkeletonLoader />}><Feedback /></Suspense>} />
                   <Route path="crm/admission-forms" element={<Suspense fallback={<SkeletonLoader />}><AdmissionForms /></Suspense>} />
 
-                  {/* Healthcare New Routes */}
-                  <Route path="healthcare/critical-patients" element={<Suspense fallback={<SkeletonLoader />}><CriticalPatients /></Suspense>} />
-                  <Route path="healthcare/patient-dashboard" element={<Suspense fallback={<SkeletonLoader />}><PatientDashboard /></Suspense>} />
-                  <Route path="healthcare/medication-management" element={<Suspense fallback={<SkeletonLoader />}><MedicationManagement /></Suspense>} />
-                  <Route path="healthcare/medicine-requests" element={<Suspense fallback={<SkeletonLoader />}><MedicineRequests /></Suspense>} />
-                  <Route path="healthcare/medicine-issue-log" element={<Suspense fallback={<SkeletonLoader />}><MedicineIssueLog /></Suspense>} />
-                  <Route path="healthcare/medication-schedule" element={<Suspense fallback={<SkeletonLoader />}><MedicationSchedule /></Suspense>} />
-                  <Route path="healthcare/nutrition-diet" element={<Suspense fallback={<SkeletonLoader />}><NutritionDiet /></Suspense>} />
-                  <Route path="healthcare/adl" element={<Suspense fallback={<SkeletonLoader />}><ADL /></Suspense>} />
+                  {/* Nursing Care New Routes */}
+                  <Route path="nursing-care/critical-patients" element={<Suspense fallback={<SkeletonLoader />}><CriticalPatients /></Suspense>} />
+                  <Route path="nursing-care/medicine-requests" element={<Suspense fallback={<SkeletonLoader />}><MedicineRequests /></Suspense>} />
+                  <Route path="nursing-care/medicine-issue-log" element={<Suspense fallback={<SkeletonLoader />}><MedicineIssueLog /></Suspense>} />
+                  <Route path="nursing-care/medication-schedule" element={<Suspense fallback={<SkeletonLoader />}><MedicationSchedule /></Suspense>} />
+                  <Route path="nursing-care/vitals" element={<Suspense fallback={<SkeletonLoader />}><Vitals /></Suspense>} />
+
+                  {/* Patient Care New Routes */}
+                  <Route path="patient-care/dashboard" element={<Suspense fallback={<SkeletonLoader />}><PatientDashboard /></Suspense>} />
+                  <Route path="patient-care/nutrition-diet" element={<Suspense fallback={<SkeletonLoader />}><NutritionDiet /></Suspense>} />
+                  <Route path="patient-care/adl" element={<Suspense fallback={<SkeletonLoader />}><ADL /></Suspense>} />
+                  <Route path="patient-care/incidents" element={<Suspense fallback={<SkeletonLoader />}><IncidentReports /></Suspense>} />
                   <Route path="healthcare/medical-monitor" element={<Suspense fallback={<SkeletonLoader />}><MedicalMonitor /></Suspense>} />
 
                   {/* Operations New Routes */}
@@ -431,6 +465,7 @@ function App() {
                   {/* Security New Routes */}
                   <Route path="security/gate-management" element={<Suspense fallback={<SkeletonLoader />}><GateManagement /></Suspense>} />
                   <Route path="security/visitor-management" element={<Suspense fallback={<SkeletonLoader />}><VisitorManagement /></Suspense>} />
+                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />
                   <Route path="security/staff-register" element={<Suspense fallback={<SkeletonLoader />}><StaffRegister /></Suspense>} />
                   <Route path="security/vehicle-register" element={<Suspense fallback={<SkeletonLoader />}><VehicleRegister /></Suspense>} />
                   <Route path="security/entry-logs" element={<Suspense fallback={<SkeletonLoader />}><EntryLogs /></Suspense>} />
@@ -468,3 +503,5 @@ function App() {
 }
 
 export default App
+
+

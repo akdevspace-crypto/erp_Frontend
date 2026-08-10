@@ -39,7 +39,12 @@ const roleDefaultRoutes: Record<string, string> = {
     'task log coordinator': '/task-log/dashboard',
     'elder finance manager': '/finance/elder-dashboard',
     'uhc admin': '/uhc/dashboard',
-    'patient care manager': '/healthcare/patient-care-dashboard',
+    'patient care manager': '/module/patient-care',
+    'patient_care_manager': '/module/patient-care',
+    'caregiver': '/module/patient-care',
+    'nursing manager': '/module/nursing-care',
+    'nursing_manager': '/module/nursing-care',
+    'nurse': '/module/nursing-care',
     'medical monitor coordinator': '/healthcare/medical-monitor-dashboard',
     'care allocation manager': '/allocation/dashboard',
     'medical inventory manager': '/inventory',
@@ -72,7 +77,8 @@ const roleDashboardAccess: Record<string, string[]> = {
     '/inventory/elder-dashboard': ['elder inventory manager'],
     '/task-log/dashboard': ['task log coordinator'],
     '/finance/elder-dashboard': ['elder finance manager'],
-    '/healthcare/patient-care-dashboard': ['patient care manager'],
+    '/module/patient-care': ['patient care manager', 'patient_care_manager', 'caregiver'],
+    '/module/nursing-care': ['nursing manager', 'nursing_manager', 'nurse'],
     '/healthcare/medical-monitor-dashboard': ['medical monitor coordinator'],
     '/allocation/dashboard': ['care allocation manager'],
     '/inventory/medical-dashboard': ['medical inventory manager'],
@@ -154,8 +160,22 @@ const rolePermissionFallbacks: Record<string, string[]> = {
         'Medical Assets', 'Assets', 'Purchase Orders', 'Stock', 'Stock Issue', 'Stock Issue Request', 'Stock Issue Approval', 'Stock Movements', 'Products', 'Inventory Products'
     ],
     'patient care manager': [
-        'Patient Care Dashboard', 'Healthcare', 'Critical Patients', 'Patient Dashboard', 'Vital Form',
-        'Medication Management', 'Medicine Requests', 'Medicine Issue Log', 'Medication Schedule', 'Nutrition & Diet', 'Stock Issue Request'
+        'Patient Care Dashboard', 'Patient Overview', 'Daily Living (ADL)', 'Nutrition & Diet', 'Incident Reports', 'Vital Form', 'Stock Issue Request'
+    ],
+    'patient_care_manager': [
+        'Patient Care Dashboard', 'Patient Overview', 'Daily Living (ADL)', 'Nutrition & Diet', 'Incident Reports', 'Vital Form', 'Stock Issue Request'
+    ],
+    'caregiver': [
+        'Patient Care Dashboard', 'Patient Overview', 'Daily Living (ADL)', 'Nutrition & Diet', 'Incident Reports', 'Vital Form'
+    ],
+    'nursing manager': [
+        'Nursing Dashboard', 'Medication Schedule', 'Medicine Issue Log', 'Medicine Requests', 'Vitals Monitoring', 'Critical Patients', 'Vital Form'
+    ],
+    'nursing_manager': [
+        'Nursing Dashboard', 'Medication Schedule', 'Medicine Issue Log', 'Medicine Requests', 'Vitals Monitoring', 'Critical Patients', 'Vital Form'
+    ],
+    'nurse': [
+        'Nursing Dashboard', 'Medication Schedule', 'Medicine Issue Log', 'Medicine Requests', 'Vitals Monitoring', 'Critical Patients', 'Vital Form'
     ],
     'medical monitor coordinator': [
         'Medical Monitor Dashboard', 'Healthcare', 'Medical Monitor', 'Critical Patients', 'Patient Dashboard', 'Vital Form', 'Stock Issue Request'
@@ -258,17 +278,20 @@ const pathPermissionMap: Array<{ prefix: string; permissions: string[] }> = [
     { prefix: '/inhouse-care/revenue', permissions: ['Revenue Form'] },
     { prefix: '/inhouse-care/vitals', permissions: ['Vital Form'] },
     { prefix: '/healthcare/critical-patients', permissions: ['Critical Patients', 'Vital Form'] },
-    { prefix: '/healthcare/patient-care-dashboard', permissions: ['Patient Care Dashboard'] },
-    { prefix: '/healthcare/patient-dashboard', permissions: ['Patient Dashboard', 'Vital Form'] },
-    { prefix: '/healthcare/vitals', permissions: ['Vital Form'] },
+    { prefix: '/module/patient-care', permissions: ['Patient Care Dashboard'] },
+    { prefix: '/module/nursing-care', permissions: ['Nursing Dashboard'] },
+    { prefix: '/nursing-care/dashboard', permissions: ['Nursing Dashboard'] },
+    { prefix: '/nursing-care/critical-patients', permissions: ['Critical Patients', 'Vital Form'] },
+    { prefix: '/nursing-care/vitals', permissions: ['Vitals Monitoring', 'Vital Form'] },
+    { prefix: '/nursing-care/medication-schedule', permissions: ['Medication Schedule'] },
+    { prefix: '/nursing-care/medicine-issue-log', permissions: ['Medicine Issue Log'] },
+    { prefix: '/nursing-care/medicine-requests', permissions: ['Medicine Requests'] },
+    { prefix: '/patient-care/dashboard', permissions: ['Patient Overview', 'Patient Dashboard', 'Vital Form'] },
+    { prefix: '/patient-care/adl', permissions: ['Daily Living (ADL)', 'ADL', 'Vital Form'] },
+    { prefix: '/patient-care/nutrition-diet', permissions: ['Nutrition & Diet', 'Vital Form'] },
+    { prefix: '/patient-care/incidents', permissions: ['Incident Reports', 'Vital Form'] },
     { prefix: '/healthcare/medical-monitor-dashboard', permissions: ['Medical Monitor Dashboard', 'Medical Monitor', 'Healthcare'] },
     { prefix: '/healthcare/medical-monitor', permissions: ['Medical Monitor', 'Healthcare', 'Vital Form'] },
-    { prefix: '/healthcare/medication-schedule', permissions: ['Medication Schedule', 'Medicine Issue Log', 'Medicine Requests', 'Medication Management', 'Stock Issue Approval'] },
-    { prefix: '/healthcare/medicine-issue-log', permissions: ['Medicine Issue Log', 'Medicine Requests', 'Medication Management', 'Stock Issue Approval'] },
-    { prefix: '/healthcare/medicine-requests', permissions: ['Medicine Requests', 'Medication Management', 'Stock Issue Approval'] },
-    { prefix: '/healthcare/medication-management', permissions: ['Medication Management', 'Vital Form'] },
-    { prefix: '/healthcare/nutrition-diet', permissions: ['Nutrition & Diet', 'Vital Form'] },
-    { prefix: '/healthcare/adl', permissions: ['ADL', 'Vital Form'] },
     { prefix: '/operations/dashboard', permissions: ['Elder Operations Dashboard'] },
     { prefix: '/operations/food-preparation', permissions: ['Food Preparation'] },
     { prefix: '/operations/nutrition-planning', permissions: ['Nutrition Planning'] },
@@ -368,8 +391,10 @@ const pathPermissionMap: Array<{ prefix: string; permissions: string[] }> = [
     { prefix: '/client-portal/notifications', permissions: ['Client Portal Dashboard'] },
     { prefix: '/super-admin/users', permissions: ['ALL_ACCESS'] },
     { prefix: '/security/dashboard', permissions: ['Security Dashboard'] },
+    { prefix: '/security/visitor-dashboard', permissions: ['Security Dashboard', 'Visitor Management', 'Security'] },
     { prefix: '/security/gate-management', permissions: ['Gate Management', 'Security'] },
     { prefix: '/security/visitor-management', permissions: ['Visitor Management', 'Security'] },
+    { prefix: '/visitor-module', permissions: ['Visitor Management', 'Security'] },
     { prefix: '/security/staff-register', permissions: ['Staff Register', 'Security'] },
     { prefix: '/security/vehicle-register', permissions: ['Vehicle Register', 'Gate Management', 'Security'] },
     { prefix: '/security/entry-logs', permissions: ['Entry Logs', 'Security'] },
@@ -502,17 +527,17 @@ export const canAccessPath = (user: User | null | undefined, pathname: string) =
 }
 
 export const getDefaultRouteForUser = (user: User | null | undefined) => {
-    if (user?.staffId && canAccessPath(user, '/task-user/dashboard')) {
-        return '/task-user/dashboard'
+    const roleDefaultRoute = roleDefaultRoutes[getNormalizedRole(user)]
+    if (roleDefaultRoute && canAccessPath(user, roleDefaultRoute)) {
+        return roleDefaultRoute
     }
 
     if (CLIENT_PORTAL_ROLES.includes(getNormalizedRole(user)) && canAccessPath(user, '/client-portal/dashboard')) {
         return '/client-portal/dashboard'
     }
 
-    const roleDefaultRoute = roleDefaultRoutes[getNormalizedRole(user)]
-    if (roleDefaultRoute && canAccessPath(user, roleDefaultRoute)) {
-        return roleDefaultRoute
+    if (user?.staffId && canAccessPath(user, '/task-user/dashboard')) {
+        return '/task-user/dashboard'
     }
 
     const preferredRoutes = [

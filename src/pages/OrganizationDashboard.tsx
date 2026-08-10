@@ -1,10 +1,11 @@
 import { Activity, AlertCircle, ClipboardCheck, IndianRupee, Mail, Megaphone, MessageSquare, RefreshCw, Target, TrendingUp, Wallet } from 'lucide-react'
-import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { SkeletonLoader } from '../components/SkeletonLoader'
 import { useOrganizationDashboard } from '../hooks/useOrganizationDashboard'
 import type { OrganizationDashboardData, OrganizationKPI } from '../services/organizationDashboardService'
+import { DonationList } from '../features/uncf_donations/pages/DonationList'
 
 const orgFallbacks = {
     uncf: { code: 'UNCF', title: 'UNCF Dashboard', subtitle: 'Foundation-wide administration, finance, HR, security, CMS, and profile monitoring.' },
@@ -145,7 +146,31 @@ const uncfCampaigns = [
 const currency = (value: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value)
 
 function UncfFoundationCommandCenter() {
-    const [activeTab, setActiveTab] = useState<'Dashboard' | 'Projects' | 'Funding' | 'Outreach' | 'People' | 'Reports' | 'Admin'>('Dashboard')
+    const location = useLocation()
+    const navigate = useNavigate()
+    
+    const getInitialTab = () => {
+        const pathSegments = location.pathname.split('/').filter(Boolean)
+        const lastSegment = pathSegments[pathSegments.length - 1]
+        const validTabs = ['dashboard', 'projects', 'funding', 'outreach', 'people', 'donations', 'reports', 'admin']
+        
+        if (validTabs.includes(lastSegment?.toLowerCase())) {
+            const index = validTabs.indexOf(lastSegment?.toLowerCase())
+            return ['Dashboard', 'Projects', 'Funding', 'Outreach', 'People', 'Donations', 'Reports', 'Admin'][index] as 'Dashboard' | 'Projects' | 'Funding' | 'Outreach' | 'People' | 'Donations' | 'Reports' | 'Admin'
+        }
+        return 'Dashboard'
+    }
+
+    const [activeTab, setActiveTab] = useState<'Dashboard' | 'Projects' | 'Funding' | 'Outreach' | 'People' | 'Donations' | 'Reports' | 'Admin'>(getInitialTab())
+
+    useEffect(() => {
+        setActiveTab(getInitialTab())
+    }, [location.pathname])
+
+    const handleTabChange = (tab: typeof activeTab) => {
+        setActiveTab(tab)
+        navigate(`/uncf/${tab.toLowerCase()}`)
+    }
     const totalTarget = uncfProjects.reduce((sum, project) => sum + project.target, 0)
     const totalCollected = uncfProjects.reduce((sum, project) => sum + project.collected, 0)
     const totalAllocated = uncfProjects.reduce((sum, project) => sum + project.allocated, 0)
@@ -183,11 +208,11 @@ function UncfFoundationCommandCenter() {
             </section>
 
             <div className="mb-4 flex flex-wrap gap-2">
-                {(['Dashboard', 'Projects', 'Funding', 'Outreach', 'People', 'Reports', 'Admin'] as const).map((tab) => (
+                {(['Dashboard', 'Projects', 'Funding', 'Outreach', 'People', 'Donations', 'Reports', 'Admin'] as const).map((tab) => (
                     <button
                         key={tab}
                         type="button"
-                        onClick={() => setActiveTab(tab)}
+                        onClick={() => handleTabChange(tab)}
                         className={`rounded-xl px-4 py-2 text-sm font-extrabold ${activeTab === tab ? 'bg-[#0F969C] text-white' : 'bg-white text-slate-700 shadow-sm'}`}
                     >
                         {tab}
@@ -245,6 +270,11 @@ function UncfFoundationCommandCenter() {
                             { title: 'Campaign Proof', detail: 'Receipts, beneficiary proof, fund usage proof, field media', status: 'Needed for trust' }
                         ]} />
                     </div>
+                </div>
+            )}
+            {activeTab === 'Donations' && (
+                <div className="-mx-2 -mt-4 sm:-mx-4 2xl:-mx-6">
+                    <DonationList />
                 </div>
             )}
             {activeTab === 'People' && (
