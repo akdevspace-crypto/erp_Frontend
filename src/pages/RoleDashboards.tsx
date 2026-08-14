@@ -778,6 +778,10 @@ export function MedicalMonitorDashboard() {
             breadcrumbs={[{ label: 'UHC' }, { label: 'Medical Monitor' }, { label: 'Dashboard' }]}
             links={[
                 { label: 'Medical Monitor', href: '/healthcare/medical-monitor' },
+                { label: 'Medical Dashboard', href: '/medical/dashboard' },
+                { label: 'Clinical View', href: '/medical/clinical-view' },
+                { label: 'Doctor Duty', href: '/medical/doctor-duty' },
+                { label: 'Doctor Visits', href: '/medical/doctor-visits' },
                 { label: 'Critical Patients', href: '/healthcare/critical-patients' },
                 { label: 'Vital Form', href: '/healthcare/vitals' },
                 { label: 'Patient Dashboard', href: '/healthcare/patient-dashboard' }

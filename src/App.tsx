@@ -132,17 +132,26 @@ const AdmissionTracking = lazy(() => import('./features/crm/pages/AdmissionTrack
 const CustomerCare = lazy(() => import('./features/crm/pages/CustomerCare').then(m => ({ default: m.CustomerCare })))
 const Feedback = lazy(() => import('./features/crm/pages/Feedback').then(m => ({ default: m.Feedback })))
 const AdmissionForms = lazy(() => import('./features/crm/pages/AdmissionForms').then(m => ({ default: m.AdmissionForms })))
+const B2PDashboard = lazy(() => import('./features/crm/pages/B2PDashboard').then(m => ({ default: m.B2PDashboard })))
+const MarketingDashboard = lazy(() => import('./features/marketing/pages/MarketingDashboard').then(m => ({ default: m.MarketingDashboard })))
 
 // Healthcare New Modules
 const CriticalPatients = lazy(() => import('./features/healthcare/pages/CriticalPatients').then(m => ({ default: m.CriticalPatients })))
 const PatientDashboard = lazy(() => import('./features/healthcare/pages/PatientDashboard').then(m => ({ default: m.PatientDashboard })))
-// const MedicationManagement = lazy(() => import('./features/healthcare/pages/MedicationManagement').then(m => ({ default: m.MedicationManagement })))
+// Operations New Modules
+const PatientRegistration = lazy(() => import('./features/healthcare/pages/PatientRegistration').then(m => ({ default: m.default })))
+const Admission = lazy(() => import('./features/healthcare/pages/Admission').then(m => ({ default: m.default })))
+const Discharge = lazy(() => import('./features/healthcare/pages/Discharge').then(m => ({ default: m.default })))
 const MedicineRequests = lazy(() => import('./features/nursing_care/pages/MedicineRequests').then(m => ({ default: m.MedicineRequests })))
 const MedicineIssueLog = lazy(() => import('./features/nursing_care/pages/MedicineIssueLog').then(m => ({ default: m.MedicineIssueLog })))
 const MedicationSchedule = lazy(() => import('./features/nursing_care/pages/MedicationSchedule').then(m => ({ default: m.MedicationSchedule })))
 const NutritionDiet = lazy(() => import('./features/patient_care/pages/NutritionDiet').then(m => ({ default: m.NutritionDiet })))
 const ADL = lazy(() => import('./features/patient_care/pages/ADL').then(m => ({ default: m.ADLDailyLiving })))
 const MedicalMonitor = lazy(() => import('./features/medical/pages/MedicalMonitor').then(m => ({ default: m.MedicalMonitor })))
+const MedicalDashboard = lazy(() => import('./features/medical/pages/MedicalDashboard').then(m => ({ default: m.MedicalDashboard })))
+const ResidentClinicalView = lazy(() => import('./features/medical/pages/ResidentClinicalView').then(m => ({ default: m.ResidentClinicalView })))
+const DoctorDuty = lazy(() => import('./features/medical/pages/DoctorDuty').then(m => ({ default: m.DoctorDuty })))
+const DoctorVisits = lazy(() => import('./features/medical/pages/DoctorVisits').then(m => ({ default: m.DoctorVisits })))
 
 // Operations New Modules
 const FoodPreparation = lazy(() => import('./features/operations/pages/FoodPreparation').then(m => ({ default: m.FoodPreparation })))
@@ -172,6 +181,7 @@ const VehicleRegister = lazy(() => import('./features/security/pages/VehicleRegi
 const EntryLogs = lazy(() => import('./features/security/pages/EntryLogs').then(m => ({ default: m.EntryLogs })))
 const SecurityReports = lazy(() => import('./features/security/pages/SecurityReports').then(m => ({ default: m.SecurityReports })))
 const OTPLogs = lazy(() => import('./features/security/pages/OTPLogs').then(m => ({ default: m.OTPLogs })))
+const ActionHistory = lazy(() => import('./features/security/pages/ActionHistory').then(m => ({ default: m.ActionHistory })))
 
 // Omnichannel New Modules
 const UnifiedInbox = lazy(() => import('./features/omnichannel/pages/UnifiedInbox').then(m => ({ default: m.UnifiedInbox })))
@@ -197,6 +207,7 @@ const DonationForm = lazy(() => import('./features/uncf_donations/pages/Donation
 const NewVisitorManagement = lazy(() => import('./features/visitor/pages/VisitorManagement'))
 const VisitorDashboard = lazy(() => import('./features/visitor/pages/VisitorDashboard'))
 const VisitorSelfCheckIn = lazy(() => import('./features/visitor/pages/VisitorSelfCheckIn'))
+const VisitorReports = lazy(() => import('./features/visitor/pages/VisitorReports').then(m => ({ default: m.VisitorReports })))
 
 // Patient Portal
 const PatientPortalLogin = lazy(() => import('./features/patient_portal/pages/PatientPortalLogin'))
@@ -291,6 +302,17 @@ function App() {
                   <Route path="super-admin/users" element={
                     <Suspense fallback={<SkeletonLoader />}><UserManagement /></Suspense>
                   } />
+                  <Route path="/medical/monitor" element={<MedicalMonitor />} />
+                  <Route path="/medical/dashboard" element={<Suspense fallback={<SkeletonLoader />}><MedicalDashboard /></Suspense>} />
+                  <Route path="/medical/clinical-view" element={<Suspense fallback={<SkeletonLoader />}><ResidentClinicalView /></Suspense>} />
+                  <Route path="/medical/doctor-duty" element={<Suspense fallback={<SkeletonLoader />}><DoctorDuty /></Suspense>} />
+                  <Route path="/medical/doctor-visits" element={<Suspense fallback={<SkeletonLoader />}><DoctorVisits /></Suspense>} />
+                            
+                  {/* Healthcare Routes */}
+                  <Route path="/healthcare/registration" element={<PatientRegistration />} />
+                  <Route path="/healthcare/admission" element={<Admission />} />
+                  <Route path="/healthcare/discharge" element={<Discharge />} />
+                  <Route path="/healthcare/patients/critical" element={<CriticalPatients />} />
 
                   {/* Master Module */}
                   <Route path="master/city" element={<Suspense fallback={<SkeletonLoader />}><CityMaster /></Suspense>} />
@@ -418,6 +440,8 @@ function App() {
                   <Route path="crm/customer-care" element={<Suspense fallback={<SkeletonLoader />}><CustomerCare /></Suspense>} />
                   <Route path="crm/feedback" element={<Suspense fallback={<SkeletonLoader />}><Feedback /></Suspense>} />
                   <Route path="crm/admission-forms" element={<Suspense fallback={<SkeletonLoader />}><AdmissionForms /></Suspense>} />
+                  <Route path="crm/b2p" element={<Suspense fallback={<SkeletonLoader />}><B2PDashboard /></Suspense>} />
+                  <Route path="crm/marketing" element={<Suspense fallback={<SkeletonLoader />}><MarketingDashboard /></Suspense>} />
 
                   {/* Nursing Care New Routes */}
                   <Route path="nursing-care/critical-patients" element={<Suspense fallback={<SkeletonLoader />}><CriticalPatients /></Suspense>} />
@@ -465,12 +489,14 @@ function App() {
                   {/* Security New Routes */}
                   <Route path="security/gate-management" element={<Suspense fallback={<SkeletonLoader />}><GateManagement /></Suspense>} />
                   <Route path="security/visitor-management" element={<Suspense fallback={<SkeletonLoader />}><VisitorManagement /></Suspense>} />
-                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />
+                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />
+                  <Route path="security/visitor-reports" element={<Suspense fallback={<SkeletonLoader />}><VisitorReports /></Suspense>} />
                   <Route path="security/staff-register" element={<Suspense fallback={<SkeletonLoader />}><StaffRegister /></Suspense>} />
                   <Route path="security/vehicle-register" element={<Suspense fallback={<SkeletonLoader />}><VehicleRegister /></Suspense>} />
                   <Route path="security/entry-logs" element={<Suspense fallback={<SkeletonLoader />}><EntryLogs /></Suspense>} />
                   <Route path="security/reports" element={<Suspense fallback={<SkeletonLoader />}><SecurityReports /></Suspense>} />
                   <Route path="security/otp-logs" element={<Suspense fallback={<SkeletonLoader />}><OTPLogs /></Suspense>} />
+                  <Route path="security/action-history" element={<Suspense fallback={<SkeletonLoader />}><ActionHistory /></Suspense>} />
 
                   {/* Omnichannel New Routes */}
                   <Route path="omnichannel/conversations" element={<Suspense fallback={<SkeletonLoader />}><UnifiedInbox /></Suspense>} />

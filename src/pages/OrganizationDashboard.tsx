@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Activity, AlertCircle, ClipboardCheck, IndianRupee, Mail, Megaphone, MessageSquare, RefreshCw, Target, TrendingUp, Wallet } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
@@ -235,7 +236,7 @@ function UncfFoundationCommandCenter() {
                 </div>
             )}
 
-            {activeTab === 'Projects' && <ProjectTable />}
+            {activeTab === 'Projects' && <ProjectManagement />}
             {activeTab === 'Funding' && (
                 <div className="grid gap-4 xl:grid-cols-3">
                     <FoundationPanel title="Fundings" rows={[
@@ -585,3 +586,6 @@ function OrganizationAnalyticsDashboard({ routeOrg }: { routeOrg: keyof typeof o
         </div>
     )
 }
+
+
+

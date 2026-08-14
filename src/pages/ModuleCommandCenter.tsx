@@ -1,6 +1,8 @@
 import { Activity, AlertTriangle, Briefcase, Calendar, CalendarDays, ClipboardCheck, ClipboardList, Database, FileText, HeartPulse, IndianRupee, MessageSquare, PhoneCall, Radio, Receipt, Stethoscope, Truck, UserPlus, Users, Pill } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
+import { PatientCareClinicalOverview } from '../features/patient_care/components/PatientCareClinicalOverview'
+import { NursingPatientCareOverview } from '../features/nursing_care/components/NursingPatientCareOverview'
 
 type HubItem = {
     title: string
@@ -96,6 +98,10 @@ const hubs: Record<string, HubConfig> = {
             { title: 'Patient Dashboard', description: 'Patient-level care overview.', href: '/healthcare/patient-dashboard', icon: Stethoscope },
             { title: 'Vitals', description: 'Vital sign entry and tracking.', href: '/healthcare/vitals', icon: Activity },
             { title: 'Medical Monitor', description: 'Clinical monitoring dashboard.', href: '/healthcare/medical-monitor', icon: HeartPulse },
+            { title: 'Medical Dashboard', description: 'Medical KPI and Live Duty Monitor.', href: '/medical/dashboard', icon: Stethoscope },
+            { title: 'Doctor Visits', description: 'Doctor Consultations & Medical Orders.', href: '/medical/doctor-visits', icon: Activity },
+            { title: 'Doctor Duty', description: 'Doctor Shift Duty Assignments.', href: '/medical/doctor-duty', icon: Activity },
+            { title: 'Clinical View', description: 'Resident Clinical History.', href: '/medical/clinical-view', icon: HeartPulse },
             { title: 'Medication Management', description: 'Medicine stock and medication operations.', href: '/healthcare/medication-management', icon: ClipboardList },
             { title: 'Nutrition & Diet', description: 'Patient diet and nutrition control.', href: '/healthcare/nutrition-diet', icon: ClipboardCheck }
         ]
@@ -145,7 +151,9 @@ const hubs: Record<string, HubConfig> = {
             { title: 'Active Enquiries', description: 'Live lead pipeline and filtering.', href: '/crm/active-enquiries', icon: Activity },
             { title: 'Clients', description: 'Client list and follow-up records.', href: '/crm/clients', icon: Users },
             { title: 'Admissions', description: 'Admission tracking and handoff control.', href: '/crm/admission-tracking', icon: ClipboardCheck },
-            { title: 'Admission Forms', description: 'Admission records and family portal access setup.', href: '/crm/admission-forms', icon: FileText }
+            { title: 'Admission Forms', description: 'Admission records and family portal access setup.', href: '/crm/admission-forms', icon: FileText },
+            { title: 'B2P Referrals', description: 'Business-to-Partner referral tracking.', href: '/crm/b2p', icon: Briefcase },
+            { title: 'Marketing Campaigns', description: 'Marketing campaign tracking and ROI.', href: '/crm/marketing', icon: Activity }
         ]
     },
     'ueo-customer': {
@@ -174,7 +182,9 @@ const hubs: Record<string, HubConfig> = {
         breadcrumbs: [{ label: 'UEO' }, { label: 'Visitor Command Center' }],
         items: [
             { title: 'Visitor Dashboard', description: 'Live overview, statistics, and entry analytics.', href: '/security/visitor-dashboard', icon: Activity },
-            { title: 'Visitor Management', description: 'Visitor registration, verification and pass workflow.', href: '/security/visitor-management', icon: Users }
+            { title: 'Visitor Management', description: 'Visitor registration, verification and pass workflow.', href: '/security/visitor-management', icon: Users },
+            { title: 'Visitor Reports', description: 'Analytics and chronological visitor logs.', href: '/security/visitor-reports', icon: FileText },
+            { title: 'Action History', description: 'System-wide digital audit and security logs.', href: '/security/action-history', icon: ClipboardList }
         ]
     }
 }
@@ -187,6 +197,9 @@ export function ModuleCommandCenter() {
     return (
         <div className="flex min-h-full flex-col px-2 pb-6 sm:px-4 2xl:px-6">
             <PageHeader title={config.title} subtitle={config.subtitle} breadcrumbs={config.breadcrumbs} />
+
+            {hub === 'patient-care' && <PatientCareClinicalOverview />}
+            {hub === 'nursing-care' && <NursingPatientCareOverview />}
 
             <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {config.items.map(({ title, description, href, icon: Icon, status }) => (
@@ -219,3 +232,4 @@ export function ModuleCommandCenter() {
         </div>
     )
 }
+
