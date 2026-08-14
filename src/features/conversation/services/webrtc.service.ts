@@ -15,7 +15,7 @@ export class WebRTCService {
         this.currentUserId = currentUserId;
         this.targetUserId = targetUserId;
 
-        const socketUrl = (import.meta.env.VITE_SOCKET_URL || 'https://backend-erp-jp2x.onrender.com').replace(/\/$/, '');
+        const socketUrl = (import.meta.env.VITE_SOCKET_URL || 'https://backend-erp-1-c5qf.onrender.com').replace(/\/$/, '');
 
         // Connect to the new /calls namespace
         this.socket = io(`${socketUrl}/calls`, {

@@ -7,6 +7,7 @@ import { DataTable, type Column } from '../../../components/DataTable'
 import { Modal } from '../../../components/Modal'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { useConvertToAdmission, useEnquiries } from '../../enquiry/hooks/useEnquiry'
+import { PatientSelector } from '../../../components/PatientSelector'
 import type { Enquiry } from '../../enquiry/types'
 
 const extractQualificationValue = (comments: string | undefined, label: string) => {
@@ -67,6 +68,17 @@ export function ActiveEnquiries() {
     const [actionFilter, setActionFilter] = useState('')
     const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null)
     const [patientName, setPatientName] = useState('')
+    const [dob, setDob] = useState('')
+    const [gender, setGender] = useState('')
+    const [bloodGroup, setBloodGroup] = useState('')
+    const [primaryContact, setPrimaryContact] = useState('')
+    const [emergencyContact, setEmergencyContact] = useState('')
+    const [admissionPriority, setAdmissionPriority] = useState('Normal')
+    const [healthCondition, setHealthCondition] = useState('')
+    const [clinicalStatus, setClinicalStatus] = useState('Stable')
+    const [floor, setFloor] = useState('')
+    const [room, setRoom] = useState('')
+    const [bed, setBed] = useState('')
 
     useEffect(() => {
         setSearchQuery(searchParams.get('search') || '')
@@ -124,6 +136,17 @@ export function ActiveEnquiries() {
         if (getLeadQualification(enquiry).isInvalid || enquiry.status === 'Lost') return
         setSelectedEnquiry(enquiry)
         setPatientName(enquiry.patientName || enquiry.clientName)
+        setDob('')
+        setGender(enquiry.patientGender || '')
+        setBloodGroup('')
+        setPrimaryContact(enquiry.mobile || '')
+        setEmergencyContact('')
+        setAdmissionPriority('Normal')
+        setHealthCondition(enquiry.patientHealthCondition || '')
+        setClinicalStatus('Stable')
+        setFloor('')
+        setRoom('')
+        setBed('')
     }
 
     const handleConvert = () => {
@@ -133,6 +156,17 @@ export function ActiveEnquiries() {
                 id: selectedEnquiry.id,
                 data: {
                     patientName,
+                    dob,
+                    gender,
+                    bloodGroup,
+                    primaryContact,
+                    emergencyContact,
+                    admissionPriority,
+                    healthCondition,
+                    clinicalStatus,
+                    floor,
+                    room,
+                    bed,
                     status: 'ACTIVE'
                 }
             },
@@ -363,17 +397,92 @@ export function ActiveEnquiries() {
                         </div>
                         <p className="mt-1 text-xs font-medium">{selectedEnquiry?.service} enquiry will become an active admission.</p>
                     </div>
-                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                        Patient Name
-                        <input
-                            value={patientName}
-                            onChange={(event) => setPatientName(event.target.value)}
-                            className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100"
-                            placeholder="Enter patient name"
-                        />
-                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex gap-2">
+                            <label className="flex-1 block text-xs font-bold text-gray-700 dark:text-gray-300">
+                                Patient Name
+                                <input
+                                    value={patientName}
+                                    onChange={(event) => setPatientName(event.target.value)}
+                                    className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100"
+                                    placeholder="Enter patient name"
+                                />
+                            </label>
+                            <div className="flex-1">
+                                <PatientSelector 
+                                    value=""
+                                    onChange={(id, name) => {
+                                        if (name) setPatientName(name);
+                                    }}
+                                    label="Or Select Existing"
+                                    className="w-full mt-1"
+                                />
+                            </div>
+                        </div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            Date of Birth
+                            <input type="date" value={dob} onChange={e => setDob(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                        </label>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            Gender
+                            <select value={gender} onChange={e => setGender(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100">
+                                <option value="">-- Select --</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </label>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            Blood Group
+                            <input value={bloodGroup} onChange={e => setBloodGroup(e.target.value)} placeholder="e.g. O+" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                        </label>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            Primary Contact
+                            <input value={primaryContact} onChange={e => setPrimaryContact(e.target.value)} placeholder="Mobile No" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                        </label>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            Emergency Contact
+                            <input value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} placeholder="Emergency Mobile" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                        </label>
+                    </div>
+                    <div className="mt-4 border-t pt-4">
+                        <h4 className="mb-2 text-sm font-bold text-primary-900">Admission & Clinical Allocation</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                                Admission Priority
+                                <select value={admissionPriority} onChange={e => setAdmissionPriority(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100">
+                                    <option value="Normal">Normal</option>
+                                    <option value="High">High</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </label>
+                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                                Health Condition
+                                <input value={healthCondition} onChange={e => setHealthCondition(e.target.value)} placeholder="Condition" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                            </label>
+                            <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                                Clinical Status
+                                <input value={clinicalStatus} onChange={e => setClinicalStatus(e.target.value)} placeholder="e.g. Stable" className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                            </label>
+                            <div className="flex gap-2">
+                                <label className="block w-1/3 text-xs font-bold text-gray-700 dark:text-gray-300">
+                                    Floor
+                                    <input value={floor} onChange={e => setFloor(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                                </label>
+                                <label className="block w-1/3 text-xs font-bold text-gray-700 dark:text-gray-300">
+                                    Room
+                                    <input value={room} onChange={e => setRoom(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                                </label>
+                                <label className="block w-1/3 text-xs font-bold text-gray-700 dark:text-gray-300">
+                                    Bed
+                                    <input value={bed} onChange={e => setBed(e.target.value)} className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-black dark:text-gray-100" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </Modal>
         </div>
     )
 }
+

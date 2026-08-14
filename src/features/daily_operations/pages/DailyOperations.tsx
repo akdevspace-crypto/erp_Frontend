@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Activity, ClipboardCheck, Clock, FileText, Plus, RefreshCw } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
+import { MasterDataSelector } from '../../../components/MasterDataSelector'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { useStaff } from '../../hr/hooks/useHR'
 import { usePatientBillingServices } from '../../patient_billing/hooks/usePatientBilling'
@@ -8,25 +9,14 @@ import type { PatientService } from '../../patient_billing/services/patientBilli
 import { useCreateDailyOperationTask, useDailyOperationTasks, usePostChargeableExpense, useUpdateDailyOperationTask } from '../hooks/useDailyOperations'
 import type { DailyOperationStatus, DailyOperationTask } from '../services/dailyOperations'
 
+
 const departments = ['Patient Care', 'Nursing', 'Housekeeping', 'Kitchen', 'Inventory', 'Administration']
+const chargeableCategories = ['Nursing Care', 'Medical Supply', 'Therapy', 'Extra Meal', 'Other']
 const statuses: DailyOperationStatus[] = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'MISSED']
 const sections = ['Department Updates', 'Patient Care Register', 'Nursing Register', 'Operational Alerts', 'End-of-Day Report'] as const
 type DailyOperationSection = typeof sections[number]
 type ChargeableExpenseForm = { allocationId: string; department: 'Patient Care' | 'Nursing'; category: string; description: string; quantity: string; rate: string; notes: string }
-const chargeableCategories = [
-    'Medicine Charges',
-    'Doctor Consultation',
-    'Medical Consumables',
-    'Patient Care Consumables',
-    'Nursing Procedure',
-    'Lab / Test Charges',
-    'Equipment / Rental',
-    'Extra Duty / Extra Hours',
-    'External Bill Paid',
-    'Diet / Food Extra',
-    'Transport / Ambulance',
-    'Other Approved Charge'
-]
+
 const phaseLabels: Record<string, string> = {
     MORNING_OPERATIONS: 'Morning Operations',
     DEPARTMENT_UPDATES: 'Department Updates',
@@ -56,7 +46,7 @@ export function DailyOperations() {
     const [chargeableForm, setChargeableForm] = useState<ChargeableExpenseForm>({
         allocationId: '',
         department: 'Patient Care',
-        category: 'Patient Care Consumables',
+        category: '',
         description: '',
         quantity: '1',
         rate: '',
@@ -768,3 +758,10 @@ function SelectField({ label, value, onChange, options }: { label: string; value
         </label>
     )
 }
+
+
+
+
+
+
+
