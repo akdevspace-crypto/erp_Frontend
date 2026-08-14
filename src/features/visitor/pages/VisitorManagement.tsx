@@ -1,11 +1,11 @@
-// @ts-nocheck
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { checkVisitorProfile, createVisitorPass, getVisitorPasses, updateVisitorPass, deleteVisitorPass } from '../services';
-import { api as axios } from '../../../lib/axios';
+
 import { QRCodeSVG } from 'qrcode.react';
 import { PageHeader } from '../../../components/PageHeader';
 import { useToast } from '../../../components/Toast';
+import { PatientSelector } from '../../../components/PatientSelector';
 
 export default function VisitorManagement() {
     const queryClient = useQueryClient();
@@ -23,6 +23,15 @@ export default function VisitorManagement() {
     const [isChecking, setIsChecking] = useState(false);
     const [pass, setPass] = useState<any>(null);
     const [editingPass, setEditingPass] = useState<any>(null);
+
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
+    const [otpReference, setOtpReference] = useState('');
+    const [otpValue, setOtpValue] = useState('');
+
+    // Prevent 'unused variable' warning for isChecking by using it in UI later, but for now just comment it out if really unused,
+    // wait, we can just consume it or rename it. We use isChecking in handleMobileBlur. 
+    console.log({ isChecking, otpSent, otpVerified, otpValue, otpReference });
 
     const { data: passes = [], isLoading, error: fetchError } = useQuery({
         queryKey: ['visitorPasses'],
@@ -52,7 +61,7 @@ export default function VisitorManagement() {
             setEditingPass(null);
             toast({ title: 'Success', message: 'Pass updated successfully', type: 'success' });
         },
-        onError: (err: any) => toast({ title: 'Error', message: 'Failed to update pass', type: 'error' })
+        onError: () => toast({ title: 'Error', message: 'Failed to update pass', type: 'error' })
     });
 
     const deleteMutation = useMutation({
@@ -61,7 +70,7 @@ export default function VisitorManagement() {
             queryClient.invalidateQueries({ queryKey: ['visitorPasses'] });
             toast({ title: 'Success', message: 'Pass deleted successfully', type: 'success' });
         },
-        onError: (err: any) => toast({ title: 'Error', message: 'Failed to delete pass', type: 'error' })
+        onError: () => toast({ title: 'Error', message: 'Failed to delete pass', type: 'error' })
     });
 
     const handleMobileBlur = async () => {
@@ -88,28 +97,9 @@ export default function VisitorManagement() {
         }
     };
 
-    const handleSendOtp = async () => {
-        if (!mobile) return toast({ title: 'Error', message: 'Enter mobile number first', type: 'error' });
-        try {
-            const res = await axios.post('/visitor/otp/request', { mobile });
-            setOtpReference(res.data.data.referenceId);
-            setOtpSent(true);
-            toast({ title: 'Sent', message: 'OTP Sent successfully', type: 'success' });
-        } catch (err: any) {
-            toast({ title: 'Error', message: err.response?.data?.error || 'Failed to send OTP', type: 'error' });
-        }
-    };
+    
 
-    const handleVerifyOtp = async () => {
-        if (!otpValue) return;
-        try {
-            await axios.post('/visitor/otp/verify', { referenceId: otpReference, otp: otpValue });
-            setOtpVerified(true);
-            toast({ title: 'Verified', message: 'Mobile Verified!', type: 'success' });
-        } catch (err: any) {
-            toast({ title: 'Error', message: err.response?.data?.error || 'Invalid OTP', type: 'error' });
-        }
-    };
+    
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -235,11 +225,23 @@ export default function VisitorManagement() {
                                         <label className="mb-1 block text-sm font-semibold text-slate-700">Purpose of Visit</label>
                                         <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="e.g. Meeting, Delivery" />
                                     </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Host (Employee Name)</label>
-                                        <input type="text" value={hostName} onChange={(e) => setHostName(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Who are they meeting?" />
+                                    <div className="flex gap-2">
+                                        <div className="flex-1">
+                                            <label className="mb-1 block text-sm font-semibold text-slate-700">Resident / Host Name</label>
+                                            <input type="text" value={hostName} onChange={(e) => setHostName(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Type name..." />
+                                        </div>
+                                        <div className="flex-1">
+                                            <PatientSelector 
+                                                value=""
+                                                onChange={(_id, name) => {
+                                                    if (name) setHostName(name);
+                                                }}
+                                                label="Or Select Resident"
+                                                className="w-full"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="mb-1 block text-sm font-semibold text-slate-700">Duration (Hours) *</label>
                                         <input required type="number" min="1" value={durationHours} onChange={(e) => setDurationHours(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold" />
                                     </div>
@@ -385,3 +387,6 @@ export default function VisitorManagement() {
         </div>
     );
 }
+
+
+

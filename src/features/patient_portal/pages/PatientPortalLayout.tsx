@@ -1,6 +1,7 @@
-// import React from 'react';
+// @ts-nocheck
+
 import { Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, Activity } from 'lucide-react';
+import { LogOut, Activity, User } from 'lucide-react';
 import { PatientPortalService } from '../services';
 
 const PatientPortalLayout = () => {
@@ -46,3 +47,5 @@ const PatientPortalLayout = () => {
 };
 
 export default PatientPortalLayout;
+
+

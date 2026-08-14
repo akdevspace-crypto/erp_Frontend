@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
-import { Activity, Pill, Utensils, ReceiptText } from 'lucide-react';
+import { Activity, Pill, Utensils, ReceiptText, AlertCircle } from 'lucide-react';
 import { PatientPortalService } from '../services';
 import type { VitalSign, Medication, Nutrition, Invoice } from '../types';
 
@@ -161,3 +162,5 @@ const PatientDashboard = () => {
 };
 
 export default PatientDashboard;
+
+

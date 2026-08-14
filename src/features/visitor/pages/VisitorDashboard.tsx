@@ -1,4 +1,4 @@
-// import React from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 import { getVisitorAnalytics } from '../services';
 import { PageHeader } from '../../../components/PageHeader';
@@ -149,3 +149,4 @@ function CategoryBar({ label, count, total, color }: any) {
         </div>
     );
 }
+
