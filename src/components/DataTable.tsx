@@ -13,7 +13,7 @@ export interface Column<T> {
 export interface DataTableProps<T> {
     data: T[]
     columns: Column<T>[]
-    keyExtractor: (item: T) => string
+    keyExtractor?: (item: T) => string
     actions?: (item: T) => React.ReactNode
     onSort?: (key: string, direction: 'asc' | 'desc') => void
     pagination?: {
@@ -29,12 +29,13 @@ export interface DataTableProps<T> {
     spreadColumns?: boolean
     fullHeight?: boolean
     className?: string
+    filters?: React.ReactNode
 }
 
 export function DataTable<T>({
     data,
     columns,
-    keyExtractor,
+    keyExtractor = (item: any) => item?.id || String(Math.random()),
     actions,
     onSort,
     pagination,
@@ -45,7 +46,8 @@ export function DataTable<T>({
     showScrollbars = false,
     spreadColumns = false,
     fullHeight = true,
-    className
+    className,
+    filters
 }: DataTableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(null)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
@@ -118,6 +120,11 @@ export function DataTable<T>({
             fullHeight ? "h-full flex-1 min-h-0" : "w-full shrink-0",
             className
         )}>
+            {filters && (
+                <div className="flex-none p-3 sm:p-4 border-b border-gray-100/80 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 rounded-t-3xl">
+                    {filters}
+                </div>
+            )}
             <div className={cn(
                 fullHeight ? "flex-1" : "w-full",
                 showScrollbars

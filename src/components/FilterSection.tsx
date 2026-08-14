@@ -8,9 +8,10 @@ interface FilterOption {
 interface FilterProps {
     name: string
     options: FilterOption[]
-    value: string
+    value: string | string[]
     onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
     placeholder?: string
+    multiple?: boolean
 }
 
 interface FilterSectionProps {
@@ -49,7 +50,8 @@ export function FilterSection({
                         name={filter.name}
                         value={filter.value}
                         onChange={filter.onChange}
-                        className="block h-10 w-full rounded-xl border border-[#6DA5C0]/25 bg-[#F7FAFC] py-2 pl-3 pr-10 text-sm font-medium text-[#05161A] shadow-sm transition-all hover:border-[#0F969C]/45 hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 sm:w-auto dark:border-[#6DA5C0]/25 dark:bg-[#0B2A30] dark:text-[#F7FAFC] dark:hover:bg-[#0A2429] dark:focus:bg-[#0B2A30]"
+                        multiple={filter.multiple}
+                        className="block w-full rounded-xl border border-[#6DA5C0]/25 bg-[#F7FAFC] py-2 pl-3 pr-10 text-sm font-medium text-[#05161A] shadow-sm transition-all hover:border-[#0F969C]/45 hover:bg-white focus:border-[#0F969C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0F969C]/20 sm:w-auto dark:border-[#6DA5C0]/25 dark:bg-[#0B2A30] dark:text-[#F7FAFC] dark:hover:bg-[#0A2429] dark:focus:bg-[#0B2A30]"
                     >
                         {filter.placeholder && (
                             <option value="" disabled className="text-gray-400">

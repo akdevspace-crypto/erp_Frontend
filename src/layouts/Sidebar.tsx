@@ -1,4 +1,4 @@
-import { Sun, Moon, LayoutDashboard, Users, Calendar, HeartPulse, LogOut, Settings, HelpCircle, Database, Briefcase, FileBox, IndianRupee, Activity, ClipboardList, ClipboardCheck, Headset, Receipt, CreditCard, PenTool, User, Bell, MessageSquare, PhoneCall, FileText, HandHelping, MapPin, Building2, Network, Badge, Bed, TrendingUp, TrendingDown, Wallet, Landmark, UserCog, GraduationCap, Clock, DoorOpen, ListChecks, Pill, Ambulance, Radio, FilePenLine, FolderArchive, FolderKanban, PiggyBank, Megaphone, HeartHandshake, FileBarChart, AlertTriangle, Stethoscope } from 'lucide-react'
+import { Sun, Moon, LayoutDashboard, Users, Calendar, HeartPulse, LogOut, Settings, HelpCircle, Database, Briefcase, FileBox, IndianRupee, Activity, ClipboardList, ClipboardCheck, Headset, Receipt, CreditCard, PenTool, User, Bell, MessageSquare, PhoneCall, FileText, HandHelping, MapPin, Building2, Network, Badge, Bed, TrendingUp, TrendingDown, Wallet, Landmark, UserCog, GraduationCap, Clock, DoorOpen, ListChecks, Pill, Ambulance, Radio, FilePenLine, FolderArchive, FolderKanban, PiggyBank, Megaphone, HeartHandshake, FileBarChart, AlertTriangle, Stethoscope, UserPlus, LogIn } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '../lib/utils'
 import { useAuthStore } from '../store/authStore'
@@ -166,7 +166,10 @@ const taskLogMenus: MenuLink[] = [
 ]
 
 const healthcareMenus: MenuLink[] = [
-    { name: 'Healthcare', icon: HeartPulse, href: '/module/uhc-healthcare' }
+    { name: 'Healthcare', icon: HeartPulse, href: '/module/uhc-healthcare' },
+    { name: 'Patient Registration', icon: UserPlus, href: '/healthcare/registration' },
+    { name: 'Admission', icon: LogIn, href: '/healthcare/admission' },
+    { name: 'Discharge', icon: LogOut, href: '/healthcare/discharge' }
 ]
 
 const allocationMenus: MenuLink[] = [
