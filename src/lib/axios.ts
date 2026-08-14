@@ -15,7 +15,7 @@ const isAuthDebugEnabled = () => import.meta.env.VITE_AUTH_DEBUG === 'true'
 let isRedirectingToLogin = false
 
 const getApiBaseUrl = () => {
-    const configuredUrl = import.meta.env.VITE_API_URL || 'https://backend-erp-1-c5qf.onrender.com/api/v1'
+    const configuredUrl = import.meta.env.VITE_API_URL || 'https://backend-erp-jp2x.onrender.com/api/v1'
 
     if (typeof window === 'undefined') {
         return configuredUrl
@@ -26,7 +26,7 @@ const getApiBaseUrl = () => {
     try {
         const appUrl = new URL(window.location.origin)
         if (!hasConfiguredUrl && ['localhost', '127.0.0.1'].includes(appUrl.hostname)) {
-            return 'https://backend-erp-1-c5qf.onrender.com/api/v1'
+            return 'https://backend-erp-jp2x.onrender.com/api/v1'
         }
 
         const apiUrl = new URL(configuredUrl)
