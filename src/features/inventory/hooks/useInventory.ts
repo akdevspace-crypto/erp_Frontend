@@ -35,10 +35,11 @@ export const useInventoryPurchases = (options?: InventoryReadOptions) => {
     })
 }
 
-export const useInventoryStockIssueRequests = (options?: InventoryReadOptions) => {
+export const useInventoryStockIssueRequests = (options?: InventoryReadOptions & { enabled?: boolean }) => {
     return useQuery({
-        queryKey: ['inventory-stock-issue-requests', scopeKey(options)],
-        queryFn: () => inventoryService.getStockIssueRequests(options)
+        queryKey: ['inventory-stock-issue-requests', scopeKey(options), options?.patientId],
+        queryFn: () => inventoryService.getStockIssueRequests(options),
+        enabled: options?.enabled
     })
 }
 

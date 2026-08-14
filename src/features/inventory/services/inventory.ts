@@ -4,12 +4,20 @@ import type { CreateProductPayload, CreatePurchasePayload, CreateStockIssueReque
 export type InventoryReadOptions = {
     scope?: 'all'
     unitId?: string | null
+    patientId?: string | null
 }
 
-const readConfig = (options?: InventoryReadOptions) => ({
-    params: options?.unitId ? { unitId: options.unitId } : options?.scope === 'all' ? { scope: 'all' } : undefined,
-    headers: options?.unitId ? { 'x-unit-id': options.unitId } : undefined
-})
+const readConfig = (options?: InventoryReadOptions) => {
+    const params: any = {}
+    if (options?.scope === 'all') params.scope = 'all'
+    if (options?.unitId) params.unitId = options.unitId
+    if (options?.patientId) params.patientId = options.patientId
+    
+    return {
+        params: Object.keys(params).length > 0 ? params : undefined,
+        headers: options?.unitId ? { 'x-unit-id': options.unitId } : undefined
+    }
+}
 
 export const inventoryService = {
     getProducts: async (options?: InventoryReadOptions): Promise<InventoryProduct[]> => {

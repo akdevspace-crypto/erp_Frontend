@@ -6,12 +6,13 @@ import { healthcareService } from '../services/healthcare'
 const resolveErrorMessage = (error: any, fallback: string) =>
     error?.response?.data?.message || fallback
 
-export const useMedicationSchedules = (unitId?: string | null) => {
+export const useMedicationSchedules = (unitId?: string | null, patientId?: string | null, options?: { enabled?: boolean }) => {
     const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
     const resolvedUnitId = unitId || activeUnitId
     return useQuery({
-        queryKey: ['medication-schedules', resolvedUnitId],
-        queryFn: () => healthcareService.getMedicationSchedules(unitId)
+        queryKey: ['healthcare-medication-schedules', resolvedUnitId, patientId],
+        queryFn: () => healthcareService.getMedicationSchedules(unitId, patientId),
+        enabled: options?.enabled
     })
 }
 
@@ -41,12 +42,13 @@ export const useCreateHealthcarePatient = () => {
     })
 }
 
-export const useVitalSigns = (unitId?: string | null) => {
+export const useVitalSigns = (unitId?: string | null, patientId?: string | null, options?: { enabled?: boolean }) => {
     const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
     const resolvedUnitId = unitId || activeUnitId
     return useQuery({
-        queryKey: ['healthcare-vital-signs', resolvedUnitId],
-        queryFn: () => healthcareService.getVitalSigns(unitId)
+        queryKey: ['healthcare-vital-signs', resolvedUnitId, patientId],
+        queryFn: () => healthcareService.getVitalSigns(unitId, patientId),
+        enabled: options?.enabled
     })
 }
 
@@ -83,6 +85,8 @@ export const useSaveCaregiverVitalChart = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['caregiver-vital-charts'] })
             queryClient.invalidateQueries({ queryKey: ['admin-file-register'] })
+            queryClient.invalidateQueries({ queryKey: ['healthcare-vital-signs'] })
+            queryClient.invalidateQueries({ queryKey: ['healthcare-patients'] })
             toast({ type: 'success', title: 'Chart Saved', message: 'Caregiver vital chart saved' })
         },
         onError: (error: any) => {
@@ -91,12 +95,13 @@ export const useSaveCaregiverVitalChart = () => {
     })
 }
 
-export const useNutritionPlans = (unitId?: string | null) => {
+export const useNutritionPlans = (unitId?: string | null, patientId?: string | null, options?: { enabled?: boolean }) => {
     const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
     const resolvedUnitId = unitId || activeUnitId
     return useQuery({
-        queryKey: ['healthcare-nutrition-plans', resolvedUnitId],
-        queryFn: () => healthcareService.getNutritionPlans(unitId)
+        queryKey: ['healthcare-nutrition-plans', resolvedUnitId, patientId],
+        queryFn: () => healthcareService.getNutritionPlans(unitId, patientId),
+        enabled: options?.enabled
     })
 }
 
@@ -117,12 +122,13 @@ export const useCreateNutritionPlan = () => {
     })
 }
 
-export const useAdlRecords = (unitId?: string | null) => {
+export const useAdlRecords = (unitId?: string | null, patientId?: string | null, options?: { enabled?: boolean }) => {
     const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || 'no-unit')
     const resolvedUnitId = unitId || activeUnitId
     return useQuery({
-        queryKey: ['healthcare-adl-records', resolvedUnitId],
-        queryFn: () => healthcareService.getAdlRecords(unitId)
+        queryKey: ['healthcare-adl-records', resolvedUnitId, patientId],
+        queryFn: () => healthcareService.getAdlRecords(unitId, patientId),
+        enabled: options?.enabled
     })
 }
 

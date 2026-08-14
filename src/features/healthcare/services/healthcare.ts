@@ -45,8 +45,11 @@ export const healthcareService = {
         return response.data?.data
     },
 
-    getVitalSigns: async (unitId?: string | null): Promise<VitalSign[]> => {
-        const response = await api.get('/vital-sign', unitId ? { headers: { 'x-unit-id': unitId } } : undefined)
+    getVitalSigns: async (unitId?: string | null, patientId?: string | null): Promise<VitalSign[]> => {
+        const config: any = {}
+        if (unitId) config.headers = { 'x-unit-id': unitId }
+        if (patientId) config.params = { patientId }
+        const response = await api.get('/vital-sign', config)
         return response.data?.data || []
     },
 
@@ -72,8 +75,11 @@ export const healthcareService = {
         return response.data?.data
     },
 
-    getNutritionPlans: async (unitId?: string | null): Promise<HealthcareNutrition[]> => {
-        const response = await api.get('/nutrition', unitId ? { headers: { 'x-unit-id': unitId } } : undefined)
+    getNutritionPlans: async (unitId?: string | null, patientId?: string | null): Promise<HealthcareNutrition[]> => {
+        const config: any = {}
+        if (unitId) config.headers = { 'x-unit-id': unitId }
+        if (patientId) config.params = { patientId }
+        const response = await api.get('/nutrition', config)
         return response.data?.data || []
     },
 
@@ -82,8 +88,11 @@ export const healthcareService = {
         return response.data?.data
     },
 
-    getAdlRecords: async (unitId?: string | null): Promise<AdlRecord[]> => {
-        const response = await api.get('/adl-records', unitId ? { headers: { 'x-unit-id': unitId } } : undefined)
+    getAdlRecords: async (unitId?: string | null, patientId?: string | null): Promise<AdlRecord[]> => {
+        const config: any = {}
+        if (unitId) config.headers = { 'x-unit-id': unitId }
+        if (patientId) config.params = { patientId }
+        const response = await api.get('/adl-records', config)
         return response.data?.data || []
     },
 
@@ -97,8 +106,11 @@ export const healthcareService = {
         return response.data?.data
     },
 
-    getMedicationSchedules: async (unitId?: string | null): Promise<MedicationSchedule[]> => {
-        const response = await api.get('/medication-schedules', unitId ? { headers: { 'x-unit-id': unitId } } : undefined)
+    getMedicationSchedules: async (unitId?: string | null, patientId?: string | null): Promise<MedicationSchedule[]> => {
+        const config: any = {}
+        if (unitId) config.headers = { 'x-unit-id': unitId }
+        if (patientId) config.params = { patientId }
+        const response = await api.get('/medication-schedules', config)
         return response.data?.data || []
     },
 

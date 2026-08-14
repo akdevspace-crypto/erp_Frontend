@@ -14,6 +14,7 @@ import { Modal } from '../../../components/Modal'
 import { ChatModal } from '../../../components/OmnichannelChatModal'
 import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
+import { PatientSelector } from '../../../components/PatientSelector'
 import { useEnquiries, useAddEnquiry, useUpdateEnquiry, useDeleteEnquiry, useRenewalFollowUpOutcome } from '../hooks/useEnquiry'
 import { enquirySchema, type EnquiryFormValues } from '../schema'
 import type { Enquiry } from '../types'
@@ -592,7 +593,21 @@ export function EnquiryFollowUp() {
                     <div>
                         <h3 className="mb-6 border-t pt-6 font-sans text-xl font-normal tracking-tight text-gray-800 dark:text-gray-100">Home Care / In-Patient Details</h3>
                         <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                            <Input label="Patient Name *" placeholder="Enter InPatient Full Name" {...register('patientName')} error={errors.patientName?.message} />
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Input label="Patient Name *" placeholder="Enter InPatient Full Name" {...register('patientName')} error={errors.patientName?.message} />
+                                </div>
+                                <div className="flex-1">
+                                    <PatientSelector 
+                                        value=""
+                                        onChange={(id, name) => {
+                                            if (name) setValue('patientName', name);
+                                        }}
+                                        label="Or Select Existing"
+                                        className="w-full"
+                                    />
+                                </div>
+                            </div>
                             <Select
                                 label="Patient Age"
                                 {...register('patientAge')}
@@ -717,3 +732,4 @@ export function EnquiryFollowUp() {
         </div>
     )
 }
+

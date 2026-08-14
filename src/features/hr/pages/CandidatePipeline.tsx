@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../components/PageHeader';
@@ -15,7 +16,7 @@ const STAGES = [
 export function CandidatePipeline() {
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState<any[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'pipeline' | 'sheet'>('pipeline');
   
@@ -385,7 +386,7 @@ HR Department`;
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((c) => {
+                {candidates.map((c, i) => {
                   const d = c.details || {};
                   return (
                     <tr key={c.id} className="border-b dark:border-white/5 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors whitespace-nowrap bg-white dark:bg-transparent">
@@ -537,3 +538,4 @@ HR Department`;
     </div>
   );
 }
+

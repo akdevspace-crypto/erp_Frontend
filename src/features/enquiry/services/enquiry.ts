@@ -108,6 +108,7 @@ const mapBackendAdmission = (record: any): AdmissionRecord => {
 
     return {
         id: record.id,
+        patientId: record.patientId || record.patient?.id,
         enquiryId: record.enquiry?.id || '',
         refNo: record.enquiry?.refNo || record.id,
         status: record.status || 'ACTIVE',

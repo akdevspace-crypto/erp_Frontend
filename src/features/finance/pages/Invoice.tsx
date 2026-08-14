@@ -6,11 +6,14 @@ import { DataTable, type Column } from '../../../components/DataTable'
 import { Modal } from '../../../components/Modal'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import { useApproveTransaction, useInvoices, useRecordInvoicePayment, useUpdateTransaction } from '../../accounts/hooks/useAccounts'
+import { ApprovalDialog } from '../../../components/ApprovalDialog'
 
 export function Invoice() {
     const [searchParams] = useSearchParams()
     const routeUnitId = searchParams.get('unitId')
     const [search, setSearch] = useState(searchParams.get('search') || '')
+    const [statusFilter, setStatusFilter] = useState('ALL')
+    const [categoryFilter, setCategoryFilter] = useState('ALL')
     const {
         data: transactions = [],
         isLoading,
@@ -25,6 +28,10 @@ export function Invoice() {
     const [paidInvoice, setPaidInvoice] = useState<any | null>(null)
     const [amountEdits, setAmountEdits] = useState<Record<string, string>>({})
     const [paymentInvoice, setPaymentInvoice] = useState<any | null>(null)
+    
+    const [approvalOpen, setApprovalOpen] = useState(false)
+    const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null)
+    
     const [paymentForm, setPaymentForm] = useState({
         amount: '',
         mode: 'Cash',
@@ -62,6 +69,16 @@ export function Invoice() {
                 taskRefNo: transaction.metadata?.taskRefNo || '-'
             }))
             .filter((transaction) => {
+                if (statusFilter !== 'ALL') {
+                    if (statusFilter === 'DRAFT' && transaction.currentStatus !== 'CREATED') return false;
+                    if (statusFilter === 'POSTED' && transaction.currentStatus !== 'POSTED') return false;
+                    if (statusFilter === 'UNPAID' && transaction.paymentStatus !== 'UNPAID') return false;
+                    if (statusFilter === 'PARTIAL' && transaction.paymentStatus !== 'PARTIAL') return false;
+                    if (statusFilter === 'PAID' && transaction.paymentStatus !== 'PAID') return false;
+                }
+                if (categoryFilter !== 'ALL' && transaction.category !== categoryFilter) {
+                    return false;
+                }
                 if (!query) return true
                 return [
                     transaction.receiptNo,
@@ -77,9 +94,14 @@ export function Invoice() {
                     transaction.metadata?.patientName
                 ].some((value) => String(value || '').toLowerCase().includes(query))
             })
-    }, [transactions, search])
+    }, [transactions, search, statusFilter, categoryFilter])
 
-    const postInvoice = async (invoice: any) => {
+    const uniqueCategories = useMemo(() => {
+        const categories = transactions.filter(t => t.type === 'INVOICE' && t.category).map(t => t.category)
+        return Array.from(new Set(categories))
+    }, [transactions])
+
+    const postInvoice = async (invoice: any, comments: string) => {
         const amount = Number(amountEdits[invoice.id] ?? invoice.amountValue ?? invoice.amount ?? 0)
 
         if (!Number.isFinite(amount) || amount <= 0) return
@@ -97,7 +119,7 @@ export function Invoice() {
             await approveTransaction.mutateAsync({
                 id: invoice.id,
                 status: 'APPROVED',
-                comments: `Invoice ${invoice.receiptNo} posted by finance`
+                comments: comments || `Invoice ${invoice.receiptNo} posted by finance`
             })
 
             setAmountEdits((prev) => {
@@ -121,12 +143,23 @@ export function Invoice() {
         })
     }
 
-    const rejectInvoice = (invoice: any) => {
+    const rejectInvoice = (invoice: any, comments: string) => {
         approveTransaction.mutate({
             id: invoice.id,
             status: 'REJECTED',
-            comments: `Invoice ${invoice.receiptNo} rejected by finance`
+            comments: comments || `Invoice ${invoice.receiptNo} rejected by finance`
         })
+    }
+
+    const handleDecision = async (comments: string, status: 'APPROVED' | 'REJECTED') => {
+        if (!selectedInvoice) return;
+        if (status === 'APPROVED') {
+            await postInvoice(selectedInvoice, comments);
+        } else {
+            rejectInvoice(selectedInvoice, comments);
+        }
+        setApprovalOpen(false);
+        setSelectedInvoice(null);
     }
 
     const collectPayment = () => {
@@ -208,26 +241,17 @@ export function Invoice() {
                 <div className="flex items-center justify-end gap-2">
                     <button
                         type="button"
-                        onClick={() => postInvoice(row)}
+                        onClick={() => { setSelectedInvoice(row); setApprovalOpen(true); }}
                         disabled={
                             row.currentStatus !== 'CREATED' ||
                             approveTransaction.isPending ||
                             updateTransaction.isPending ||
                             Number(amountEdits[row.id] ?? row.amountValue ?? 0) <= 0
                         }
-                        className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                        className="inline-flex items-center gap-1 rounded-md bg-[#0F969C] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0A7075] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
                     >
                         <CheckCircle className="h-3.5 w-3.5" />
-                        Post
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => rejectInvoice(row)}
-                        disabled={row.currentStatus !== 'CREATED' || approveTransaction.isPending}
-                        className="inline-flex items-center gap-1 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
-                    >
-                        <XCircle className="h-3.5 w-3.5" />
-                        Reject
+                        Review & Post
                     </button>
                     <button
                         type="button"
@@ -308,8 +332,47 @@ export function Invoice() {
                     keyExtractor={(item) => item.id}
                     isLoading={isLoading}
                     emptyStateMessage="No service invoices available"
+                    filters={
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-sm font-bold text-gray-700">Filter by Lifecycle:</span>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                            >
+                                <option value="ALL">All Invoices</option>
+                                <option value="DRAFT">Draft (Not Posted)</option>
+                                <option value="POSTED">Posted (Approved)</option>
+                                <option value="UNPAID">Unpaid</option>
+                                <option value="PARTIAL">Partially Paid</option>
+                                <option value="PAID">Fully Paid</option>
+                            </select>
+
+                            <span className="ml-2 text-sm font-bold text-gray-700">Filter by Category:</span>
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="h-9 rounded-md border border-gray-200 bg-white px-3 text-sm font-semibold outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                            >
+                                <option value="ALL">All Categories</option>
+                                {uniqueCategories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                    }
                 />
             )}
+
+            <ApprovalDialog
+                isOpen={approvalOpen}
+                onClose={() => { setApprovalOpen(false); setSelectedInvoice(null); }}
+                title="Review Invoice"
+                entityName={`Invoice ${selectedInvoice?.receiptNo} for ${selectedInvoice?.clientName}`}
+                onApprove={(comments) => handleDecision(comments, 'APPROVED')}
+                onReject={(comments) => handleDecision(comments, 'REJECTED')}
+                isProcessing={approveTransaction.isPending}
+            />
 
             <Modal
                 isOpen={Boolean(paymentInvoice)}
@@ -376,3 +439,5 @@ export function Invoice() {
         </div>
     )
 }
+
+

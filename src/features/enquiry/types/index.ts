@@ -68,6 +68,7 @@ export interface Client {
 
 export interface AdmissionRecord {
     id: string
+    patientId?: string
     enquiryId: string
     refNo: string
     status: string

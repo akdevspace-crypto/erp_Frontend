@@ -4,6 +4,7 @@ import { CalendarPlus, ClipboardList, FileText, HeartPulse, IndianRupee, UserPlu
 import { PageHeader } from '../../../components/PageHeader'
 import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
+import { PatientSelector } from '../../../components/PatientSelector'
 import { useCreateExistingPatient } from '../hooks/useEnquiry'
 import type { ExistingPatientValues } from '../services/enquiry'
 
@@ -146,12 +147,26 @@ export function ExistingPatient() {
                             onChange={(event) => updateField('clientName', event.target.value)}
                             placeholder="Family member or billing contact"
                         />
-                        <Input
-                            label="Patient Name *"
-                            value={form.patientName}
-                            onChange={(event) => updateField('patientName', event.target.value)}
-                            placeholder="Patient/resident name"
-                        />
+                        <div className="flex gap-2">
+                            <div className="flex-1">
+                                <Input
+                                    label="Patient Name *"
+                                    value={form.patientName}
+                                    onChange={(event) => updateField('patientName', event.target.value)}
+                                    placeholder="Patient/resident name"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <PatientSelector 
+                                    value=""
+                                    onChange={(id, name) => {
+                                        if (name) updateField('patientName', name);
+                                    }}
+                                    label="Or Select Existing"
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
                         <Input
                             label="Mobile *"
                             value={form.mobile}
@@ -263,3 +278,4 @@ export function ExistingPatient() {
         </div>
     )
 }
+

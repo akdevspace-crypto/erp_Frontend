@@ -6,6 +6,7 @@ import { DataTable, type Column } from '../../../components/DataTable'
 import { Drawer } from '../../../components/Drawer'
 import { FilterSection } from '../../../components/FilterSection'
 import { Input } from '../../../components/Input'
+import { ResidentProfileDrawer } from '../components/ResidentProfileDrawer'
 import { PageHeader } from '../../../components/PageHeader'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
 import {
@@ -25,6 +26,9 @@ export function PatientDashboard() {
     const [vitalsRecordedFor, setVitalsRecordedFor] = useState('')
     const [patientDrawerOpen, setPatientDrawerOpen] = useState(false)
     const [vitalDrawerOpen, setVitalDrawerOpen] = useState(false)
+    const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
+    const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
+    const [selectedPatientName, setSelectedPatientName] = useState('')
     const [patientName, setPatientName] = useState('')
     const [vitalForm, setVitalForm] = useState({ patientId: '', bp: '', pulse: '', temp: '', spO2: '', notes: '' })
 
@@ -88,7 +92,23 @@ export function PatientDashboard() {
         },
         { key: 'nutrition', header: 'Nutrition Plans', cell: (patient) => patient.nutritions?.length || 0 },
         { key: 'medications', header: 'Medications', cell: (patient) => patient.medications?.length || 0 },
-        { key: 'createdAt', header: 'Created', cell: (patient) => formatDateTime(patient.createdAt), sortable: true }
+        { key: 'createdAt', header: 'Created', cell: (patient) => formatDateTime(patient.createdAt), sortable: true },
+        {
+            key: 'actions',
+            header: 'Actions',
+            cell: (patient) => (
+                <button
+                    onClick={() => {
+                        setSelectedPatientId(patient.id)
+                        setSelectedPatientName(patient.name)
+                        setProfileDrawerOpen(true)
+                    }}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-900"
+                >
+                    View Profile
+                </button>
+            )
+        }
     ]
 
     const handleCreatePatient = async (event: React.FormEvent) => {
@@ -231,6 +251,12 @@ export function PatientDashboard() {
                     </div>
                 </form>
             </Drawer>
+            <ResidentProfileDrawer
+                isOpen={profileDrawerOpen}
+                onClose={() => setProfileDrawerOpen(false)}
+                patientId={selectedPatientId}
+                patientName={selectedPatientName}
+            />
         </div>
     )
 }

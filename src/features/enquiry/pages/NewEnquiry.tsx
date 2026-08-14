@@ -6,6 +6,7 @@ import { Check, ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { Input } from '../../../components/Input'
 import { Select } from '../../../components/Select'
+import { PatientSelector } from '../../../components/PatientSelector'
 import { useAddEnquiry, useAddFollowUp } from '../hooks/useEnquiry'
 import { useUnits } from '../../master/hooks/useUnit'
 import { useClientServices } from '../../master/services/client-service'
@@ -257,7 +258,21 @@ export function NewEnquiry() {
 
                     {step === 2 && (
                         <WorkflowSection title="Step 3: Patient / Service Details">
-                            <Input label="Patient Name" placeholder="Enter patient name" {...register('patientName')} error={errors.patientName?.message} />
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Input label="Patient Name" placeholder="Enter patient name" {...register('patientName')} error={errors.patientName?.message} />
+                                </div>
+                                <div className="flex-1">
+                                    <PatientSelector 
+                                        value=""
+                                        onChange={(id, name) => {
+                                            if (name) setValue('patientName', name);
+                                        }}
+                                        label="Or Select Existing"
+                                        className="w-full"
+                                    />
+                                </div>
+                            </div>
                             <Select label="Patient Age" {...register('patientAge')} error={errors.patientAge?.message} options={[{ value: '0 to 10', label: '0 to 10' }, { value: '10 to 18', label: '10 to 18' }, { value: '18 to 30', label: '18 to 30' }, { value: '30 to 45', label: '30 to 45' }, { value: '45 to 60', label: '45 to 60' }, { value: '60+', label: '60+' }]} placeholder="-- Select Age --" />
                             <Select label="Patient Gender" {...register('patientGender')} error={errors.patientGender?.message} options={[{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Other', label: 'Other' }]} placeholder="-- Select Gender --" />
                             <Input label="Patient Health Condition" placeholder="Enter health condition" {...register('patientHealthCondition')} error={errors.patientHealthCondition?.message} />
@@ -333,3 +348,4 @@ function TextArea({ label, placeholder, register, disabled }: { label: string; p
         </div>
     )
 }
+

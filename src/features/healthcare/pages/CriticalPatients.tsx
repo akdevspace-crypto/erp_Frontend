@@ -4,12 +4,16 @@ import { DataTable, type Column } from '../../../components/DataTable'
 import { FilterSection } from '../../../components/FilterSection'
 import { PageHeader } from '../../../components/PageHeader'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
+import { ResidentProfileDrawer } from '../components/ResidentProfileDrawer'
 import { useHealthcarePatients, useVitalSigns } from '../hooks/useHealthcare'
 import type { HealthcarePatient } from '../types'
 import { formatDateTime, getVitalRisk, latestVitalForPatient, patientServiceLabel } from '../utils'
 
 export function CriticalPatients() {
     const [searchQuery, setSearchQuery] = useState('')
+    const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
+    const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
+    const [selectedPatientName, setSelectedPatientName] = useState('')
     const { data: patients = [], isLoading: patientsLoading } = useHealthcarePatients()
     const { data: vitals = [], isLoading: vitalsLoading } = useVitalSigns()
 
@@ -56,7 +60,23 @@ export function CriticalPatients() {
         },
         { key: 'reason', header: 'Reason', cell: (item) => item.risk.reasons.join(', ') },
         { key: 'status', header: 'Status', cell: () => <StatusHighlighter value="Critical" /> },
-        { key: 'recordedAt', header: 'Recorded At', cell: (item) => formatDateTime(item.vital?.createdAt), sortable: true }
+        { key: 'recordedAt', header: 'Recorded At', cell: (item) => formatDateTime(item.vital?.createdAt), sortable: true },
+        {
+            key: 'actions',
+            header: 'Actions',
+            cell: (item) => (
+                <button
+                    onClick={() => {
+                        setSelectedPatientId(item.patient.id)
+                        setSelectedPatientName(item.patient.name)
+                        setProfileDrawerOpen(true)
+                    }}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-900"
+                >
+                    View Profile
+                </button>
+            )
+        }
     ]
 
     return (
@@ -105,6 +125,12 @@ export function CriticalPatients() {
                 <HeartPulse className="mr-1 inline h-4 w-4" />
                 This page does not use demo data. It only reads patients and vital signs created in the selected unit.
             </div>
+            <ResidentProfileDrawer
+                isOpen={profileDrawerOpen}
+                onClose={() => setProfileDrawerOpen(false)}
+                patientId={selectedPatientId}
+                patientName={selectedPatientName}
+            />
         </div>
     )
 }
