@@ -61,5 +61,22 @@ export const medicalService = {
     deleteAssignment: async (id: string): Promise<MedicalAssignment> => {
         const res = await api.delete(`/medical/assignments/${id}`)
         return res.data.data
+    },
+
+    getDoctorVisits: async (params?: { patientId?: string; doctorId?: string }): Promise<any[]> => {
+        const res = await api.get('/medical/visits', {
+            params: compactPayload(params || {})
+        })
+        return res.data.data || []
+    },
+
+    createDoctorVisit: async (data: any): Promise<any> => {
+        const res = await api.post('/medical/visits', compactPayload(data))
+        return res.data.data
+    },
+
+    updateDoctorVisit: async ({ id, data }: { id: string; data: any }): Promise<any> => {
+        const res = await api.patch(`/medical/visits/${id}`, compactPayload(data))
+        return res.data.data
     }
 }

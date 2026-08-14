@@ -114,16 +114,53 @@ export const useDeleteMedicalAssignment = () => {
     const { toast } = useToast()
 
     return useMutation({
-        mutationFn: medicalService.deleteAssignment,
+        mutationFn: (id: string) => medicalService.deleteAssignment(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['medical-assignments'] })
             queryClient.invalidateQueries({ queryKey: ['medical-dashboard'] })
-            queryClient.invalidateQueries({ queryKey: ['medical-staff'] })
-            queryClient.invalidateQueries({ queryKey: ['staff'] })
-            toast({ type: 'success', title: 'Removed', message: 'Medical assignment removed' })
+            toast({ type: 'success', title: 'Deleted', message: 'Medical assignment removed' })
         },
         onError: (error: any) => {
-            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to remove assignment') })
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to delete assignment') })
+        }
+    })
+}
+
+export const useDoctorVisits = (params?: { patientId?: string; doctorId?: string }) => {
+    return useQuery({
+        queryKey: ['doctor-visits', params],
+        queryFn: () => medicalService.getDoctorVisits(params)
+    })
+}
+
+export const useCreateDoctorVisit = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: (data: any) => medicalService.createDoctorVisit(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['doctor-visits'] })
+            toast({ type: 'success', title: 'Saved', message: 'Doctor visit saved successfully' })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to save visit') })
+        }
+    })
+}
+
+export const useUpdateDoctorVisit = () => {
+    const queryClient = useQueryClient()
+    const { toast } = useToast()
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: any }) => medicalService.updateDoctorVisit({ id, data }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['doctor-visits'] })
+            toast({ type: 'success', title: 'Updated', message: 'Doctor visit updated successfully' })
+        },
+        onError: (error: any) => {
+            toast({ type: 'error', title: 'Error', message: resolveApiErrorMessage(error, 'Failed to update visit') })
         }
     })
 }

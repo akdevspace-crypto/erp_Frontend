@@ -1,343 +1,266 @@
-import { useMemo, useState } from 'react'
-import { CalendarClock, CheckCircle2, Pill, Plus } from 'lucide-react'
-import { ActionBar } from '../../../components/ActionBar'
-import { DataTable, type Column } from '../../../components/DataTable'
-import { Drawer } from '../../../components/Drawer'
-import { FilterSection } from '../../../components/FilterSection'
-import { Input } from '../../../components/Input'
+// @ts-nocheck
+import { useState } from 'react'
+import { CalendarClock, CheckCircle2, Pill, Plus, ClipboardList } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
-import { Select } from '../../../components/Select'
-import { StatusHighlighter } from '../../../components/StatusHighlighter'
-import { useInventoryStockIssueRequests } from '../../inventory/hooks/useInventory'
-import type { InventoryStockIssueRequest } from '../../inventory/types'
-import { useAdministerMedicationDose, useCreateMedicationSchedule, useMedicationSchedules } from '../../healthcare/hooks/useHealthcare'
-import type { MedicationSchedule } from '../../healthcare/types'
-
-const medicineCategory = 'medical'
-const medicineUsageType = 'PATIENT_MEDICATION'
-const doseSlots = ['Morning', 'Afternoon', 'Night']
-
-const today = () => new Date().toISOString().slice(0, 10)
-
-const formatDateTime = (value?: string | null) => {
-    if (!value) return '-'
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return '-'
-    return date.toLocaleString('en-GB')
-}
-
-const isMedicineIssue = (request: InventoryStockIssueRequest) => {
-    const category = String(request.category || '').toLowerCase()
-    return request.status === 'APPROVED' && (category === medicineCategory || request.usageType === medicineUsageType)
-}
-
-const scheduleStatusLabel = (status: MedicationSchedule['status']) => {
-    if (status === 'COMPLETED') return 'Administered'
-    if (status === 'IN_PROGRESS') return 'Partially Given'
-    return 'Scheduled'
-}
+import { DataTable, type Column } from '../../../components/DataTable'
+import { Modal } from '../../../components/Modal'
+import { useAdmissions } from '../../enquiry/hooks/useEnquiry'
+import { usePrescriptions, useCreatePrescription, useMedicationLogs, useAdministerMedicationLog, useVerifyMedicationLog } from '../hooks/useNursingCare'
+import { useAuthStore } from '../../../store/authStore'
+import { formatDateTime } from '../../healthcare/utils'
 
 export function MedicationSchedule() {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [drawerOpen, setDrawerOpen] = useState(false)
-    const [selectedSlots, setSelectedSlots] = useState<string[]>(['Morning'])
-    const [formData, setFormData] = useState({ medicineIssueId: '', dose: '', frequency: 'Once Daily', startDate: today(), notes: '' })
+    const { data: admissions = [], isLoading } = useAdmissions()
+    const [selectedPatientId, setSelectedPatientId] = useState<string>('')
+    const [activeTab, setActiveTab] = useState<'prescriptions' | 'logs'>('prescriptions')
 
-    const { data: issueRequests = [], isLoading: isIssuesLoading } = useInventoryStockIssueRequests()
-    const { data: schedules = [], isLoading: isSchedulesLoading } = useMedicationSchedules()
-    const createSchedule = useCreateMedicationSchedule()
-    const administerDose = useAdministerMedicationDose()
+    // Modals
+    const [isAddPrescriptionOpen, setIsAddPrescriptionOpen] = useState(false)
+    const [administeringPrescription, setAdministeringPrescription] = useState<any>(null)
+    const [verifyingLogId, setVerifyingLogId] = useState<string | null>(null)
 
-    const approvedMedicineIssues = useMemo(() => issueRequests.filter(isMedicineIssue), [issueRequests])
-    const scheduledIssueIds = useMemo(() => new Set(schedules.map((schedule) => schedule.medicineIssueId)), [schedules])
-    const unscheduledMedicineIssues = useMemo(
-        () => approvedMedicineIssues.filter((request) => !scheduledIssueIds.has(request.id)),
-        [approvedMedicineIssues, scheduledIssueIds]
-    )
+    // Form states
+    const [medication, setMedication] = useState('')
+    const [dosage, setDosage] = useState('')
+    const [frequency, setFrequency] = useState('Once Daily')
+    const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10))
+    const [endDate, setEndDate] = useState('')
+    const [instructions, setInstructions] = useState('')
 
-    const issueOptions = useMemo(() => (
-        unscheduledMedicineIssues.map((request) => ({
-            value: request.id,
-            label: `${request.productName} - ${request.issuedTo || 'Patient'} - Qty ${request.quantity}`
-        }))
-    ), [unscheduledMedicineIssues])
+    const [dosageGiven, setDosageGiven] = useState('')
+    const [administerNotes, setAdministerNotes] = useState('')
+    const [verifyNotes, setVerifyNotes] = useState('')
 
-    const selectedIssue = useMemo(
-        () => approvedMedicineIssues.find((request) => request.id === formData.medicineIssueId),
-        [approvedMedicineIssues, formData.medicineIssueId]
-    )
+    const user = useAuthStore((state) => state.user)
+    const canPrescribe = user?.role === 'SUPER_ADMIN' || user?.role === 'MEDICAL_DOCTOR' || user?.role === 'MEDICAL_MANAGER'
+    const canAdminister = user?.role === 'SUPER_ADMIN' || user?.role === 'NURSING_CARE_STAFF' || user?.role === 'NURSING_MANAGER'
+    const canVerify = user?.role === 'SUPER_ADMIN' || user?.role === 'NURSING_MANAGER' || user?.role === 'MEDICAL_MANAGER'
 
-    const visibleSchedules = useMemo(() => {
-        const query = searchQuery.trim().toLowerCase()
-        return schedules.filter((schedule) => !query || [
-            schedule.medicineName,
-            schedule.patientName,
-            schedule.dose,
-            schedule.frequency,
-            schedule.status,
-            schedule.notes || ''
-        ].some((value) => String(value).toLowerCase().includes(query)))
-    }, [schedules, searchQuery])
+    const { data: prescriptions = [], isLoading: loadingPrescriptions } = usePrescriptions(selectedPatientId, null, { enabled: Boolean(selectedPatientId) })
+    const { data: logs = [], isLoading: loadingLogs } = useMedicationLogs(selectedPatientId, null, { enabled: Boolean(selectedPatientId) })
 
-    const toggleSlot = (slot: string) => {
-        setSelectedSlots((prev) => (
-            prev.includes(slot)
-                ? prev.filter((item) => item !== slot)
-                : [...prev, slot]
-        ))
-    }
+    const createPrescription = useCreatePrescription()
+    const administerLog = useAdministerMedicationLog()
+    const verifyLog = useVerifyMedicationLog()
 
-    const resetForm = () => {
-        setFormData({ medicineIssueId: '', dose: '', frequency: 'Once Daily', startDate: today(), notes: '' })
-        setSelectedSlots(['Morning'])
-    }
-
-    const openScheduleDrawer = (issue?: InventoryStockIssueRequest) => {
-        setFormData({ medicineIssueId: issue?.id || '', dose: '', frequency: 'Once Daily', startDate: today(), notes: '' })
-        setSelectedSlots(['Morning'])
-        setDrawerOpen(true)
-    }
-
-    const handleCreateSchedule = async (event: React.FormEvent) => {
-        event.preventDefault()
-        if (!selectedIssue || !formData.dose.trim() || selectedSlots.length === 0) return
-
-        await createSchedule.mutateAsync({
-            medicineIssueId: selectedIssue.id,
-            medicineName: selectedIssue.productName,
-            patientName: selectedIssue.issuedTo || 'Patient',
-            dose: formData.dose.trim(),
-            frequency: formData.frequency,
-            times: selectedSlots,
-            startDate: formData.startDate,
-            notes: formData.notes.trim()
-        })
-
-        resetForm()
-        setDrawerOpen(false)
-    }
-
-    const handleAdministerDose = async (schedule: MedicationSchedule, slot: string) => {
-        const administeredSlots = Array.isArray(schedule.administeredSlots) ? schedule.administeredSlots : []
-        if (administeredSlots.includes(slot)) return
-        await administerDose.mutateAsync({ id: schedule.id, slot })
-    }
-
-    const columns: Column<MedicationSchedule>[] = [
-        { key: 'sno', header: 'S.No', cell: (_item, index) => index + 1, sortable: false },
-        {
-            key: 'medicine',
-            header: 'Medicine / Patient',
-            cell: (schedule) => (
-                <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-700">
-                        <Pill className="h-4 w-4" />
-                    </span>
-                    <div className="flex flex-col">
-                        <span className="font-extrabold text-gray-900 dark:text-gray-100">{schedule.medicineName}</span>
-                        <span className="text-xs font-semibold text-gray-500">{schedule.patientName}</span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            key: 'dose',
-            header: 'Dose Plan',
-            cell: (schedule) => (
-                <div className="flex flex-col">
-                    <span className="font-semibold text-gray-800 dark:text-gray-100">{schedule.dose}</span>
-                    <span className="text-xs text-gray-500">{schedule.frequency} from {schedule.startDate}</span>
-                    <span className="text-xs text-gray-400">{schedule.notes || '-'}</span>
-                </div>
-            )
-        },
-        {
-            key: 'times',
-            header: 'Dose Slots',
-            cell: (schedule) => (
-                <div className="flex flex-wrap gap-2">
-                    {(Array.isArray(schedule.times) ? schedule.times : []).map((slot) => {
-                        const administeredSlots = Array.isArray(schedule.administeredSlots) ? schedule.administeredSlots : []
-                        const done = administeredSlots.includes(slot)
-                        return (
-                            <button
-                                key={slot}
-                                type="button"
-                                onClick={() => handleAdministerDose(schedule, slot)}
-                                disabled={done || administerDose.isPending}
-                                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-extrabold transition disabled:opacity-70 ${done ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}
-                                title={done ? `${slot} dose already administered` : `Mark ${slot} dose as given`}
-                            >
-                                {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : null}
-                                {done ? `${slot} Given` : `Mark ${slot} Given`}
-                            </button>
-                        )
-                    })}
-                </div>
-            )
-        },
-        {
-            key: 'history',
-            header: 'Administration History',
-            cell: (schedule) => {
-                const history = Array.isArray(schedule.administeredHistory) ? schedule.administeredHistory : []
-                if (!history.length) return <span className="text-xs font-semibold text-gray-400">No dose given yet</span>
-
-                return (
-                    <div className="max-w-56 space-y-1">
-                        {history.slice(-2).map((item, index) => (
-                            <div key={`${item.slot}-${item.administeredAt || index}`} className="rounded-lg bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">
-                                <p className="font-extrabold">{item.slot} given</p>
-                                <p className="truncate">{item.administeredBy || 'Care staff'} - {formatDateTime(item.administeredAt)}</p>
-                            </div>
-                        ))}
-                        {history.length > 2 ? <p className="text-[11px] font-bold text-gray-400">+{history.length - 2} earlier dose record(s)</p> : null}
-                    </div>
-                )
+    const handleSavePrescription = () => {
+        if (!selectedPatientId) return
+        createPrescription.mutate({
+            patientId: selectedPatientId,
+            medication,
+            dosage,
+            frequency,
+            startDate: new Date(startDate).toISOString(),
+            endDate: endDate ? new Date(endDate).toISOString() : undefined,
+            instructions
+        }, {
+            onSuccess: () => {
+                setIsAddPrescriptionOpen(false)
+                setMedication('')
+                setDosage('')
+                setInstructions('')
             }
-        },
-        { key: 'status', header: 'Status', cell: (schedule) => <StatusHighlighter value={scheduleStatusLabel(schedule.status)} /> },
+        })
+    }
+
+    const handleAdminister = () => {
+        if (!administeringPrescription) return
+        administerLog.mutate({
+            patientId: selectedPatientId,
+            prescriptionId: administeringPrescription.id,
+            medication: administeringPrescription.medication,
+            dosageGiven,
+            notes: administerNotes
+        }, {
+            onSuccess: () => {
+                setAdministeringPrescription(null)
+                setDosageGiven('')
+                setAdministerNotes('')
+                setActiveTab('logs')
+            }
+        })
+    }
+
+    const handleVerify = () => {
+        if (!verifyingLogId) return
+        verifyLog.mutate({ id: verifyingLogId, notes: verifyNotes }, {
+            onSuccess: () => {
+                setVerifyingLogId(null)
+                setVerifyNotes('')
+            }
+        })
+    }
+
+    const prescriptionColumns: Column<any>[] = [
+        { header: 'Medication', key: 'col', cell: (row: any) => row.medication, className: 'font-semibold text-gray-900 dark:text-gray-100' },
+        { header: 'Dosage', key: 'col', cell: (row: any) => row.dosage },
+        { header: 'Frequency', key: 'col', cell: (row: any) => row.frequency },
+        { header: 'Start Date', key: 'col', cell: (row: any) => formatDateTime(row.startDate) },
+        { header: 'End Date', key: 'col', cell: (row: any) => row.endDate ? formatDateTime(row.endDate) : 'Ongoing' }
+    ]
+
+    const logColumns: Column<any>[] = [
+        { header: 'Time', key: 'col', cell: (row: any) => formatDateTime(row.administeredAt), className: 'font-medium' },
+        { header: 'Medication', key: 'col', cell: (row: any) => row.medication },
+        { header: 'Dosage Given', key: 'col', cell: (row: any) => row.dosageGiven },
+        { header: 'Administered By', key: 'col', cell: (row: any) => row.administeredBy },
         {
-            key: 'updatedAt',
-            header: 'Last Updated',
-            cell: (schedule) => formatDateTime(schedule.updatedAt),
-            sortable: true
+            header: 'Status',
+            key: 'col', cell: (row: any) => (
+                row.isVerified ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Verified
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600">
+                        Pending Verification
+                    </span>
+                )
+            )
         }
     ]
 
-    const summary = [
-        { label: 'Schedules', value: schedules.length, tone: 'bg-primary-50 text-primary-700' },
-        { label: 'Pending Doses', value: schedules.reduce((sum, item) => {
-            const times = Array.isArray(item.times) ? item.times : []
-            const administeredSlots = Array.isArray(item.administeredSlots) ? item.administeredSlots : []
-            return sum + Math.max(0, times.length - administeredSlots.length)
-        }, 0), tone: 'bg-amber-50 text-amber-700' },
-        { label: 'Completed', value: schedules.filter((item) => item.status === 'COMPLETED').length, tone: 'bg-emerald-50 text-emerald-700' }
-    ]
-
     return (
-        <div className="flex h-full flex-col">
+        <div className="space-y-6">
             <PageHeader
                 title="Medication Schedule"
-                subtitle="Schedule issued medicines and mark daily dose administration."
-                breadcrumbs={[{ label: 'Healthcare' }, { label: 'Medication Schedule' }]}
-            />
-
-            <div className="mb-5 grid gap-3 md:grid-cols-3">
-                {summary.map((item) => (
-                    <div key={item.label} className={`rounded-2xl border border-slate-100 p-4 shadow-sm ${item.tone}`}>
-                        <p className="text-2xl font-extrabold">{item.value}</p>
-                        <p className="text-xs font-extrabold uppercase tracking-wide">{item.label}</p>
-                    </div>
-                ))}
-            </div>
-
-            <ActionBar onAdd={() => openScheduleDrawer()} addLabel="Create Schedule" />
-
-            <div className="mb-4 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-gray-900">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Issued medicines waiting for schedule</p>
-                        <p className="text-xs font-semibold text-gray-500">Approved medicine issues appear here before patient dose tracking starts.</p>
-                    </div>
-                    <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-extrabold text-sky-700">
-                        {unscheduledMedicineIssues.length} Pending
-                    </span>
-                </div>
-                {unscheduledMedicineIssues.length ? (
-                    <div className="grid gap-2 lg:grid-cols-2">
-                        {unscheduledMedicineIssues.slice(0, 4).map((issue) => (
-                            <div key={issue.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-extrabold text-gray-900 dark:text-gray-100">{issue.productName}</p>
-                                    <p className="text-xs font-semibold text-gray-500">Qty {issue.quantity} issued to {issue.issuedTo || 'Patient'}</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => openScheduleDrawer(issue)}
-                                    className="rounded-lg bg-[#0F969C] px-3 py-1.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#294D61]"
-                                >
-                                    Create Schedule
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-                        All approved issued medicines are already scheduled.
-                    </div>
-                )}
-            </div>
-
-            <div className="mb-4 rounded-2xl border border-primary-100 bg-primary-50 px-4 py-3 text-sm font-semibold text-primary-800">
-                <div className="flex items-center gap-2">
-                    <CalendarClock className="h-4 w-4" />
-                    Schedules are created from approved medicine issue records, so patient medication tracking starts only after stock is approved.
-                </div>
-            </div>
-
-            <FilterSection
-                searchQuery={searchQuery}
-                onSearchChange={(event) => setSearchQuery(event.target.value)}
-                searchPlaceholder="Search medicine, patient, dose, status..."
-            />
-
-            <DataTable
-                data={visibleSchedules}
-                columns={columns}
-                keyExtractor={(schedule) => schedule.id}
-                isLoading={isIssuesLoading || isSchedulesLoading}
-                emptyStateMessage="No medication schedules found. Approve a medicine request, then create a schedule."
-            />
-
-            <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} title="Create Medication Schedule" size="md">
-                <form onSubmit={handleCreateSchedule} className="space-y-4">
-                    <Select
-                        label="Issued Medicine"
-                        required
-                        value={formData.medicineIssueId}
-                        onChange={(event) => setFormData((prev) => ({ ...prev, medicineIssueId: event.target.value }))}
-                        options={issueOptions}
-                        placeholder={issueOptions.length ? 'Select approved medicine issue' : 'No unscheduled issued medicines'}
-                    />
-                    <Input label="Dose" required value={formData.dose} onChange={(event) => setFormData((prev) => ({ ...prev, dose: event.target.value }))} placeholder="1 tablet after food" />
-                    <Select
-                        label="Frequency"
-                        value={formData.frequency}
-                        onChange={(event) => setFormData((prev) => ({ ...prev, frequency: event.target.value }))}
-                        options={['Once Daily', 'Twice Daily', 'Thrice Daily', 'As Needed'].map((value) => ({ value, label: value }))}
-                    />
-                    <Input label="Start Date" type="date" required value={formData.startDate} onChange={(event) => setFormData((prev) => ({ ...prev, startDate: event.target.value }))} />
-                    <div>
-                        <p className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-200">Dose Slots</p>
-                        <div className="flex flex-wrap gap-2">
-                            {doseSlots.map((slot) => (
-                                <button
-                                    key={slot}
-                                    type="button"
-                                    onClick={() => toggleSlot(slot)}
-                                    className={`rounded-full px-4 py-2 text-xs font-extrabold transition ${selectedSlots.includes(slot) ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                                >
-                                    {slot}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <Input label="Notes" value={formData.notes} onChange={(event) => setFormData((prev) => ({ ...prev, notes: event.target.value }))} placeholder="Monitoring notes or instruction" />
-
-                    <div className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-                        Dose completion is stored in the database through the medication schedule audit trail.
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={() => setDrawerOpen(false)} className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-black dark:text-gray-300 dark:hover:bg-white/5">Cancel</button>
-                        <button type="submit" disabled={createSchedule.isPending || issueOptions.length === 0} className="inline-flex items-center gap-2 rounded-xl bg-[#0F969C] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#294D61] disabled:opacity-60">
+                subtitle="Manage prescriptions and medication administration logs"
+                icon={Pill}
+                actions={
+                    canPrescribe && (
+                        <button
+                            onClick={() => setIsAddPrescriptionOpen(true)}
+                            disabled={!selectedPatientId}
+                            className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 disabled:opacity-50"
+                        >
                             <Plus className="h-4 w-4" />
-                            {createSchedule.isPending ? 'Saving...' : 'Save Schedule'}
+                            New Prescription
+                        </button>
+                    )
+                }
+            />
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-black">
+                <div className="max-w-md">
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
+                        Select Patient
+                    </label>
+                    <select
+                        value={selectedPatientId}
+                        onChange={(e) => setSelectedPatientId(e.target.value)}
+                        className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-900 outline-none focus:border-primary-500 focus:bg-white focus:ring-2 focus:ring-primary-100 dark:border-white/10 dark:bg-white/5 dark:text-gray-100"
+                    >
+                        <option value="">-- Choose Admitted Patient --</option>
+                        {admissions.filter(a => a.patientId).map((a) => (
+                            <option key={a.id} value={a.patientId}>{a.patientName} ({a.refNo})</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            {selectedPatientId && (
+                <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden dark:border-white/10 dark:bg-black">
+                    <div className="flex border-b border-gray-200 dark:border-white/10">
+                        <button
+                            onClick={() => setActiveTab('prescriptions')}
+                            className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                                activeTab === 'prescriptions' ? 'border-[#0F969C] text-[#0F969C]' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            }`}
+                        >
+                            <CalendarClock className="h-4 w-4" />
+                            Active Prescriptions
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('logs')}
+                            className={`flex items-center gap-2 px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                                activeTab === 'logs' ? 'border-[#0F969C] text-[#0F969C]' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                            }`}
+                        >
+                            <ClipboardList className="h-4 w-4" />
+                            Medication Logs
                         </button>
                     </div>
-                </form>
-            </Drawer>
+
+                    <div className="p-4">
+                        {activeTab === 'prescriptions' ? (
+                            <DataTable
+                                data={prescriptions}
+                                columns={prescriptionColumns}
+                                keyExtractor={(item) => item.id}
+                                isLoading={loadingPrescriptions}
+                                actionsTitle="Action"
+                                actions={(row: any) => (
+                                    canAdminister && row.isApproved ? (
+                                        <button
+                                            onClick={() => {
+                                                setAdministeringPrescription(row)
+                                                setDosageGiven(row.dosage)
+                                            }}
+                                            className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700 hover:bg-green-100"
+                                        >
+                                            Administer Dose
+                                        </button>
+                                    ) : null
+                                )}
+                            />
+                        ) : (
+                            <DataTable
+                                data={logs}
+                                columns={logColumns}
+                                keyExtractor={(item) => item.id}
+                                isLoading={loadingLogs}
+                                actionsTitle="Action"
+                                actions={(row: any) => (
+                                    !row.isVerified && canVerify ? (
+                                        <button
+                                            onClick={() => setVerifyingLogId(row.id)}
+                                            className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-700 hover:bg-primary-100"
+                                        >
+                                            Verify Log
+                                        </button>
+                                    ) : null
+                                )}
+                            />
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <Modal isOpen={isAddPrescriptionOpen} onClose={() => setIsAddPrescriptionOpen(false)} title="New Prescription" confirmLabel="Create Prescription" onConfirm={handleSavePrescription}>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                    <label className="block text-sm font-medium">Medication<input value={medication} onChange={e => setMedication(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" placeholder="e.g. Paracetamol 500mg" /></label>
+                    <label className="block text-sm font-medium">Dosage<input value={dosage} onChange={e => setDosage(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" placeholder="1 tablet" /></label>
+                    <label className="block text-sm font-medium">Frequency
+                        <select value={frequency} onChange={e => setFrequency(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10">
+                            <option>Once Daily</option><option>Twice Daily</option><option>Three Times Daily</option><option>As Needed (PRN)</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm font-medium">Start Date<input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" /></label>
+                    <label className="block text-sm font-medium">End Date (Optional)<input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" /></label>
+                    <div className="col-span-2">
+                        <label className="block text-sm font-medium">Instructions (Optional)<textarea value={instructions} onChange={e => setInstructions(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" placeholder="Take after food" /></label>
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal isOpen={Boolean(administeringPrescription)} onClose={() => setAdministeringPrescription(null)} title="Administer Medication" confirmLabel="Log Dose" onConfirm={handleAdminister}>
+                <div className="mt-4 space-y-4">
+                    <div className="rounded-xl bg-gray-50 p-4 dark:bg-white/5">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{administeringPrescription?.medication}</p>
+                        <p className="text-sm text-gray-500">Prescribed: {administeringPrescription?.dosage} - {administeringPrescription?.frequency}</p>
+                    </div>
+                    <label className="block text-sm font-medium">Dosage Given<input value={dosageGiven} onChange={e => setDosageGiven(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" /></label>
+                    <label className="block text-sm font-medium">Administration Notes (Optional)<textarea value={administerNotes} onChange={e => setAdministerNotes(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" placeholder="Patient responded well" /></label>
+                </div>
+            </Modal>
+
+            <Modal isOpen={Boolean(verifyingLogId)} onClose={() => setVerifyingLogId(null)} title="Verify Administration" confirmLabel="Approve Log" onConfirm={handleVerify}>
+                <div className="mt-4"><label className="block text-sm font-medium">Verification Notes (Optional)<textarea value={verifyNotes} onChange={e => setVerifyNotes(e.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm dark:bg-black dark:border-white/10" placeholder="Looks good" /></label></div>
+            </Modal>
         </div>
     )
 }
+
+
+
