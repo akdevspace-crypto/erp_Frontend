@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 const resolveSocketUrl = () => {
-    const configuredUrl = import.meta.env.VITE_SOCKET_URL || "https://backend-erp-1-c5qf.onrender.com";
+    const configuredUrl = import.meta.env.VITE_SOCKET_URL || "https://backend-erp-jp2x.onrender.com";
 
     if (typeof window === "undefined") {
         return configuredUrl;
