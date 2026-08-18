@@ -93,39 +93,55 @@ export default function VisitorSelfCheckIn() {
                             <p className="text-red-500/80">{verifyError}</p>
                         </div>
                     ) : verifyData ? (
-                        <div className="space-y-6">
-                            <div className="text-center">
-                                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-50 mb-4 shadow-inner">
-                                    <ShieldCheck className="h-10 w-10 text-emerald-500" />
+                        <div className="space-y-4">
+                            <div className="text-center pt-2">
+                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4 shadow-sm border border-emerald-100 relative">
+                                    <ShieldCheck className="h-8 w-8 text-emerald-500" />
+                                    <div className="absolute -top-1 -right-1 flex h-4 w-4">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                      <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white"></span>
+                                    </div>
                                 </div>
-                                <h2 className="text-3xl font-black text-slate-800 tracking-tight">Pass Verified</h2>
-                                <span className={`inline-block mt-3 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm ${verifyData.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200'}`}>
-                                    Status: {verifyData.status}
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">Digital Pass Verified</h2>
+                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest shadow-sm ${verifyData.status === 'APPROVED' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                    {verifyData.status}
                                 </span>
                             </div>
                             
-                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-5 shadow-sm">
-                                <div>
-                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Visitor Name</p>
-                                    <p className="text-slate-800 font-bold text-xl">{verifyData.visitor?.name}</p>
-                                </div>
-                                <div>
-                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Mobile</p>
-                                    <p className="text-slate-700 font-medium">{verifyData.visitor?.mobile}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Category</p>
-                                        <p className="text-[#0B3B4B] font-bold">{verifyData.visitor?.category}</p>
+                            <div className="bg-white border border-slate-200 rounded-[1.5rem] overflow-hidden shadow-sm mt-8 relative">
+                                {/* Ticket cutout effect */}
+                                <div className="absolute top-[5rem] -left-4 w-8 h-8 bg-slate-50 rounded-full border-r border-slate-200"></div>
+                                <div className="absolute top-[5rem] -right-4 w-8 h-8 bg-slate-50 rounded-full border-l border-slate-200"></div>
+
+                                {/* Top part: Visitor info */}
+                                <div className="p-6 border-b border-dashed border-slate-200 flex items-center gap-4 relative z-10">
+                                    <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#0B3B4B] to-slate-800 flex items-center justify-center text-white text-xl font-bold shadow-md shrink-0">
+                                        {verifyData.visitor?.name?.charAt(0)?.toUpperCase()}
                                     </div>
-                                    <div>
-                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Host</p>
-                                        <p className="text-slate-700 font-medium">{verifyData.hostName || 'N/A'}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">Visitor Details</p>
+                                        <p className="text-slate-800 font-extrabold text-xl truncate tracking-tight">{verifyData.visitor?.name}</p>
+                                        <p className="text-slate-500 text-sm font-medium mt-0.5">{verifyData.visitor?.mobile}</p>
                                     </div>
                                 </div>
-                                <div>
-                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Purpose</p>
-                                    <p className="text-slate-600 text-sm leading-relaxed bg-white p-3 rounded-xl border border-slate-200">{verifyData.purpose || 'Not specified'}</p>
+
+                                {/* Bottom part: Details */}
+                                <div className="p-6 bg-slate-50/50 space-y-5 relative z-10">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">Category</p>
+                                            <p className="text-[#0B3B4B] font-bold">{verifyData.visitor?.category}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">Elder / Resident</p>
+                                            <p className="text-slate-800 font-bold">{verifyData.hostName || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">Purpose of Visit</p>
+                                        <p className="text-slate-700 text-sm font-medium bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm leading-relaxed">{verifyData.purpose || 'Not specified'}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -201,7 +217,7 @@ export default function VisitorSelfCheckIn() {
                             value={hostName}
                             onChange={(e) => setHostName(e.target.value)}
                             className="w-full rounded-2xl bg-slate-50 border border-slate-200 py-4 pl-12 pr-4 text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#0B3B4B]/50 focus:ring-4 focus:ring-[#0B3B4B]/10 font-medium transition-all text-base"
-                            placeholder="Who are you meeting?"
+                            placeholder="Elder / Resident Name"
                         />
                     </div>
                     
@@ -218,4 +234,3 @@ export default function VisitorSelfCheckIn() {
         </div>
     );
 }
-
