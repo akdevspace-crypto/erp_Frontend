@@ -276,7 +276,7 @@ export default function VisitorManagement() {
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="flex-1">
-                                            <label className="mb-1 block text-sm font-semibold text-slate-700">Elder Name</label>
+                                            <label className="mb-1 block text-sm font-semibold text-slate-700">Elder / Resident Name</label>
                                             <input type="text" value={hostName} onChange={(e) => setHostName(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Type name..." />
                                         </div>
                                         <div className="flex-1">
@@ -285,7 +285,7 @@ export default function VisitorManagement() {
                                                 onChange={(_id, name) => {
                                                     if (name) setHostName(name);
                                                 }}
-                                                label="Or Select Elder"
+                                                label="Or Select Elder / Resident"
                                                 className="w-full"
                                             />
                                         </div>
