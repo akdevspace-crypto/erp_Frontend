@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api as axios } from '../../../lib/axios';
-import { CheckCircle, Phone, User, Briefcase, Building2, ArrowRight } from 'lucide-react';
+import { CheckCircle, Phone, User, Briefcase, Building2, ArrowRight, ShieldCheck, XCircle } from 'lucide-react';
 
 export default function VisitorSelfCheckIn() {
+    const [searchParams] = useSearchParams();
+    const verifyId = searchParams.get('verify');
+
     const [mobile, setMobile] = useState('');
     const [name, setName] = useState('');
     const [purpose, setPurpose] = useState('');
@@ -11,6 +15,20 @@ export default function VisitorSelfCheckIn() {
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const [verifyData, setVerifyData] = useState<any>(null);
+    const [verifyLoading, setVerifyLoading] = useState(false);
+    const [verifyError, setVerifyError] = useState('');
+
+    useEffect(() => {
+        if (verifyId) {
+            setVerifyLoading(true);
+            axios.get(`/visitor/verify/${verifyId}`)
+                .then(res => setVerifyData(res.data.data))
+                .catch(err => setVerifyError(err.response?.data?.error || 'Invalid or expired pass'))
+                .finally(() => setVerifyLoading(false));
+        }
+    }, [verifyId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,6 +65,65 @@ export default function VisitorSelfCheckIn() {
                         <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">You're Checked In!</h1>
                         <p className="text-slate-500 mt-3 text-lg leading-relaxed">Thank you. Please wait at the reception area while we notify your host.</p>
                     </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (verifyId) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000"></div>
+                
+                <div className="relative bg-white/10 backdrop-blur-2xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-md w-full space-y-8 border border-white/20">
+                    {verifyLoading ? (
+                        <div className="text-center text-white py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                            <p className="mt-4 font-medium text-slate-300">Verifying Pass...</p>
+                        </div>
+                    ) : verifyError ? (
+                        <div className="text-center py-8">
+                            <XCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
+                            <h2 className="text-2xl font-bold text-white mb-2">Invalid Pass</h2>
+                            <p className="text-red-200">{verifyError}</p>
+                        </div>
+                    ) : verifyData ? (
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <ShieldCheck className="h-16 w-16 text-emerald-400 mx-auto mb-4" />
+                                <h2 className="text-3xl font-black text-white tracking-tight">Pass Verified</h2>
+                                <span className={`inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${verifyData.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
+                                    Status: {verifyData.status}
+                                </span>
+                            </div>
+                            
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+                                <div>
+                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Visitor Name</p>
+                                    <p className="text-white font-semibold text-lg">{verifyData.visitor?.name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Mobile</p>
+                                    <p className="text-white font-medium">{verifyData.visitor?.mobile}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Category</p>
+                                        <p className="text-cyan-300 font-medium">{verifyData.visitor?.category}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Host</p>
+                                        <p className="text-white font-medium">{verifyData.hostName || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Purpose</p>
+                                    <p className="text-slate-300 text-sm leading-relaxed">{verifyData.purpose || 'Not specified'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
                 </div>
             </div>
         );
