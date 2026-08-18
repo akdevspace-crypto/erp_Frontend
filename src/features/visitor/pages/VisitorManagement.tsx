@@ -17,7 +17,11 @@ export default function VisitorManagement() {
     const [category, setCategory] = useState('GUEST');
     const [purpose, setPurpose] = useState('');
     const [hostName, setHostName] = useState('');
-    const [durationHours, setDurationHours] = useState('2');
+    const [inTime, setInTime] = useState('');
+    const [outTime, setOutTime] = useState('');
+    const [bloodGroup, setBloodGroup] = useState('');
+    const [residentialAddress, setResidentialAddress] = useState('');
+    const [pincode, setPincode] = useState('');
 
     // UI State
     const [isChecking, setIsChecking] = useState(false);
@@ -103,6 +107,20 @@ export default function VisitorManagement() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        let calcDurationHours = '2'; // Default
+        if (inTime && outTime) {
+            const inDate = new Date(`1970-01-01T${inTime}`);
+            const outDate = new Date(`1970-01-01T${outTime}`);
+            const diffHours = (outDate.getTime() - inDate.getTime()) / 3600000;
+            if (diffHours > 0) {
+                calcDurationHours = diffHours.toFixed(2);
+            }
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const checkInAt = inTime ? new Date(`${todayStr}T${inTime}`).toISOString() : undefined;
+
         // OTP verification is temporarily disabled
         createMutation.mutate({
             mobile,
@@ -110,7 +128,11 @@ export default function VisitorManagement() {
             category,
             purpose,
             hostName,
-            durationHours
+            durationHours: calcDurationHours,
+            checkInAt,
+            bloodGroup,
+            residentialAddress,
+            pincode
         });
     };
 
@@ -141,7 +163,11 @@ export default function VisitorManagement() {
         setCategory('GUEST');
         setPurpose('');
         setHostName('');
-        setDurationHours('2');
+        setInTime('');
+        setOutTime('');
+        setBloodGroup('');
+        setResidentialAddress('');
+        setPincode('');
         setPass(null);
         setOtpSent(false);
         setOtpVerified(false);
@@ -174,7 +200,7 @@ export default function VisitorManagement() {
                                     <QRCodeSVG value={`${window.location.origin}/visitor-checkin?verify=${pass.pass.id}`} size={180} />
                                 </div>
                                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Scan at Gate</p>
-                                {pass.pass.hostName && <p className="mt-4 text-md font-bold text-indigo-900">Meeting: {pass.pass.hostName}</p>}
+                                {pass.pass.hostName && <p className="mt-4 text-md font-bold text-indigo-900">Visiting: {pass.pass.hostName}</p>}
                             </div>
                             <button onClick={handleReset} className="mt-4 px-6 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-bold hover:bg-indigo-100 transition-colors">
                                 Enter Another Visitor
@@ -212,7 +238,30 @@ export default function VisitorManagement() {
                                             <option value="VENDOR">Vendor</option>
                                             <option value="DOCTOR">Visiting Doctor</option>
                                             <option value="REGULAR_STAFF">Regular Staff</option>
+                                            <option value="ATTENDER">Attender</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Blood Group</label>
+                                        <select value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 bg-white">
+                                            <option value="">Select Blood Group</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                        </select>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Residential Address</label>
+                                        <textarea value={residentialAddress} onChange={(e) => setResidentialAddress(e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Enter complete address"></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Pincode</label>
+                                        <input type="text" value={pincode} onChange={(e) => setPincode(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="e.g. 110001" />
                                     </div>
                                 </div>
                             </section>
@@ -227,7 +276,7 @@ export default function VisitorManagement() {
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="flex-1">
-                                            <label className="mb-1 block text-sm font-semibold text-slate-700">Resident / Host Name</label>
+                                            <label className="mb-1 block text-sm font-semibold text-slate-700">Elder Name</label>
                                             <input type="text" value={hostName} onChange={(e) => setHostName(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Type name..." />
                                         </div>
                                         <div className="flex-1">
@@ -236,14 +285,18 @@ export default function VisitorManagement() {
                                                 onChange={(_id, name) => {
                                                     if (name) setHostName(name);
                                                 }}
-                                                label="Or Select Resident"
+                                                label="Or Select Elder"
                                                 className="w-full"
                                             />
                                         </div>
                                     </div>
-                                    <div className="md:col-span-2">
-                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Duration (Hours) *</label>
-                                        <input required type="number" min="1" value={durationHours} onChange={(e) => setDurationHours(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold" />
+                                    <div>
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">In Time *</label>
+                                        <input required type="time" value={inTime} onChange={(e) => setInTime(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold" />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Out Time *</label>
+                                        <input required type="time" value={outTime} onChange={(e) => setOutTime(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold" />
                                     </div>
                                 </div>
                             </section>
@@ -298,7 +351,7 @@ export default function VisitorManagement() {
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Visitor</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mobile</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Host</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Elder / Resident</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Duration (Hours)</th>
                                 <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
                             </tr>
@@ -369,7 +422,7 @@ export default function VisitorManagement() {
                                 <input type="text" value={editingPass.purpose || ''} onChange={(e) => setEditingPass({...editingPass, purpose: e.target.value})} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-semibold text-slate-700">Host Name</label>
+                                <label className="mb-1 block text-sm font-semibold text-slate-700">Elder / Resident Name</label>
                                 <input type="text" value={editingPass.hostName || ''} onChange={(e) => setEditingPass({...editingPass, hostName: e.target.value})} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" />
                             </div>
                             <div>
