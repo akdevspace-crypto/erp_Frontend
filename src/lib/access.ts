@@ -58,7 +58,8 @@ const roleDefaultRoutes: Record<string, string> = {
     'follow-up coordinator': '/crm/follow-up-dashboard',
     'customer relations manager': '/customer-care/dashboard',
     'omnichannel coordinator': '/omnichannel/dashboard',
-    'admissions coordinator': '/crm/admissions-dashboard'
+    'admissions coordinator': '/crm/admissions-dashboard',
+    'visitor receptionist': '/visitor-module/dashboard'
 }
 
 const roleDashboardAccess: Record<string, string[]> = {
@@ -117,6 +118,9 @@ const rolePermissionFallbacks: Record<string, string[]> = {
     ],
     'security supervisor': [
         'Security Dashboard', 'Gate Management', 'Visitor Management', 'Staff Register', 'Vehicle Register', 'Entry Logs', 'Security Reports', 'OTP Logs', 'Security'
+    ],
+    'visitor receptionist': [
+        'Visitor Management'
     ],
     'cms manager': [
         'CMS Dashboard', 'Blogs', 'FAQ', 'Events', 'CMS'
@@ -400,7 +404,7 @@ const pathPermissionMap: Array<{ prefix: string; permissions: string[] }> = [
     { prefix: '/security/vehicle-register', permissions: ['Vehicle Register', 'Gate Management', 'Security'] },
     { prefix: '/security/entry-logs', permissions: ['Entry Logs', 'Security'] },
     { prefix: '/security/reports', permissions: ['Security Reports', 'Security'] },
-    { prefix: '/security/otp-logs', permissions: ['OTP Logs', 'Security'] },
+
     { prefix: '/omnichannel/dashboard', permissions: ['Omnichannel Dashboard'] },
     { prefix: '/omnichannel/conversations', permissions: ['Conversations', 'Omnichannel'] },
     { prefix: '/omnichannel/email', permissions: ['Email', 'Omnichannel'] },

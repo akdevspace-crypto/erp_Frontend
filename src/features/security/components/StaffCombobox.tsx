@@ -27,7 +27,7 @@ export function StaffCombobox({ onSelect, error }: StaffComboboxProps) {
     const filteredStaff = useMemo(() => {
         if (!query) return staffList;
         return staffList.filter((s: any) => {
-            const searchStr = `${s.firstName || ''} ${s.lastName || ''} ${s.empId || ''} ${s.department || ''}`.toLowerCase();
+            const searchStr = `${s.name || ''} ${s.empId || ''} ${s.department || ''}`.toLowerCase();
             return searchStr.includes(query.toLowerCase());
         });
     }, [staffList, query]);
@@ -79,7 +79,7 @@ export function StaffCombobox({ onSelect, error }: StaffComboboxProps) {
                             >
                                 <div className="flex flex-col">
                                     <span className="text-sm font-bold text-gray-900">
-                                        {staff.firstName} {staff.lastName || ''} <span className="text-gray-500 font-medium">({staff.empId})</span>
+                                        {staff.name} <span className="text-gray-500 font-medium">({staff.empId})</span>
                                     </span>
                                     <span className="text-xs text-gray-500">
                                         {staff.department || 'No Dept'} • {staff.designation || 'No Role'}

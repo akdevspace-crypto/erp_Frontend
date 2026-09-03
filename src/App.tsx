@@ -183,7 +183,7 @@ const StaffRegister = lazy(() => import('./features/security/pages/StaffRegister
 const VehicleRegister = lazy(() => import('./features/security/pages/VehicleRegister').then(m => ({ default: m.VehicleRegister })))
 const EntryLogs = lazy(() => import('./features/security/pages/EntryLogs').then(m => ({ default: m.EntryLogs })))
 const SecurityReports = lazy(() => import('./features/security/pages/SecurityReports').then(m => ({ default: m.SecurityReports })))
-const OTPLogs = lazy(() => import('./features/security/pages/OTPLogs').then(m => ({ default: m.OTPLogs })))
+
 const ActionHistory = lazy(() => import('./features/security/pages/ActionHistory').then(m => ({ default: m.ActionHistory })))
 
 // Omnichannel New Modules
@@ -496,13 +496,13 @@ function App() {
                   <Route path="security/gate-management" element={<Suspense fallback={<SkeletonLoader />}><GateManagement /></Suspense>} />
                   <Route path="visitor-module" element={<Suspense fallback={<SkeletonLoader />}><NewVisitorManagement /></Suspense>} />
 
-                  <Route path="security/visitor-dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />
+                  <Route path="visitor-module/dashboard" element={<Suspense fallback={<SkeletonLoader />}><VisitorDashboard /></Suspense>} />
                   <Route path="security/visitor-reports" element={<Suspense fallback={<SkeletonLoader />}><VisitorReports /></Suspense>} />
                   <Route path="security/staff-register" element={<Suspense fallback={<SkeletonLoader />}><StaffRegister /></Suspense>} />
                   <Route path="security/vehicle-register" element={<Suspense fallback={<SkeletonLoader />}><VehicleRegister /></Suspense>} />
                   <Route path="security/entry-logs" element={<Suspense fallback={<SkeletonLoader />}><EntryLogs /></Suspense>} />
                   <Route path="security/reports" element={<Suspense fallback={<SkeletonLoader />}><SecurityReports /></Suspense>} />
-                  <Route path="security/otp-logs" element={<Suspense fallback={<SkeletonLoader />}><OTPLogs /></Suspense>} />
+
                   <Route path="security/action-history" element={<Suspense fallback={<SkeletonLoader />}><ActionHistory /></Suspense>} />
 
                   {/* Omnichannel New Routes */}

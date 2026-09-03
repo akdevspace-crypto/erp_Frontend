@@ -1025,11 +1025,9 @@ const roleDashboards: Record<string, RoleDashboardConfig> = {
         breadcrumbs: [{ label: 'UNCF' }, { label: 'Security' }, { label: 'Dashboard' }],
         links: [
             { label: 'Gate', href: '/security/gate-management' },
-
             { label: 'Staff', href: '/security/staff-register' },
             { label: 'Vehicles', href: '/security/vehicle-register' },
-            { label: 'Entry Logs', href: '/security/entry-logs' },
-            { label: 'OTP Logs', href: '/security/otp-logs' }
+            { label: 'Entry Logs', href: '/security/entry-logs' }
         ],
         metrics: [
             { label: 'Gate Entries', value: 46, helper: 'Entries logged today', icon: ShieldCheck },

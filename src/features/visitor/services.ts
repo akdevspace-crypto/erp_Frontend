@@ -31,7 +31,3 @@ export const checkoutVisitorPass = async (id: string): Promise<any> => {
     return res.data?.data;
 };
 
-export const deleteVisitorPass = async (id: string): Promise<any> => {
-    const res = await axios.delete(`/visitor/pass/${id}`);
-    return res.data;
-};

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarClock, ClipboardList, DoorOpen, LogOut, ShieldCheck, Truck, UserCog, Users } from 'lucide-react'
+import { CalendarClock, ClipboardList, DoorOpen, LogOut, LogIn, ShieldCheck, Truck, UserCog, Users, MapPin, AlertCircle } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
-import { useGateEntries, useCheckoutGateEntry } from '../hooks/useSecurity'
+import { useDashboardActionQueue, useDailyMovementReport, useCheckoutGateEntry, useRecordResidentExit, useRecordResidentReturn, useSecurityDashboardSummary } from '../hooks/useSecurity'
 import type { GateEntry } from '../types'
 
 const normalizeStatus = (value?: string) => String(value || '').trim().toLowerCase()
@@ -36,37 +36,56 @@ const entryTypeLabel = (entry: GateEntry) => {
 }
 
 export function SecurityDashboard() {
-    const { data: entries = [], isLoading } = useGateEntries()
+    const today = todayKey()
+    const { data: actionQueue = [], isLoading: isQueueLoading } = useDashboardActionQueue()
+    const { data: dailyMovement = [], isLoading: isMovementLoading } = useDailyMovementReport(today)
+    const { data: summary } = useSecurityDashboardSummary()
     const checkoutEntry = useCheckoutGateEntry()
+    const recordReturn = useRecordResidentReturn()
     const [queueType, setQueueType] = useState('ALL')
+    const [recentType, setRecentType] = useState('ALL')
     const [viewingEntry, setViewingEntry] = useState<GateEntry | null>(null)
 
-    const today = todayKey()
-    const activeEntries = useMemo(() => entries.filter((entry) => normalizeStatus(entry.status) === 'checked in'), [entries])
-    const expectedVisitors = useMemo(() => entries.filter((entry) => entry.entryType !== 'VEHICLE' && entry.entryType !== 'STAFF' && normalizeStatus(entry.status) === 'expected'), [entries])
-    const todayEntries = useMemo(() => entries.filter((entry) => dateKey(entry.checkInAt || entry.createdAt) === today), [entries, today])
-    const todayCheckedOut = useMemo(() => entries.filter((entry) => normalizeStatus(entry.status) === 'checked out' && dateKey(entry.checkOutAt || entry.updatedAt) === today), [entries, today])
+    const isLoading = isQueueLoading || isMovementLoading
 
     const queueRows = useMemo(() => {
-        const rows = activeEntries.filter((entry) => 
+        const rows = actionQueue.filter((entry) => 
             queueType === 'ALL' || 
             (queueType === 'VISITOR' ? (entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') : entry.entryType === queueType)
         )
         return rows.slice(0, 8)
-    }, [activeEntries, queueType])
+    }, [actionQueue, queueType])
+
+    const recentActivityRows = useMemo(() => {
+        const rows = dailyMovement.filter((entry) => 
+            entry.entryType !== 'RESIDENT' &&
+            (recentType === 'ALL' || 
+            (recentType === 'VISITOR' ? (entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') : entry.entryType === recentType))
+        )
+        return rows.slice(0, 8)
+    }, [dailyMovement, recentType])
+
+    const completedResidentOutings = useMemo(() => {
+        return dailyMovement.filter(entry => entry.entryType === 'RESIDENT' && normalizeStatus(entry.status) === 'returned').slice(0, 8)
+    }, [dailyMovement])
 
     const handleCheckout = (entry: GateEntry) => {
-        if (!window.confirm(`Are you sure you want to check out ${entryName(entry)}?`)) return
-        checkoutEntry.mutate({ id: entry.id })
+        if (entry.entryType === 'RESIDENT') {
+            if (!window.confirm(`Are you sure you want to record RETURN for ${entryName(entry)}?`)) return;
+            recordReturn.mutate({ id: (entry as any).movementId });
+        } else {
+            if (!window.confirm(`Are you sure you want to check out ${entryName(entry)}?`)) return;
+            checkoutEntry.mutate({ id: entry.id });
+        }
     }
 
     const stats = [
-        { label: 'Visitors Inside', value: activeEntries.filter((entry) => entry.entryType !== 'VEHICLE' && entry.entryType !== 'STAFF').length, icon: Users, tone: 'bg-primary-50 text-primary-700', href: '/security/gate-management' },
-        { label: 'Staff Inside', value: activeEntries.filter((entry) => entry.entryType === 'STAFF').length, icon: UserCog, tone: 'bg-sky-50 text-sky-700', href: '/security/staff-register' },
-        { label: 'Vehicles Inside', value: activeEntries.filter((entry) => entry.entryType === 'VEHICLE').length, icon: Truck, tone: 'bg-indigo-50 text-indigo-700', href: '/security/vehicle-register' },
-        { label: 'Expected Visitors', value: expectedVisitors.length, icon: CalendarClock, tone: 'bg-amber-50 text-amber-700', href: '/security/gate-management' },
-        { label: 'Today Entries', value: todayEntries.length, icon: DoorOpen, tone: 'bg-slate-50 text-slate-700', href: '/security/entry-logs' },
-        { label: 'Today Checked Out', value: todayCheckedOut.length, icon: ShieldCheck, tone: 'bg-emerald-50 text-emerald-700', href: '/security/entry-logs' }
+        { label: 'Visitors Inside', value: summary?.activeVisitors ?? 0, icon: Users, tone: 'bg-primary-50 text-primary-700', href: '/security/gate-management' },
+        { label: 'Staff Inside', value: summary?.activeStaff ?? 0, icon: UserCog, tone: 'bg-sky-50 text-sky-700', href: '/security/staff-register' },
+        { label: 'Vehicles Inside', value: summary?.activeVehicles ?? 0, icon: Truck, tone: 'bg-indigo-50 text-indigo-700', href: '/security/vehicle-register' },
+        { label: 'Resident Outings Outside', value: actionQueue.filter((entry) => entry.entryType === 'RESIDENT').length, icon: MapPin, tone: 'bg-fuchsia-50 text-fuchsia-700', href: '/security/resident-outings' },
+        { label: 'Resident Outings Completed', value: dailyMovement.filter((entry) => entry.entryType === 'RESIDENT' && normalizeStatus(entry.status) === 'returned').length, icon: ShieldCheck, tone: 'bg-emerald-50 text-emerald-700', href: '/security/resident-outings' },
+        { label: 'Overdue Resident Returns', value: actionQueue.filter((entry) => entry.entryType === 'RESIDENT' && (entry as any).isOverdue).length, icon: AlertCircle, tone: 'bg-rose-50 text-rose-700', href: '/security/resident-outings' },
     ]
 
     const columns: Column<GateEntry>[] = [
@@ -86,9 +105,9 @@ export function SecurityDashboard() {
                     )}
                     <div>
                         <span className="block font-extrabold text-slate-900">{entryName(entry)}</span>
-                        {(entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') && entry.category && entry.category !== 'GUEST' && (
+                        {(entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') && entry.category && (
                             <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
-                                {entry.category}
+                                {entry.category.replace(/_/g, ' ')}
                             </span>
                         )}
                         {entry.entryType === 'STAFF' && entry.designation && (
@@ -123,9 +142,9 @@ export function SecurityDashboard() {
                     )}
                     <div>
                         <span className="block font-extrabold text-slate-900">{entryName(entry)}</span>
-                        {(entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') && entry.category && entry.category !== 'GUEST' && (
+                        {(entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS') && entry.category && (
                             <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
-                                {entry.category}
+                                {entry.category.replace(/_/g, ' ')}
                             </span>
                         )}
                         {entry.entryType === 'STAFF' && entry.designation && (
@@ -149,6 +168,15 @@ export function SecurityDashboard() {
         { key: 'status', header: 'Status', cell: (entry) => <StatusHighlighter value={entry.status} /> }
     ]
 
+    const completedOutingColumns: Column<GateEntry>[] = [
+        { key: 'visitorName', header: 'Resident', cell: entryName, sortable: true },
+        { key: 'expectedAt', header: 'Expected Return', cell: (entry) => formatTime(entry.expectedReturnAt) },
+        { key: 'checkInAt', header: 'Actual Exit', cell: (entry) => formatTime(entry.checkInAt) },
+        { key: 'checkOutAt', header: 'Actual Return', cell: (entry) => formatTime(entry.checkOutAt) },
+        { key: 'exitRecordedBy', header: 'Exit Recorded By', cell: (entry) => <span className="text-xs font-medium text-slate-600">{entry.exitRecordedBy || '-'}</span> },
+        { key: 'returnRecordedBy', header: 'Return Recorded By', cell: (entry) => <span className="text-xs font-medium text-slate-600">{entry.returnRecordedBy || '-'}</span> }
+    ]
+
     return (
         <div className="flex h-full flex-col space-y-6 bg-transparent">
             <PageHeader
@@ -163,7 +191,7 @@ export function SecurityDashboard() {
                 )}
             />
 
-            <div className="grid gap-3 md:grid-cols-3 2xl:grid-cols-6">
+            <div className="grid gap-3 md:grid-cols-3">
                 {stats.map((item) => (
                     <Link key={item.label} to={item.href} className={`rounded-2xl border border-slate-100 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${item.tone}`}>
                         <item.icon className="mb-3 h-5 w-5" />
@@ -198,7 +226,8 @@ export function SecurityDashboard() {
                             ['ALL', 'All'],
                             ['STAFF', 'Staff'],
                             ['VEHICLE', 'Vehicles'],
-                            ['VISITOR', 'Visitors']
+                            ['VISITOR', 'Visitors'],
+                            ['RESIDENT', 'Residents']
                         ].map(([value, label]) => (
                             <button
                                 key={value}
@@ -226,12 +255,54 @@ export function SecurityDashboard() {
                             <button
                                 type="button"
                                 onClick={() => handleCheckout(entry)}
-                                disabled={checkoutEntry.isPending}
-                                className="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-extrabold text-rose-600 hover:bg-rose-100 disabled:opacity-60"
-                                title="Check out manually"
+                                disabled={checkoutEntry.isPending || recordReturn.isPending}
+                                className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-extrabold disabled:opacity-60 ${entry.entryType === 'RESIDENT' ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
+                                title={entry.entryType === 'RESIDENT' ? 'Record Return manually' : 'Check out manually'}
                             >
-                                <LogOut className="h-3.5 w-3.5" />
-                                Check Out
+                                {entry.entryType === 'RESIDENT' ? <LogIn className="h-3.5 w-3.5" /> : <LogOut className="h-3.5 w-3.5" />}
+                                {entry.entryType === 'RESIDENT' ? 'ARRIVED' : 'Check Out'}
+                            </button>
+                        </div>
+                    )}
+                />
+            </section>
+
+            <section className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-400">Recent Gate Activity</p>
+                        <h2 className="text-xl font-extrabold text-slate-950">Recent normal gate activity</h2>
+                        <p className="text-sm font-bold text-slate-500">Visitor check-in / checkout • Staff entry / exit • Vehicle entry / exit</p>
+                    </div>
+                    <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+                        {[
+                            ['ALL', 'All'],
+                            ['VISITOR', 'Visitors'],
+                            ['STAFF', 'Staff'],
+                            ['VEHICLE', 'Vehicles']
+                        ].map(([value, label]) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setRecentType(value)}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-extrabold ${recentType === value ? 'bg-primary-600 text-white shadow-sm' : 'text-slate-600'}`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <DataTable
+                    fullHeight={false}
+                    data={recentActivityRows}
+                    columns={historyColumns}
+                    keyExtractor={(entry) => entry.id}
+                    isLoading={isLoading}
+                    emptyStateMessage="No recent gate activity."
+                    actions={(entry) => (
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => setViewingEntry(entry)} className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 hover:bg-primary-100">
+                                Open
                             </button>
                         </div>
                     )}
@@ -240,17 +311,16 @@ export function SecurityDashboard() {
 
             <section className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
                 <div className="mb-4">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-slate-400">History</p>
-                    <h2 className="text-xl font-extrabold text-slate-950">Recently Visited</h2>
-                    <p className="text-sm font-bold text-slate-500">History of visitors who completed their visit today.</p>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-emerald-600">Completed Resident Outings</p>
+                    <h2 className="text-xl font-extrabold text-slate-950">Residents who have ARRIVED</h2>
                 </div>
                 <DataTable
                     fullHeight={false}
-                    data={todayCheckedOut.slice(0, 8)}
-                    columns={historyColumns}
+                    data={completedResidentOutings}
+                    columns={completedOutingColumns}
                     keyExtractor={(entry) => entry.id}
                     isLoading={isLoading}
-                    emptyStateMessage="No visitors have checked out today."
+                    emptyStateMessage="No residents have returned from outings today."
                     actions={(entry) => (
                         <div className="flex items-center gap-2">
                             <button onClick={() => setViewingEntry(entry)} className="rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-extrabold text-primary-700 hover:bg-primary-100">
@@ -280,7 +350,7 @@ export function SecurityDashboard() {
                             {(viewingEntry.entryType === 'VISITOR' || viewingEntry.entryType === 'VISITOR_PASS') && (
                                 <div className="flex justify-between">
                                     <span className="font-semibold text-slate-500">Category:</span>
-                                    <span className="font-bold text-slate-800">{viewingEntry.category || '-'}</span>
+                                    <span className="font-bold text-slate-800">{viewingEntry.category ? viewingEntry.category.replace(/_/g, ' ') : '-'}</span>
                                 </div>
                             )}
                             {viewingEntry.entryType === 'STAFF' && (
@@ -297,6 +367,26 @@ export function SecurityDashboard() {
                                 <div className="flex justify-between">
                                     <span className="font-semibold text-slate-500">Person / Resident Visiting:</span>
                                     <span className="font-bold text-slate-800">{viewingEntry.visitingPerson || '-'}</span>
+                                </div>
+                            )}
+                            {viewingEntry.approvedBy && (
+                                <div className="flex justify-between items-start mt-2 bg-indigo-50/50 p-2 rounded-lg border border-indigo-50">
+                                    <span className="font-semibold text-slate-500">Approved By:</span>
+                                    <div className="flex flex-col items-end">
+                                        <span className="font-bold text-slate-800">{viewingEntry.approvedBy.name || 'Not available'}</span>
+                                        {viewingEntry.approvedBy.empId && (
+                                            <span className="text-xs text-slate-500 font-semibold">{viewingEntry.approvedBy.empId}</span>
+                                        )}
+                                        {viewingEntry.approvedBy.designation && (
+                                            <span className="text-xs text-slate-400 font-medium">{viewingEntry.approvedBy.designation}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {viewingEntry.remarks && viewingEntry.remarks.trim().length > 0 && (
+                                <div className="flex justify-between">
+                                    <span className="font-semibold text-slate-500">Materials Brought:</span>
+                                    <span className="font-bold text-slate-800">{viewingEntry.remarks}</span>
                                 </div>
                             )}
                             {viewingEntry.entryType === 'VEHICLE' && viewingEntry.driverName && (

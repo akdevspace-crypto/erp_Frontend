@@ -1,11 +1,35 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { checkVisitorProfile, createVisitorPass, getVisitorPasses, updateVisitorPass, deleteVisitorPass, checkoutVisitorPass } from '../services';
+import { checkVisitorProfile, createVisitorPass, getVisitorPasses, updateVisitorPass, checkoutVisitorPass } from '../services';
 
 import { QRCodeSVG } from 'qrcode.react';
 import { PageHeader } from '../../../components/PageHeader';
 import { useToast } from '../../../components/Toast';
 import { PatientSelector } from '../../../components/PatientSelector';
+import { VisitorPassCard } from '../components/VisitorPassCard';
+import { VisitorMaterialEntry } from '../components/VisitorMaterialEntry';
+import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard } from 'lucide-react';
+
+const CATEGORY_PURPOSES: Record<string, string[]> = {
+    RESIDENT_FAMILY_RELATIVE: ['Family Visit', 'Care Discussion', 'Personal Matter', 'Document / Item Handover', 'Other'],
+    RESIDENT_CAREGIVER_ATTENDANT: ['Resident Care', 'Personal Assistance', 'Daily Care Support', 'Accompaniment', 'Other'],
+    OLD_AGE_CARE_ADMISSION_ENQUIRY: ['New Admission Enquiry', 'Facility Visit', 'Pricing / Service Enquiry', 'Documentation Enquiry', 'Counselling / Discussion', 'Other'],
+    HEALTHCARE_PROFESSIONAL: ['Patient Consultation', 'Clinical Review', 'Medical Visit', 'Treatment / Procedure', 'Professional Meeting', 'Other'],
+    MEDICAL_PHARMA_REPRESENTATIVE: ['Product Discussion', 'Medicine / Product Presentation', 'Doctor / Clinical Meeting', 'Sample / Information Submission', 'Other'],
+    VENDOR_SUPPLIER: ['Material Delivery', 'Vendor Meeting', 'Service Discussion', 'Product Discussion', 'Payment / Documentation', 'Other'],
+    CONTRACTOR_TEMPORARY_WORKER: ['Maintenance', 'Repair', 'Installation', 'Inspection', 'Construction / Project Work', 'Other'],
+    OUTSOURCED_AGENCY_WORKER: ['Assigned Work', 'Service Delivery', 'Routine Duty', 'Replacement / Temporary Duty', 'Other'],
+    DAILY_REGULAR_WORKER: ['Routine Work', 'Maintenance', 'Cleaning', 'Gardening', 'Support Service', 'Other'],
+    STUDENT_INTERN_TRAINEE: ['Internship', 'Training', 'Academic Visit', 'Research', 'Observation', 'Other'],
+    VOLUNTEER_NGO_COMMUNITY: ['Volunteering', 'Community Service', 'Resident Support', 'Donation / Community Activity', 'Awareness / Outreach', 'Other'],
+    DELIVERY_COURIER: ['Parcel Delivery', 'Document Delivery', 'Medicine Delivery', 'Material Delivery', 'Food Delivery', 'Other'],
+    TRANSPORT_DRIVER: ['Resident Transport', 'Patient Transport', 'Pickup / Drop-off', 'Material Transport', 'Official Transport', 'Other'],
+    GOVERNMENT_OFFICIAL_INSPECTOR: ['Inspection', 'Official Visit', 'Verification', 'Government Service', 'Compliance Check', 'Other'],
+    AUDITOR_CONSULTANT: ['Audit', 'Consultation', 'Assessment', 'Professional Meeting', 'Review', 'Other'],
+    EVENT_INSTITUTIONAL_GUEST: ['Event', 'Institutional Visit', 'Meeting', 'Partnership Discussion', 'Official Function', 'Other'],
+    OTHER: ['General Visit', 'Personal Matter', 'Other']
+};
 
 export default function VisitorManagement() {
     const queryClient = useQueryClient();
@@ -13,14 +37,21 @@ export default function VisitorManagement() {
 
     // Form State
     const [mobile, setMobile] = useState('');
+    const [whatsapp, setWhatsapp] = useState('');
+    const [whatsappSameAsMobile, setWhatsappSameAsMobile] = useState(true);
     const [name, setName] = useState('');
-    const [category, setCategory] = useState('GUEST');
+    const [dob, setDob] = useState('');
+    const [category, setCategory] = useState('OTHER');
     const [purpose, setPurpose] = useState('');
+    const [customPurpose, setCustomPurpose] = useState('');
     const [hostName, setHostName] = useState('');
-    const [inTime, setInTime] = useState('');
     const [bloodGroup, setBloodGroup] = useState('');
     const [residentialAddress, setResidentialAddress] = useState('');
     const [pincode, setPincode] = useState('');
+
+    const [hasMaterials, setHasMaterials] = useState(false);
+    const [materialDetails, setMaterialDetails] = useState<string | null>(null);
+    const [isMaterialsValid, setIsMaterialsValid] = useState(false);
 
     // UI State
     const [isChecking, setIsChecking] = useState(false);
@@ -68,14 +99,6 @@ export default function VisitorManagement() {
         onError: () => toast({ title: 'Error', message: 'Failed to update pass', type: 'error' })
     });
 
-    const deleteMutation = useMutation({
-        mutationFn: deleteVisitorPass,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['visitorPasses'] });
-            toast({ title: 'Success', message: 'Pass deleted successfully', type: 'success' });
-        },
-        onError: () => toast({ title: 'Error', message: 'Failed to delete pass', type: 'error' })
-    });
 
     const checkoutMutation = useMutation({
         mutationFn: checkoutVisitorPass,
@@ -100,6 +123,13 @@ export default function VisitorManagement() {
             if (profile) {
                 setName(profile.name);
                 setCategory(profile.category);
+                if (profile.whatsapp) {
+                    setWhatsapp(profile.whatsapp);
+                    setWhatsappSameAsMobile(profile.whatsapp === mobile);
+                }
+                if (profile.dob) {
+                    setDob(profile.dob);
+                }
                 // If returning visitor, we can bypass OTP for convenience, or strictly enforce it.
                 // We'll auto-verify them for convenience.
                 setOtpVerified(true);
@@ -123,30 +153,31 @@ export default function VisitorManagement() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
+        if (hasMaterials && !isMaterialsValid) {
+            return; // Prevent submission, VisitorMaterialEntry will show validation messages
+        }
+
         let calcDurationHours = '2'; // Default
-        const todayStr = new Date().toISOString().split('T')[0];
-        const checkInAt = inTime ? new Date(`${todayStr}T${inTime}`).toISOString() : undefined;
+        
+        const finalPurpose = purpose === 'Other' ? customPurpose : purpose;
 
         // OTP verification is temporarily disabled
         createMutation.mutate({
             mobile,
+            whatsapp: whatsappSameAsMobile ? mobile : whatsapp,
+            dob: dob || undefined,
             name,
             category,
-            purpose,
+            purpose: finalPurpose,
             hostName,
             durationHours: calcDurationHours,
-            checkInAt,
             bloodGroup,
             residentialAddress,
-            pincode
+            pincode,
+            ...(hasMaterials && materialDetails ? { materialDetails } : {})
         });
     };
 
-    const handleDelete = (id: string) => {
-        if (confirm("Are you sure you want to delete this visitor pass?")) {
-            deleteMutation.mutate(id);
-        }
-    };
 
     const handleEditSave = (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,11 +196,14 @@ export default function VisitorManagement() {
 
     const handleReset = () => {
         setMobile('');
+        setWhatsapp('');
+        setWhatsappSameAsMobile(true);
+        setDob('');
         setName('');
-        setCategory('GUEST');
+        setCategory('OTHER');
         setPurpose('');
+        setCustomPurpose('');
         setHostName('');
-        setInTime('');
         setBloodGroup('');
         setResidentialAddress('');
         setPincode('');
@@ -178,9 +212,13 @@ export default function VisitorManagement() {
         setOtpVerified(false);
         setOtpReference('');
         setOtpValue('');
+        setHasMaterials(false);
+        setMaterialDetails(null);
+        setIsMaterialsValid(false);
     };
 
     const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSd126ooky6N92XAa1l9-dnTaWLHHCvFVG5_EasCpeaWwdzT1g/viewform?usp=publish-editor"; // <-- PASTE YOUR REAL GOOGLE FORM LINK HERE
+    const navigate = useNavigate();
 
     return (
         <div className="flex min-h-full flex-col space-y-6 bg-transparent">
@@ -188,7 +226,16 @@ export default function VisitorManagement() {
             <PageHeader
                 title="Visitor Management"
                 subtitle="Live visitor entry tracking, OTP verification, and pass generation."
-                breadcrumbs={[{ label: 'Security' }, { label: 'Visitor Management' }]}
+                breadcrumbs={[{ label: 'Front Desk' }, { label: 'Visitor Management' }]}
+                action={
+                    <button
+                        onClick={() => navigate('/visitor-module/dashboard')}
+                        className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-all"
+                    >
+                        <LayoutDashboard className="h-4 w-4" />
+                        View Dashboard
+                    </button>
+                }
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,21 +243,7 @@ export default function VisitorManagement() {
                 {/* LEFT COLUMN: FORM */}
                 <div className="lg:col-span-2 space-y-6">
                     {pass ? (
-                        <section className="rounded-2xl border border-indigo-100 bg-white p-12 shadow-sm flex flex-col items-center justify-center space-y-6">
-                            <div className="text-green-500 text-2xl font-bold">Pass Generated Successfully!</div>
-                            <div className="p-8 bg-gray-50 rounded-2xl shadow-inner flex flex-col items-center min-w-[300px]">
-                                <h3 className="font-extrabold text-2xl">{pass.profile.name}</h3>
-                                <p className="text-gray-500 uppercase font-semibold">{pass.profile.category}</p>
-                                <div className="my-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                    <QRCodeSVG value={`${window.location.origin}/visitor-checkin?verify=${pass.pass.id}`} size={180} />
-                                </div>
-                                <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Scan at Gate</p>
-                                {pass.pass.hostName && <p className="mt-4 text-md font-bold text-indigo-900">Visiting: {pass.pass.hostName}</p>}
-                            </div>
-                            <button onClick={handleReset} className="mt-4 px-6 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-bold hover:bg-indigo-100 transition-colors">
-                                Enter Another Visitor
-                            </button>
-                        </section>
+                        <VisitorPassCard pass={pass} onReset={handleReset} />
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* 1. VISITOR DETAILS */}
@@ -232,18 +265,62 @@ export default function VisitorManagement() {
                                         </div>
                                     </div>
 
+                                    <div className="md:col-span-2">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-sm font-semibold text-slate-700">WhatsApp Number</label>
+                                            <label className="flex items-center text-sm text-slate-600 cursor-pointer">
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="mr-2 rounded text-indigo-600 focus:ring-indigo-500" 
+                                                    checked={whatsappSameAsMobile}
+                                                    onChange={(e) => setWhatsappSameAsMobile(e.target.checked)}
+                                                />
+                                                Same as Mobile Number
+                                            </label>
+                                        </div>
+                                        {!whatsappSameAsMobile && (
+                                            <input
+                                                type="text"
+                                                value={whatsapp}
+                                                onChange={(e) => setWhatsapp(e.target.value)}
+                                                className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold"
+                                                placeholder="e.g. +91 9876543210"
+                                            />
+                                        )}
+                                    </div>
+
                                     <div>
                                         <label className="mb-1 block text-sm font-semibold text-slate-700">Visitor Name *</label>
                                         <input required type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" />
                                     </div>
                                     <div>
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">Date of Birth</label>
+                                        <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 bg-white" />
+                                    </div>
+                                    <div>
                                         <label className="mb-1 block text-sm font-semibold text-slate-700">Category *</label>
-                                        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 bg-white">
-                                            <option value="GUEST">Guest</option>
-                                            <option value="VENDOR">Vendor</option>
-                                            <option value="DOCTOR">Visiting Doctor</option>
-                                            <option value="REGULAR_STAFF">Regular Staff</option>
-                                            <option value="ATTENDER">Attender</option>
+                                        <select value={category} onChange={(e) => {
+                                            setCategory(e.target.value);
+                                            setPurpose('');
+                                            setCustomPurpose('');
+                                        }} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 bg-white">
+                                            <option value="RESIDENT_FAMILY_RELATIVE">Resident Family / Relative</option>
+                                            <option value="RESIDENT_CAREGIVER_ATTENDANT">Resident Caregiver / Attendant</option>
+                                            <option value="OLD_AGE_CARE_ADMISSION_ENQUIRY">Old Age Care / Admission Enquiry</option>
+                                            <option value="HEALTHCARE_PROFESSIONAL">Healthcare Professional</option>
+                                            <option value="MEDICAL_PHARMA_REPRESENTATIVE">Medical / Pharma Representative</option>
+                                            <option value="VENDOR_SUPPLIER">Vendor / Supplier</option>
+                                            <option value="CONTRACTOR_TEMPORARY_WORKER">Contractor / Temporary Worker</option>
+                                            <option value="OUTSOURCED_AGENCY_WORKER">Outsourced / Agency Worker</option>
+                                            <option value="DAILY_REGULAR_WORKER">Daily / Regular Worker</option>
+                                            <option value="STUDENT_INTERN_TRAINEE">Student / Intern / Trainee</option>
+                                            <option value="VOLUNTEER_NGO_COMMUNITY">Volunteer / NGO / Community</option>
+                                            <option value="DELIVERY_COURIER">Delivery / Courier</option>
+                                            <option value="TRANSPORT_DRIVER">Transport / Driver</option>
+                                            <option value="GOVERNMENT_OFFICIAL_INSPECTOR">Government / Official / Inspector</option>
+                                            <option value="AUDITOR_CONSULTANT">Auditor / Consultant</option>
+                                            <option value="EVENT_INSTITUTIONAL_GUEST">Event / Institutional Guest</option>
+                                            <option value="OTHER">Other</option>
                                         </select>
                                     </div>
                                     <div>
@@ -277,7 +354,15 @@ export default function VisitorManagement() {
                                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                                     <div>
                                         <label className="mb-1 block text-sm font-semibold text-slate-700">Purpose of Visit</label>
-                                        <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="e.g. Meeting, Delivery" />
+                                        <select value={purpose} onChange={(e) => setPurpose(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 bg-white">
+                                            <option value="">Select Purpose</option>
+                                            {(CATEGORY_PURPOSES[category] || CATEGORY_PURPOSES['OTHER']).map(p => (
+                                                <option key={p} value={p}>{p}</option>
+                                            ))}
+                                        </select>
+                                        {purpose === 'Other' && (
+                                            <input type="text" value={customPurpose} onChange={(e) => setCustomPurpose(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500" placeholder="Please specify..." />
+                                        )}
                                     </div>
                                     <div className="flex gap-2">
                                         <div className="flex-1">
@@ -296,10 +381,54 @@ export default function VisitorManagement() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="mb-1 block text-sm font-semibold text-slate-700">In Time *</label>
-                                        <input required type="time" value={inTime} onChange={(e) => setInTime(e.target.value)} className="w-full rounded-xl border border-slate-200 p-2.5 outline-none focus:border-indigo-500 font-bold" />
+                                        <label className="mb-1 block text-sm font-semibold text-slate-700">In Time</label>
+                                        <div className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-500 font-semibold cursor-not-allowed">
+                                            Automatic (Server Time)
+                                        </div>
                                     </div>
                                 </div>
+                            </section>
+
+                            {/* 3. MATERIALS */}
+                            <section className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                                <h2 className="mb-4 text-lg font-bold text-indigo-800 uppercase tracking-wide border-b pb-2 border-indigo-50">3. Materials & Items</h2>
+                                <div className="mb-4">
+                                    <label className="mb-3 block text-sm font-semibold text-slate-700">Are you carrying any items/materials?</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input 
+                                                type="radio" 
+                                                name="hasMaterials" 
+                                                checked={!hasMaterials} 
+                                                onChange={() => setHasMaterials(false)}
+                                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span className="text-sm font-bold text-slate-700">No</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input 
+                                                type="radio" 
+                                                name="hasMaterials" 
+                                                checked={hasMaterials} 
+                                                onChange={() => setHasMaterials(true)}
+                                                className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span className="text-sm font-bold text-slate-700">Yes</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {hasMaterials && (
+                                    <div className="mt-4 border-t border-slate-100 pt-4">
+                                        <VisitorMaterialEntry 
+                                            onChange={setMaterialDetails}
+                                            onValidityChange={setIsMaterialsValid}
+                                        />
+                                        {hasMaterials && !isMaterialsValid && (
+                                            <p className="mt-2 text-sm font-semibold text-rose-500">Please provide valid material details before submitting.</p>
+                                        )}
+                                    </div>
+                                )}
                             </section>
 
                             {/* SUBMIT */}
@@ -446,12 +575,6 @@ export default function VisitorManagement() {
                                         >
                                             View
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(p.id)}
-                                            className="text-red-600 hover:text-red-900 font-bold bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition-colors"
-                                        >
-                                            Delete
-                                        </button>
                                     </td>
                                 </tr>
                             )})}
@@ -550,6 +673,33 @@ export default function VisitorManagement() {
                             <div className="flex justify-between">
                                 <span className="font-semibold text-slate-500">Pass ID:</span>
                                 <span className="font-bold text-slate-800 text-xs">{viewingPass.id}</span>
+                            </div>
+
+                            {/* APPROVED BY SECTION */}
+                            <div className="mt-6 pt-4 border-t border-slate-100">
+                                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Approved By</h3>
+                                {viewingPass.approvedByUser ? (
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="font-semibold text-slate-500">Name:</span>
+                                            <span className="font-bold text-slate-800">
+                                                {viewingPass.approvedByUser.firstName} {viewingPass.approvedByUser.lastName || ''}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-semibold text-slate-500">Employee ID:</span>
+                                            <span className="font-bold text-slate-800">{viewingPass.approvedByUser.staff?.empId || '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="font-semibold text-slate-500">Designation:</span>
+                                            <span className="font-bold text-slate-800">{viewingPass.approvedByUser.staff?.designation || '-'}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm font-bold text-slate-400">
+                                        Not available
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex justify-end pt-6">

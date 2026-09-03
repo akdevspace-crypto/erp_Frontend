@@ -6,20 +6,11 @@ import { DataTable, type Column } from '../../../components/DataTable'
 import { Input } from '../../../components/Input'
 import { Modal } from '../../../components/Modal'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
-import { useCheckInExpectedVisitor, useCheckoutGateEntry, useCreateExpectedVisitor, useGateEntries, useRequestOTP, useVerifyOTP } from '../hooks/useSecurity'
-import { VisitorPassModal } from '../components/VisitorPassModal'
+import { useCheckInExpectedVisitor, useCheckoutGateEntry, useGateQueue } from '../hooks/useSecurity'
+import { ResidentOutingsList } from '../components/ResidentOutingsList'
 import type { GateEntry } from '../types'
 
-const initialForm = {
-    visitorName: '',
-    mobile: '',
-    purpose: '',
-    visitingPerson: '',
-    department: '',
-    vehicleNo: '',
-    remarks: '',
-    expectedAt: ''
-}
+
 
 const formatTime = (value?: string | null) => {
     if (!value) return '-'
@@ -29,34 +20,20 @@ const formatTime = (value?: string | null) => {
 }
 
 const normalizeStatus = (value?: string) => String(value || '').trim().toLowerCase()
-const visitorCheckoutOtpPurpose = 'Visitor checkout verification'
 
-const getCheckoutOtp = (entry: GateEntry) => entry.otpVerification?.[visitorCheckoutOtpPurpose]
-    const isCheckoutOtpVerified = (entry: GateEntry) => {
-        const otpLog = getCheckoutOtp(entry)
-        return otpLog?.status === 'VERIFIED'
-    }
-    // Prevent TS unused error
-    void isCheckoutOtpVerified;
 
 export function GateManagement() {
-    const { data: entries = [], isLoading, refetch, isFetching } = useGateEntries()
+    const { data: entries = [], isLoading, refetch, isFetching } = useGateQueue()
 
-    const createExpectedVisitor = useCreateExpectedVisitor()
     const checkInExpectedVisitor = useCheckInExpectedVisitor()
     const checkoutEntry = useCheckoutGateEntry()
-    const requestOTP = useRequestOTP()
-    const verifyOTP = useVerifyOTP()
     const [searchQuery, setSearchQuery] = useState('')
-    const [formData, setFormData] = useState(initialForm)
     const [selectedEntry, setSelectedEntry] = useState<GateEntry | null>(null)
-    const [verifyEntry, setVerifyEntry] = useState<GateEntry | null>(null)
-    const [checkoutOtp, setCheckoutOtp] = useState('')
+    const [activeTab, setActiveTab] = useState<'VISITORS' | 'RESIDENTS'>('VISITORS')
 
 
-    const visitorEntries = useMemo(() => entries.filter((entry) => entry.entryType !== 'VEHICLE' && entry.entryType !== 'STAFF'), [entries])
+    const visitorEntries = useMemo(() => entries.filter((entry) => entry.entryType === 'VISITOR' || entry.entryType === 'VISITOR_PASS'), [entries])
     const activeEntries = useMemo(() => visitorEntries.filter((entry) => normalizeStatus(entry.status) === 'checked in'), [visitorEntries])
-    const expectedEntries = useMemo(() => visitorEntries.filter((entry) => normalizeStatus(entry.status) === 'expected'), [visitorEntries])
     const checkedOutEntries = useMemo(() => visitorEntries.filter((entry) => normalizeStatus(entry.status) === 'checked out'), [visitorEntries])
     const filteredEntries = useMemo(() => {
         const query = searchQuery.toLowerCase()
@@ -68,19 +45,7 @@ export function GateManagement() {
         )
     }, [activeEntries, searchQuery])
 
-    const handleChange = (key: keyof typeof initialForm, value: string) => {
-        setFormData((current) => ({ ...current, [key]: value }))
-    }
 
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault()
-        try {
-            await createExpectedVisitor.mutateAsync(formData)
-            setFormData(initialForm)
-        } catch {
-            // Toast is handled by the mutation hook.
-        }
-    }
 
     const handleCheckout = (entry: GateEntry) => {
         // OTP temporarily frozen for manual checkout
@@ -89,34 +54,7 @@ export function GateManagement() {
         checkoutEntry.mutate({ id: entry.id, remarks: remarks || undefined })
     }
 
-    const handleRequestCheckoutOtp = async (entry: GateEntry) => {
-        try {
-            await requestOTP.mutateAsync({
-                mobile: entry.mobile,
-                purpose: visitorCheckoutOtpPurpose,
-                referenceId: entry.id
-            })
-            await refetch()
-        } catch {
-            // Toast is handled by the mutation hook.
-        }
-    }
-    // Prevent TS unused error
-    void handleRequestCheckoutOtp;
 
-    const handleVerifyCheckoutOtp = async () => {
-        const otpLog = verifyEntry ? getCheckoutOtp(verifyEntry) : null
-        if (!otpLog) return
-
-        try {
-            await verifyOTP.mutateAsync({ id: otpLog.id, otp: checkoutOtp })
-            setCheckoutOtp('')
-            setVerifyEntry(null)
-            await refetch()
-        } catch {
-            // Keep modal open so the operator can retry.
-        }
-    }
 
     const handleExpectedCheckIn = async (entry: GateEntry) => {
         const remarks = window.prompt(`Arrival remarks for ${entry.visitorName || 'visitor'}`, '')
@@ -144,9 +82,9 @@ export function GateManagement() {
                     )}
                     <div>
                         <span className="block font-extrabold text-slate-900">{entry.visitorName || entry.staffName || entry.driverName || '-'}</span>
-                        {entry.category && entry.category !== 'GUEST' && (
+                        {entry.category && (
                             <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
-                                {entry.category}
+                                {entry.category.replace(/_/g, ' ')}
                             </span>
                         )}
                     </div>
@@ -185,9 +123,9 @@ export function GateManagement() {
                     )}
                     <div>
                         <span className="block font-extrabold text-slate-900">{entry.visitorName || entry.staffName || entry.driverName || '-'}</span>
-                        {entry.category && entry.category !== 'GUEST' && (
+                        {entry.category && (
                             <span className="mt-0.5 inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
-                                {entry.category}
+                                {entry.category.replace(/_/g, ' ')}
                             </span>
                         )}
                     </div>
@@ -214,11 +152,26 @@ export function GateManagement() {
                 breadcrumbs={[{ label: 'Security' }, { label: 'Gate Management' }]}
             />
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="flex w-full max-w-full rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 p-1 md:inline-flex md:w-auto">
+                <button 
+                    onClick={() => setActiveTab('VISITORS')}
+                    className={`min-w-0 flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-extrabold transition-all md:flex-none md:px-6 ${activeTab === 'VISITORS' ? 'bg-white dark:bg-white/10 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                    Visitors
+                </button>
+                <button 
+                    onClick={() => setActiveTab('RESIDENTS')}
+                    className={`min-w-0 flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-extrabold transition-all md:flex-none md:px-6 ${activeTab === 'RESIDENTS' ? 'bg-white dark:bg-white/10 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                    Resident Outings
+                </button>
+            </div>
+
+            {activeTab === 'VISITORS' && (
+                <>
+                    <div className="grid gap-3 md:grid-cols-2">
                 {[
                     { label: 'Currently Inside', value: activeEntries.length, tone: 'bg-primary-50 text-primary-700' },
-                    { label: 'Expected Visitors', value: expectedEntries.length, tone: 'bg-amber-50 text-amber-700' },
-                    { label: 'Total Entries', value: visitorEntries.length, tone: 'bg-slate-50 text-slate-700' },
                     { label: 'Checked Out', value: visitorEntries.filter((entry) => normalizeStatus(entry.status) === 'checked out').length, tone: 'bg-emerald-50 text-emerald-700' }
                 ].map((item) => (
                     <div key={item.label} className={`rounded-2xl border border-slate-100 px-4 py-3 ${item.tone}`}>
@@ -228,93 +181,7 @@ export function GateManagement() {
                 ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                        <Plus className="h-5 w-5 text-primary-600" />
-                        <h2 className="text-lg font-extrabold text-slate-950">New Expected Visitor</h2>
-                    </div>
-                    <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
-                        <span className="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-extrabold text-white shadow-sm">
-                            Expected Visitor
-                        </span>
-                    </div>
-                </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                    <Input label="Visitor Name" value={formData.visitorName} onChange={(event) => handleChange('visitorName', event.target.value)} required />
-                    <Input label="Mobile" value={formData.mobile} onChange={(event) => handleChange('mobile', event.target.value)} required />
-                    <Input label="Purpose" value={formData.purpose} onChange={(event) => handleChange('purpose', event.target.value)} required />
-                    <Input label="Visiting Person" value={formData.visitingPerson} onChange={(event) => handleChange('visitingPerson', event.target.value)} />
-                    <Input label="Department" value={formData.department} onChange={(event) => handleChange('department', event.target.value)} />
-                    <Input label="Vehicle No." value={formData.vehicleNo} onChange={(event) => handleChange('vehicleNo', event.target.value)} />
-                    <Input label="Expected Time" type="datetime-local" value={formData.expectedAt} onChange={(event) => handleChange('expectedAt', event.target.value)} />
-                    <div className="md:col-span-2">
-                        <Input label="Remarks" value={formData.remarks} onChange={(event) => handleChange('remarks', event.target.value)} />
-                    </div>
-                    <div className="flex items-end">
-                        <button
-                            type="submit"
-                            disabled={createExpectedVisitor.isPending}
-                            className="h-11 w-full rounded-xl bg-primary-600 px-4 text-sm font-extrabold text-white shadow-sm hover:bg-primary-700 disabled:opacity-60"
-                        >
-                            {createExpectedVisitor.isPending ? 'Saving...' : 'Save Expected Visitor'}
-                        </button>
-                    </div>
-                </div>
-            </form>
 
-            <div className="rounded-3xl border border-amber-100 bg-amber-50/60 p-4">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                        <CalendarClock className="h-5 w-5 text-amber-600" />
-                        <h2 className="text-lg font-extrabold text-slate-950">Expected Visitors</h2>
-                    </div>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold text-amber-700">{expectedEntries.length} Pending</span>
-                </div>
-                {expectedEntries.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-amber-200 bg-white/70 px-4 py-6 text-center text-sm font-bold text-slate-500">
-                        No expected visitors waiting for arrival.
-                    </div>
-                ) : (
-                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                        {expectedEntries.map((entry) => (
-                            <div key={entry.id} className="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <p className="text-base font-extrabold text-slate-950">{entry.visitorName}</p>
-                                        <p className="text-sm font-bold text-slate-500">{entry.purpose}</p>
-                                    </div>
-                                    <StatusHighlighter value={entry.status} />
-                                </div>
-                                <div className="mt-3 space-y-1 text-xs font-bold text-slate-500">
-                                    <p>Mobile: <span className="text-slate-800">{entry.mobile}</span></p>
-                                    <p>Visiting: <span className="text-slate-800">{entry.visitingPerson || entry.department || '-'}</span></p>
-                                    <p>Expected: <span className="text-slate-800">{formatTime(entry.expectedAt)}</span></p>
-                                </div>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedEntry(entry)}
-                                        className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-extrabold text-slate-700 hover:bg-slate-200"
-                                    >
-                                        <Eye className="h-3.5 w-3.5" />
-                                        View
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleExpectedCheckIn(entry)}
-                                        disabled={checkInExpectedVisitor.isPending}
-                                        className="inline-flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-primary-700 disabled:opacity-60"
-                                    >
-                                        <LogIn className="h-3.5 w-3.5" />
-                                        Arrived
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
 
             <section className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -343,39 +210,6 @@ export function GateManagement() {
                         emptyStateMessage={activeEntries.length > 0 ? 'No active visitors match the current search.' : 'No active visitors are currently checked in.'}
                         actions={(entry) => (
                             <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedEntry(entry)}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-extrabold text-slate-700 hover:bg-slate-100"
-                                >
-                                    <Eye className="h-3.5 w-3.5" />
-                                    Pass
-                                </button>
-                                {/* OTP verification temporarily disabled
-                                <button
-                                    type="button"
-                                    onClick={() => handleRequestCheckoutOtp(entry)}
-                                    disabled={requestOTP.isPending || isCheckoutOtpVerified(entry)}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-extrabold text-amber-700 hover:bg-amber-100 disabled:opacity-60"
-                                    title={isCheckoutOtpVerified(entry) ? 'Checkout OTP already verified' : 'Send checkout OTP'}
-                                >
-                                    <KeyRound className="h-3.5 w-3.5" />
-                                    OTP
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setCheckoutOtp('')
-                                        setVerifyEntry(entry)
-                                    }}
-                                    disabled={!getCheckoutOtp(entry) || isCheckoutOtpVerified(entry)}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
-                                    title="Verify checkout OTP"
-                                >
-                                    <ShieldCheck className="h-3.5 w-3.5" />
-                                    Verify
-                                </button>
-                                */}
                                 <button
                                     type="button"
                                     onClick={() => handleCheckout(entry)}
@@ -407,47 +241,17 @@ export function GateManagement() {
                         keyExtractor={(entry) => entry.id}
                         isLoading={isLoading}
                         emptyStateMessage="No visitors have checked out today."
-                        actions={(entry) => (
-                            <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedEntry(entry)}
-                                    className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-extrabold text-slate-700 hover:bg-slate-100"
-                                >
-                                    <Eye className="h-3.5 w-3.5" />
-                                    View
-                                </button>
-                            </div>
-                        )}
+                        actions={(entry) => null}
                     />
                 </div>
             </section>
 
-            <VisitorPassModal entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
-            <Modal
-                isOpen={Boolean(verifyEntry)}
-                onClose={() => {
-                    setCheckoutOtp('')
-                    setVerifyEntry(null)
-                }}
-                title="Verify Checkout OTP"
-                message={verifyEntry ? `${verifyEntry.visitorName || 'Visitor'} checkout verification` : undefined}
-                type="success"
-                confirmLabel={verifyOTP.isPending ? 'Verifying...' : 'Verify OTP'}
-                confirmDisabled={verifyOTP.isPending || !/^\d{6}$/.test(checkoutOtp)}
-                onConfirm={handleVerifyCheckoutOtp}
-            >
-                <div className="mt-5 text-left">
-                    <Input
-                        label="Six-Digit OTP"
-                        value={checkoutOtp}
-                        onChange={(event) => setCheckoutOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        placeholder="000000"
-                    />
-                </div>
-            </Modal>
+                </>
+            )}
+
+            {activeTab === 'RESIDENTS' && (
+                <ResidentOutingsList />
+            )}
         </div>
     )
 }

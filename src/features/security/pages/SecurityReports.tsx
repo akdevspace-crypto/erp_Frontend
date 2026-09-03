@@ -3,7 +3,7 @@ import { Download, Printer } from 'lucide-react'
 import { PageHeader } from '../../../components/PageHeader'
 import { DataTable, type Column } from '../../../components/DataTable'
 import { StatusHighlighter } from '../../../components/StatusHighlighter'
-import { useGateEntries } from '../hooks/useSecurity'
+import { useDailyMovementReport } from '../hooks/useSecurity'
 import type { GateEntry } from '../types'
 
 type SecurityReportRow = GateEntry & {
@@ -52,8 +52,8 @@ const escapeCsv = (value?: string | number | null) => {
 }
 
 export function SecurityReports() {
-    const { data: entries = [], isLoading } = useGateEntries()
     const [reportDate, setReportDate] = useState(todayKey())
+    const { data: entries = [], isLoading } = useDailyMovementReport(reportDate)
     const [typeFilter, setTypeFilter] = useState('ALL')
 
     const reportRows = useMemo<SecurityReportRow[]>(() => entries

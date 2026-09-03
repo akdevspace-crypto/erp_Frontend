@@ -34,7 +34,8 @@ const roleDashboardOwners: Record<string, string | string[]> = {
     '/crm/follow-up-dashboard': 'follow-up coordinator',
     '/customer-care/dashboard': 'customer relations manager',
     '/omnichannel/dashboard': 'omnichannel coordinator',
-    '/crm/admissions-dashboard': 'admissions coordinator'
+    '/crm/admissions-dashboard': 'admissions coordinator',
+    '/visitor-module/dashboard': 'visitor receptionist'
 }
 
 const withoutRoleDashboards = (links: MenuLink[]) =>
@@ -203,11 +204,15 @@ const omnichannelMenus: MenuLink[] = [
 
 const securityCommandMenus: MenuLink[] = [
     { name: 'Security Dashboard', icon: LayoutDashboard, href: '/security/dashboard' },
-    { name: 'Visitor Management', icon: UserCheck, href: '/visitor-module' },
     { name: 'Gate Management', icon: DoorOpen, href: '/security/gate-management' },
     { name: 'Staff Register', icon: User, href: '/security/staff-register' },
     { name: 'Vehicle Register', icon: DoorOpen, href: '/security/vehicle-register' },
     { name: 'Entry Logs', icon: ClipboardList, href: '/security/entry-logs' }
+]
+
+const visitorMenus: MenuLink[] = [
+    { name: 'Dashboard', icon: LayoutDashboard, href: '/visitor-module/dashboard' },
+    { name: 'Visitor Management', icon: Users, href: '/visitor-module' }
 ]
 
 const patientCareMenus: MenuLink[] = [
@@ -298,11 +303,12 @@ export const subMenus: Record<string, MenuLink[]> = {
         ...withoutRoleDashboards(enquiryMenus),
         ...withoutRoleDashboards(customerCareMenus),
         ...withoutRoleDashboards(omnichannelMenus),
-        ...withoutRoleDashboards(securityCommandMenus)
+        ...visitorMenus
     ],
     'Enquiry Desk': enquiryMenus,
     'Customer Relations': customerCareMenus,
     'Omnichannel': omnichannelMenus,
+    'Visitor Management': visitorMenus,
     'Security': securityCommandMenus,
     
     'Patient Care': patientCareMenus,
