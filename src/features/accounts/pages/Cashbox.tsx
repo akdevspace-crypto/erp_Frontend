@@ -6,15 +6,35 @@ import { Input } from '../../../components/Input'
 import { useCashbox, useUpdateTransaction, useDeleteTransaction } from '../hooks/useAccounts'
 import { Edit2, Eye, Trash2 } from 'lucide-react'
 import { TransactionActionModal } from '../components/TransactionActionModal'
+import { useUnits } from '../../master/hooks/useUnit'
+import { useAuthStore } from '../../../store/authStore'
+import { hasAllAccess, hasUnitAccess } from '../../../lib/access'
 
 export function Cashbox() {
-    const { data: transactions = [], isLoading } = useCashbox()
-    const updateTransaction = useUpdateTransaction()
-    const deleteTransaction = useDeleteTransaction()
-
     const [fromDate, setFromDate] = useState(new Date().toISOString().split('T')[0])
     const [toDate, setToDate] = useState(new Date().toISOString().split('T')[0])
     const [activeDateRange, setActiveDateRange] = useState({ start: fromDate, end: toDate })
+
+    const user = useAuthStore((state) => state.user)
+    const activeUnitId = useAuthStore((state) => state.activeUnitId)
+    const setActiveUnitId = useAuthStore((state) => state.setActiveUnitId)
+    const { data: units = [] } = useUnits()
+
+    const accessibleUnits = useMemo(
+        () => hasAllAccess(user) ? units : units.filter((unit: any) => hasUnitAccess(user, unit.id)),
+        [units, user]
+    )
+
+    const safeActiveUnitId = useMemo(() => {
+        if (accessibleUnits.some((u: any) => u.id === activeUnitId)) {
+            return activeUnitId || ''
+        }
+        return accessibleUnits[0]?.id || ''
+    }, [accessibleUnits, activeUnitId])
+
+    const { data: transactions = [], isLoading } = useCashbox(activeDateRange.start, activeDateRange.end)
+    const updateTransaction = useUpdateTransaction()
+    const deleteTransaction = useDeleteTransaction()
 
     const [modalState, setModalState] = useState<{
         isOpen: boolean,
@@ -65,8 +85,8 @@ export function Cashbox() {
     }
 
     const data = useMemo(() => {
-        return transactions.filter(t => t.currentStatus === 'APPROVED' || t.currentStatus === 'POSTED')
-            .map(t => ({
+        return transactions.filter((t: any) => t.currentStatus === 'APPROVED' || t.currentStatus === 'POSTED')
+            .map((t: any) => ({
                 id: t.id,
                 invoiceNo: t.receiptNo || 'N/A',
                 dateTime: `${t.date} 10:00 AM`,
@@ -128,6 +148,21 @@ export function Cashbox() {
                 {/* Date Filters Section */}
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                        {accessibleUnits.length > 0 && (
+                            <div className="w-full sm:w-48 flex-shrink-0">
+                                <select
+                                    value={safeActiveUnitId}
+                                    onChange={(e) => setActiveUnitId(e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-[9px] text-sm text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                >
+                                    {accessibleUnits.map((unit: any) => (
+                                        <option key={unit.id} value={unit.id}>
+                                            {unit.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         <div className="w-full sm:w-40 flex-shrink-0">
                             <Input
                                 label=""

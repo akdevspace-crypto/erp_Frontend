@@ -22,6 +22,23 @@ const Field = ({ label, value, onChange, placeholder, type = "text", disabled = 
   </div>
 );
 
+const RateField = ({ label, priceObj, onChange }: any) => {
+  return (
+    <div>
+      <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-600">
+        {label}
+      </label>
+      <input
+        type="number"
+        placeholder="Rate (₹)"
+        value={priceObj?.rate || priceObj?.rs || ""}
+        onChange={(e) => onChange({ ...priceObj, rate: e.target.value, rs: e.target.value })}
+        className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-primary-500 bg-white"
+      />
+    </div>
+  );
+};
+
 const SubsidyField = ({ label, priceObj, onChange }: any) => {
   const hasSubsidy = !!priceObj?.subsidy;
   return (
@@ -472,7 +489,6 @@ export function PatientManualBilling() {
     "Rendering Service": { rs: "" },
     "Essentials Service": { rs: "" },
     "LATE FEE": { rs: "" },
-    "UNCF Subsidy": { rs: "0" },
   });
 
   // Calculators
@@ -571,18 +587,16 @@ export function PatientManualBilling() {
       grossTotal += parseFloat(billingSummary.lateMaterialFee) || 0;
       grossTotal += parseFloat(billingSummary.previousPending) || 0;
     } else {
-      Object.keys(homeFields).forEach((key) => {
-        if (key !== "UNCF Subsidy") {
-          grossTotal +=
-            parseFloat(String(homeFields[key].rate || "0").replace(/[^0-9.]/g, "")) || 0;
-          totalSubsidy +=
-            parseFloat(String(homeFields[key].subsidy || "0").replace(/[^0-9.]/g, "")) || 0;
-        }
-      });
-      totalSubsidy +=
-        parseFloat(
-          String(homeFields["UNCF Subsidy"]?.subsidy || "0").replace(/[^0-9.]/g, ""),
-        ) || 0;
+        Object.keys(homeFields).forEach((key) => {
+          const rate = parseFloat(String(homeFields[key].rate || homeFields[key].rs || "0").replace(/[^0-9.]/g, "")) || 0;
+          const hasQty = homeFields[key].qty !== undefined;
+          let qty = 1;
+          if (hasQty) {
+            const qStr = String(homeFields[key].qty).trim();
+            qty = qStr === "" ? 0 : (parseFloat(qStr) || 0);
+          }
+          grossTotal += (qty * rate);
+        });
     }
 
     return { grossTotal, totalSubsidy, netPayable: grossTotal - totalSubsidy };
@@ -635,7 +649,7 @@ export function PatientManualBilling() {
                 <tr>
                     <td>${htmlEscape(desc)}</td>
                     <td class="text-right">Rs ${invoiceMoney(price)}</td>
-                    <td class="text-right">Rs ${invoiceMoney(sub)}</td>
+                    ${billType === "ELDER_CARE" ? `<td class="text-right">Rs ${invoiceMoney(sub)}</td>` : ""}
                     <td class="text-right">Rs ${invoiceMoney(payable)}</td>
                 </tr>
             `;
@@ -878,29 +892,30 @@ export function PatientManualBilling() {
     });
     elderRows += renderSection("FEES & BALANCES", feesRows);
 
-    // HOME CARE ROWS (unchanged logic)
+    // HOME CARE ROWS
     let homeRows = "";
     if (billType === "HOME_CARE") {
-      const renderHomeGroup = (keys: string[], title: string) => {
-        let grpRows = "";
-        keys.forEach((key) => {
-          const price =
-            parseFloat(
-              String(homeFields[key]?.rate || "0").replace(/[^0-9.]/g, ""),
-            ) || 0;
-          const sub =
-            parseFloat(
-              String(homeFields[key]?.subsidy || "0").replace(/[^0-9.]/g, ""),
-            ) || 0;
-          if (price > 0 || sub > 0) {
-            grpRows += renderRow(
-              `${key} ${homeFields[key].qty ? "(Qty: " + homeFields[key].qty + ")" : ""}`,
-              { price, subsidy: sub },
-            );
-          }
-        });
-        return renderSection(title, grpRows);
-      };
+        const renderHomeGroup = (keys: string[], title: string) => {
+          let grpRows = "";
+          keys.forEach((key) => {
+            const rate = parseFloat(String(homeFields[key]?.rate || homeFields[key]?.rs || "0").replace(/[^0-9.]/g, "")) || 0;
+            const hasQty = homeFields[key]?.qty !== undefined;
+            let qty = 1;
+            if (hasQty) {
+              const qStr = String(homeFields[key].qty).trim();
+              qty = qStr === "" ? 0 : (parseFloat(qStr) || 0);
+            }
+            const price = qty * rate;
+            
+            if (price > 0 || (rate > 0 && qty > 0)) {
+              grpRows += renderRow(
+                `${key} ${hasQty && homeFields[key].qty ? "(Qty: " + homeFields[key].qty + ")" : ""}`,
+                { price, subsidy: 0 },
+              );
+            }
+          });
+          return renderSection(title, grpRows);
+        };
 
       homeRows += renderHomeGroup(
         [
@@ -953,7 +968,7 @@ export function PatientManualBilling() {
                     <tr>
                         <th style="text-align: left;">Description</th>
                         <th style="text-align: right; width: 100px;">Amount</th>
-                        <th style="text-align: right; width: 100px;">UNCF Subsidy</th>
+                        ${billType === "ELDER_CARE" ? `<th style="text-align: right; width: 100px;">UNCF Subsidy</th>` : ""}
                         <th style="text-align: right; width: 100px;">Net Amount</th>
                     </tr>
                 </thead>
@@ -1084,6 +1099,8 @@ export function PatientManualBilling() {
                         ${patientDob ? `<tr><td>DOB</td><td>${htmlEscape(patientDob)}</td></tr>` : ""}
                         ${membershipPlan ? `<tr><td>Membership Plan</td><td>${htmlEscape(membershipPlan)}</td></tr>` : ""}
                         ${membershipCategory ? `<tr><td>Membership Category</td><td>${htmlEscape(membershipCategory)}</td></tr>` : ""}
+                        ${contractStartDate ? `<tr><td>Service Contract Start Date</td><td>${htmlEscape(contractStartDate)}</td></tr>` : ""}
+                        ${contractEndDate ? `<tr><td>Service Contract End Date</td><td>${htmlEscape(contractEndDate)}</td></tr>` : ""}
                         ${patientId ? `<tr><td>Patient ID</td><td>${htmlEscape(patientId)}</td></tr>` : ""}
                         ${elderId ? `<tr><td>Elder ID</td><td>${htmlEscape(elderId)}</td></tr>` : ""}
                         ${(bedSharing && billType === "ELDER_CARE") ? `<tr><td>Bed Sharing</td><td>${htmlEscape(bedSharing)}</td></tr>` : ""}
@@ -2575,7 +2592,7 @@ export function PatientManualBilling() {
                     "Gold Membership",
                     "Platinum Membership",
                   ].map((k) => (
-                    <SubsidyField
+                    <RateField
                       key={k}
                       label={k}
                       priceObj={homeFields[k]}
@@ -2617,7 +2634,7 @@ export function PatientManualBilling() {
                           }
                         />
                       </div>
-                      <SubsidyField
+                      <RateField
                         label="Price"
                         priceObj={homeFields[k]}
                         onChange={(v: any) =>
@@ -2626,7 +2643,6 @@ export function PatientManualBilling() {
                             [k]: {
                               ...homeFields[k],
                               rate: v.rate,
-                              subsidy: v.subsidy,
                             },
                           })
                         }
@@ -2652,7 +2668,7 @@ export function PatientManualBilling() {
                     "Rendering Service",
                     "Essentials Service",
                   ].map((k) => (
-                    <SubsidyField
+                    <RateField
                       key={k}
                       label={k}
                       priceObj={homeFields[k]}
@@ -2662,7 +2678,6 @@ export function PatientManualBilling() {
                           [k]: {
                             ...homeFields[k],
                             rate: v.rate,
-                            subsidy: v.subsidy,
                           },
                         })
                       }
@@ -2991,14 +3006,16 @@ export function PatientManualBilling() {
               {invoiceMoney(totalAmount)}
             </div>
           </div>
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              UNCF Subsidy
+          {billType === "ELDER_CARE" && (
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                UNCF Subsidy
+              </div>
+              <div className="text-xl font-bold text-red-600">
+                - {invoiceMoney(subsidy)}
+              </div>
             </div>
-            <div className="text-xl font-bold text-red-600">
-              - {invoiceMoney(subsidy)}
-            </div>
-          </div>
+          )}
           <div className="border-l border-slate-200 pl-6">
             <div className="text-xs font-bold uppercase tracking-wider text-primary-600">
               Total Payable

@@ -242,6 +242,7 @@ export const subMenus: Record<string, MenuLink[]> = {
         { name: 'Finance', icon: Wallet, href: '/finance/cashbox' },
         { name: 'Patient Daily Cost', icon: Receipt, href: '/finance/patient-daily-cost' },
         { name: 'Manual Patient Billing', icon: Receipt, href: '/finance/manual-billing' },
+        { name: 'Invoice', icon: Receipt, href: '/finance/invoice' },
         { name: 'Daily Operations', icon: ClipboardCheck, href: '/daily-operations' },
         { name: 'Human Resource', icon: Users, href: '/hr/dashboard' },
         { name: 'Workflow Timeline', icon: Activity, href: '/workflow/timeline' },

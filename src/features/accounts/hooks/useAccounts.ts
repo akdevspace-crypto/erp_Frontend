@@ -3,20 +3,12 @@ import { accountsService } from '../services/accounts'
 import { useToast } from '../../../components/Toast'
 import { useAuthStore } from '../../../store/authStore'
 
-export const useCashbox = () => {
+export const useCashbox = (fromDate?: string, toDate?: string) => {
     const activeUnitId = useAuthStore((state) => state.activeUnitId || state.user?.unitId || null)
-    const canReadAllUnits = useAuthStore((state) => {
-        const roleName = typeof state.user?.role === 'string'
-            ? state.user.role
-            : state.user?.role?.name || ''
-        const normalizedRole = roleName.trim().toLowerCase().replace(/_/g, ' ')
-        return state.user?.unitAccess?.includes('*')
-            || ['admin', 'super admin', 'superadmin', 'finance manager'].includes(normalizedRole)
-    })
 
     return useQuery({
-        queryKey: ['cashbox', canReadAllUnits ? 'all' : activeUnitId],
-        queryFn: () => accountsService.getCashbox({ scope: 'all' })
+        queryKey: ['cashbox', activeUnitId, fromDate, toDate],
+        queryFn: () => accountsService.getCashbox({ fromDate, toDate })
     })
 }
 

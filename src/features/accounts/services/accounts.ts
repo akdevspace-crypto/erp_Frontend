@@ -20,13 +20,15 @@ const mapTransaction = (t: any) => ({
 })
 
 export const accountsService = {
-    getCashbox: async (options?: { scope?: 'all' }): Promise<any[]> => {
+    getCashbox: async (options?: { fromDate?: string, toDate?: string }): Promise<any[]> => {
         let transactions: any[] = []
 
         try {
-            const res = await api.get('/accounts/cashbox', {
-                params: options?.scope === 'all' ? { scope: 'all' } : undefined
-            })
+            const params: any = {}
+            if (options?.fromDate) params.fromDate = options.fromDate
+            if (options?.toDate) params.toDate = options.toDate
+
+            const res = await api.get('/accounts/cashbox', { params })
             transactions = Array.isArray(res.data.data) ? res.data.data : []
         } catch (error) {
             transactions = []
